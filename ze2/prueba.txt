@@ -1,0 +1,32 @@
+juego de rol 2d narrativo, godot/android
+
+el mapa tiene varios pnj y elementos de interaccion.
+el player tiene 5 niveles [a1,a2,b1,b2,c1], con experiencia en cada nivel.
+la experiencia se consigue en las conversaciones.
+cada pnj tiene guiones de conversacion con el player.
+
+segun el nivel de player se iniciara la conversacion correspondiente.
+
+las conversaciones estaran en archivos txt, el nombre del archivo= <mapa>_<nombre_pnj>_<nivel>.txt, separador "_",sin espacios,minusculas alfanumerico.
+mapa, nombre y nivel son univocos y no pueden contener "_".
+mapa=nombre del mapa donde se usa el guion.
+nombre=nombre del pnj asociado al guion.
+nivel=nivel del player para usar el guion.
+
+
+el guion tiene posibilidad de:
+dar experiencia al player, (xp)
+quitar experiencia, (qx)
+dar objeto al player, (+)
+quitar objeto del player, (-)
+salto automatico con condicion de "si objeto" | "no tiene objeto" 
+
+?llave_castillo -> respuesta_con_llave
+
+el formato del guion es:
+
+
+
+
+cuando el player se acerque a un pnj se iniciara automaticamente el guion que corresponda con el nombre del pnj y el nivel del player, 
+si no existe guion para el pnj con el nivel requerido, se inicia uno por defecto "default.txt"

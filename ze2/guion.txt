@@ -1,0 +1,267 @@
+
+ESTRUCTURA DEL GUIÓN
+
+Los identificadores de objetos, nodos y nombres internos no llevan espacios, tildes ni caracteres especiales
+
+NOMBRE DEL ARCHIVO
+
+Formato:
+
+mapa_nombre_nivel.txt
+
+Reglas:
+
+Todo en minúsculas.
+Sin espacios.
+Solo caracteres alfanuméricos y "_".
+mapa, nombre y nivel no pueden contener "_".
+mapa = nombre del mapa.
+nombre = nombre del PNJ.
+nivel = nivel del jugador: a1, a2, b1, b2 o c1.
+
+Ejemplos:
+
+pueblo_anciano_a1.txt
+pueblo_anciano_b1.txt
+castillo_guardia_c1.txt
+
+Cuando el jugador habla con un PNJ:
+
+Se obtiene el mapa actual. 
+Se obtiene el nombre del PNJ.
+Se obtiene el nivel del jugador.
+Se busca mapa_nombre_nivel.txt.
+
+Si no existe, se utiliza default.txt.
+
+COMENTARIOS 
+# comentario del guionista
+
+NODOS
+
+Cada nodo comienza con un nombre entre corchetes:
+
+[START]
+[bienvenida]
+[comprobar_llave]
+[tiene_llave]
+[END]
+
+START es siempre el nodo inicial.
+
+END indica el final del guion.
+
+TEXTO DEL PNJ
+
+El texto se escribe directamente debajo del nombre del nodo.
+
+[bienvenida]
+¡Hola, viajero!
+Bienvenido a nuestro pueblo.
+
+OPCIONES DEL JUGADOR
+
+Formato:
+
+numero. Texto de la opción -> nodo_destino
+
+Ejemplo:
+
+¿Dónde estoy? -> pueblo
+¿Quién eres? -> identidad
+Adiós -> despedida
+
+El número identifica la opción.
+
+EXPERIENCIA
+
+Para añadir experiencia:
+
+xp+20
+
+Para quitar experiencia:
+
+xp-30
+
+Ejemplos:
+
+Gracias -> despedida | xp+20
+
+No quiero ayudarte -> despedida | xp-10
+
+OBJETOS
+
+Dar un objeto:
+
++nombre_objeto
+
+Quitar un objeto:
+
+-nombre_objeto
+
+Ejemplos:
+
+Aceptar la misión -> mision | +carta_castillo
+
+Entregar la carta -> despedida | -carta_castillo
+
+VARIOS EFECTOS
+
+Los efectos se separan mediante comas.
+
+Ejemplo:
+
+Entregar la carta -> despedida | -carta_castillo, xp+50
+
+Otro ejemplo:
+
+Abrir el cofre -> tesoro | +espada, +oro, xp+100
+
+BIFURCACIÓN AUTOMÁTICA
+
+Formato:
+
+?objeto | SI->nodo_si | NO->nodo_no
+
+Ejemplo:
+
+?llave_castillo | SI->tiene_llave | NO->no_tiene_llave
+
+El jugador no ve esta condición.
+
+El sistema comprueba automáticamente si tiene el objeto y salta al nodo correspondiente.
+
+Ejemplo:
+
+[comprobar_llave]
+?llave_castillo | SI->tiene_llave | NO->no_tiene_llave
+
+FIN DE LA CONVERSACIÓN
+
+Una opción puede terminar la conversación:
+
+Adiós -> END
+
+También puede ejecutar efectos antes de terminar:
+
+Entrar al castillo -> END | xp+100
+
+RESUMEN DE SINTAXIS
+
+[START]
+[nombre_nodo]
+[END]
+
+Texto -> nodo
+
+xp+20
+xp-20
+
++objeto
+-objeto
+
+?objeto | SI->nodo | NO->nodo
+
+Los efectos de una opción:
+
+Texto -> nodo | efecto1, efecto2, efecto3
+EJEMPLO COMPLETO Y RESUMIDO
+
+Archivo:
+
+pueblo_anciano_a1.txt
+
+[START]
+Hola, viajero. ¿Qué necesitas?
+
+Busco el castillo. -> castillo | xp+10
+Tengo una llave. -> comprobar_llave
+Adiós. -> despedida
+
+[castillo]
+El castillo está al este del pueblo.
+
+¿Puedo entrar? -> comprobar_llave
+Gracias. -> despedida
+
+[comprobar_llave]
+?llave_castillo | SI->tiene_llave | NO->no_tiene_llave
+
+[tiene_llave]
+Veo que tienes la llave del castillo.
+
+Abrir la puerta -> entrada | -llave_castillo, xp+50
+
+[no_tiene_llave]
+No tienes la llave.
+
+¿Dónde consigo una? -> herrero
+Adiós. -> despedida
+
+[herrero]
+El herrero puede darte una llave.
+
+Pedir una llave -> recibir_llave | xp+10
+
+[recibir_llave]
+El herrero te entrega una llave.
+
+Gracias -> comprobar_llave | +llave_castillo
+
+[entrada]
+La puerta del castillo se abre.
+
+Entrar -> END | xp+100
+Todavía no. -> despedida
+
+[despedida]
+¡Que tengas un buen viaje!
+
+[END]
+
+
+
+-----------------------------------------------------------
+acciones del guion:
+xp+numero → experiencia positiva
+xp-numero → experiencia negativa
++texto    → añadir objeto
+-texto    → eliminar objeto
+SI TIENE  → condición
+SI NO TIENE → condición inversa
+
+
+
+[START]
+¡Hola viajero! Eres nuevo por aquí, ¿verdad?
+1. ¿Dónde estoy? -> respuesta_1 | +mapa_pueblo
+2. Necesito información sobre el castillo -> respuesta_2 | ?llave_castillo
+3. Adiós -> despedida
+
+[respuesta_1]
+Estás en el pueblo de Valleclaro. Ten cuidado con los lobos al norte.
+1. Gracias por la información -> despedida | xp=50
+2. ¿Lobos? ¿Qué tan peligrosos son? -> respuesta_3 | xp=30
+
+[respuesta_2]
+El castillo está al este, pero necesitas la llave para entrar.
+1. Tengo la llave -> respuesta_4 | -llave_castillo, xp=100
+2. No tengo la llave -> despedida | xp=10
+
+[respuesta_3]
+Los lobos son peligrosos al atardecer, pero con una espada podrás defenderte.
+1. Gracias por el consejo -> despedida | xp=20
+2. ¿Dónde consigo una espada? -> respuesta_5
+
+[respuesta_4]
+¡Perfecto! La puerta está abierta. Adelante.
+1. Entrar -> END | xp=100
+
+[respuesta_5]
+Hay una herrería al sur del pueblo.
+1. Gracias -> despedida | xp=10
+
+[despedida]
+¡Que tengas buen viaje!
+
+[END]
