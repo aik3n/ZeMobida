@@ -1,0 +1,61 @@
+[START]
+Hola, viajero. ¿Buscas el castillo?
+
+1. Sí, ¿dónde está el castillo? -> castillo | xp+10
+2. No, me gustan las manzanas. -> despedida | xp+5
+3. Tengo mucha prisa. -> despedida | xp+5
+
+[castillo]
+El castillo está al este del pueblo. Necesitas una llave para entrar.
+
+1. Tengo la llave. -> comprobar_llave | xp+10
+2. ¿Dónde consigo la llave? -> herrero | xp+10
+3. Gracias, adiós. -> despedida | xp+5
+
+[comprobar_llave]
+?llave_castillo | SI->tiene_llave | NO->no_tiene_llave
+
+[tiene_llave]
+Veo que tienes la llave del castillo.
+
+1. Quiero entrar en el castillo. -> entrada_castillo | -llave_castillo, xp+50
+2. Primero iré a hablar con el herrero. -> herrero | xp+5
+
+[no_tiene_llave]
+No tienes la llave. El herrero del pueblo puede ayudarte.
+
+1. Iré a hablar con el herrero. -> herrero | xp+10
+2. Volveré más tarde. -> despedida | xp+5
+
+[herrero]
+El herrero está trabajando en su taller.
+
+1. Necesito la llave del castillo. -> recibir_llave
+2. ¿Puedes fabricar una espada? -> espada | xp+10
+3. Gracias, volveré después. -> despedida | xp+5
+
+[recibir_llave]
+El herrero saca una pequeña llave de un cajón.
+
+1. Muchas gracias. -> comprobar_llave | +llave_castillo, xp+20
+
+[espada]
+El herrero te muestra una espada.
+
+1. Quiero comprarla. -> comprar_espada | +espada, xp+30
+2. No, gracias. -> despedida | xp+5
+
+[comprar_espada]
+Aquí tienes. Cuídala bien.
+
+1. Gracias. -> comprobar_llave | xp+10
+
+[entrada_castillo]
+La llave gira en la cerradura y la puerta se abre.
+
+1. Entrar en el castillo. -> END | xp+50
+
+[despedida]
+Que tengas un buen viaje.
+
+[END]
