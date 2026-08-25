@@ -1,0 +1,23 @@
+# Inicio
+Buenos días.
+
+linterna: ->LIN
+agua: ->AGUA
+
+1:Hola ->FIN
+2:Quiero agua ->AGUA, xp+10, +cubo
+
+# el pj tiene linterna
+[LIN]
+Veo tu linterna.
+
+1:Sí ->FIN, +gorro
+
+[AGUA]
+Aquí tienes agua.
+
+1:Gracias ->FIN, +agua
+
+# termina la conversacion
+[FIN]
+Hasta luego.
