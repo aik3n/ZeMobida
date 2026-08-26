@@ -1,0 +1,31 @@
+# INICIO			--linea de comentario
+Hola, aventurero.
+
+?llave > PUERTA		-- condicion inventario tiene "llave", salta automaticamente a #PUERTA
+?moneda ?guante > TIENDA	-- condicion inventario tiene "moneda" AND "guante", salta automaticamente a #TIENDA
+
+1 ¿Quién eres? > QUIEN
+2 Comprar poción > TIENDA [+pocion, xp+5]   --otro de comentario de guion
+
+# QUIEN
+Soy el guardián de esta puerta.
+
+1 Dame la llave > INICIO [+llave, xp-10]
+
+# TIENDA
+Aquí tienes tu poción.
+
+1 Gracias > INICIO [+moneda]
+
+# PUERTA
+Veo que tienes la llave.
+
+1 Abrir la puerta > FINAL [-llave, +tesoro, xp+10]
+
+# FINAL
+¡Has conseguido el tesoro!
+
+1 Terminar > ZAPATO
+
+# ZAPATO
+Fin de la aventura. 
