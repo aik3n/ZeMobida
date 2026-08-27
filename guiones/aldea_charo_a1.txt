@@ -4,7 +4,7 @@ quieres comprar algo
 
 ?avion ?tren > TODO -- condiciones inventario, salta automaticamente a #TODO
 
-1 Comprar avion > AVION [+AvioN, xp+1]
+2 Comprar avion > AVION [+AvioN, xp+1]
 2 Comprar tren > TREN[+TrEn, xp+5]   --otro de comentario de guion
 
 # AVION 
