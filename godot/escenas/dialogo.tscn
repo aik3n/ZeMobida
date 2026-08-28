@@ -7,14 +7,14 @@
 [node name="DialogueUI" type="CanvasLayer" unique_id=2027231516]
 script = ExtResource("1_l0sow")
 
-[node name="Panel" type="Panel" parent="." unique_id=1311012228]
-offset_left = 23.0
-offset_top = 347.0
-offset_right = 1082.0
-offset_bottom = 623.0
+[node name="PanelTexto" type="Panel" parent="." unique_id=1311012228]
+offset_left = 53.0
+offset_top = 75.0
+offset_right = 435.0
+offset_bottom = 177.0
 theme_override_styles/panel = SubResource("StyleBoxEmpty_6v2ab")
 
-[node name="NameLabel" type="Label" parent="Panel" unique_id=1183654783]
+[node name="NameLabel" type="Label" parent="PanelTexto" unique_id=1183654783]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 4.0
@@ -22,17 +22,27 @@ offset_right = 203.0
 offset_bottom = 27.0
 text = "kaixo"
 
-[node name="DialogueText" type="Label" parent="Panel" unique_id=2064739650]
+[node name="DialogueText" type="Label" parent="PanelTexto" unique_id=2064739650]
 layout_mode = 0
 offset_left = 10.0
-offset_top = 55.0
+offset_top = 33.0
 offset_right = 50.0
-offset_bottom = 78.0
-text = "ops"
+offset_bottom = 56.0
+text = "quedisecabesa"
 
-[node name="OptionsContainer" type="VBoxContainer" parent="Panel" unique_id=499011989]
-layout_mode = 0
-offset_left = 6.0
-offset_top = 148.0
-offset_right = 287.0
-offset_bottom = 268.0
+[node name="PanelOpciones" type="Panel" parent="." unique_id=534952449]
+offset_left = 52.0
+offset_top = 417.0
+offset_right = 339.0
+offset_bottom = 636.0
+
+[node name="OptionsContainer" type="VBoxContainer" parent="PanelOpciones" unique_id=499011989]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.065000005
+anchor_right = 0.615
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = 5.7649984
+offset_right = 94.494995
+offset_bottom = 30.5

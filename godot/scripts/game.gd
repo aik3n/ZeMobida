@@ -1,4 +1,3 @@
-#archivo: game.gd
 extends Node
 
 
@@ -7,6 +6,7 @@ const ALDEA_SCENE := "res://escenas/aldea.tscn"
 
 
 @onready var scene_container: Node = $SceneContainer
+@onready var player_actual: Node = $Player
 
 @onready var ui: CanvasLayer = $UI
 
@@ -28,7 +28,6 @@ const ALDEA_SCENE := "res://escenas/aldea.tscn"
 
 
 var mapa_actual: Node = null
-var player_actual: Node = null
 
 
 const NIVELES := {
@@ -53,6 +52,10 @@ func _ready() -> void:
 
 	estado_panel.visible = false
 
+	player_actual.visible = false
+	player_actual.set_physics_process(false)
+	player_actual.set_process_unhandled_input(false)
+
 	boton_estado.pressed.connect(
 		_abrir_estado
 	)
@@ -60,6 +63,12 @@ func _ready() -> void:
 	boton_cerrar.pressed.connect(
 		_cerrar_estado
 	)
+
+	if player_actual.has_signal("xp_changed"):
+
+		player_actual.xp_changed.connect(
+			_actualizar_hud
+		)
 
 	cargar_escena(
 		BIENVENIDA_SCENE
@@ -71,11 +80,15 @@ func cargar_escena(
 	scene_path: String
 ) -> void:
 
+	# Desactivar Player mientras no hay mapa cargado.
+	player_actual.visible = false
+	player_actual.set_physics_process(false)
+	player_actual.set_process_unhandled_input(false)
+
 	for child in scene_container.get_children():
 		child.queue_free()
 
 	mapa_actual = null
-	player_actual = null
 
 	ui.visible = scene_path != BIENVENIDA_SCENE
 
@@ -95,17 +108,18 @@ func cargar_escena(
 	var instance: Node = scene.instantiate()
 
 	if scene_path != BIENVENIDA_SCENE:
+
 		mapa_actual = instance
 
 	scene_container.add_child(
 		instance
 	)
 
-	if scene_path != BIENVENIDA_SCENE:
-
-		DialogueManager.load_player_status()
+	if mapa_actual != null:
 
 		_configurar_player()
+
+		DialogueManager.load_player_status()
 
 	if instance.has_signal("jugar"):
 
@@ -118,25 +132,36 @@ func cargar_escena(
 func _configurar_player() -> void:
 
 	if mapa_actual == null:
+
+		player_actual.visible = false
+		player_actual.set_physics_process(false)
+		player_actual.set_process_unhandled_input(false)
+
 		return
 
-	player_actual = mapa_actual.get_node_or_null(
-		"player"
+	var spawn := mapa_actual.get_node_or_null(
+		"SpawnPlayer"
 	)
 
-	if player_actual == null:
+	if spawn == null:
 
 		push_warning(
-			"No se encontró el Player para actualizar el HUD."
+			"No se encontró SpawnPlayer en el mapa."
 		)
+
+		player_actual.visible = false
+		player_actual.set_physics_process(false)
+		player_actual.set_process_unhandled_input(false)
 
 		return
 
-	if player_actual.has_signal("xp_changed"):
+	player_actual.global_position = (
+		spawn.global_position
+	)
 
-		player_actual.xp_changed.connect(
-			_actualizar_hud
-		)
+	player_actual.visible = true
+	player_actual.set_physics_process(true)
+	player_actual.set_process_unhandled_input(true)
 
 	_actualizar_hud()
 
@@ -153,6 +178,9 @@ func ir_a_aldea() -> void:
 func _actualizar_hud() -> void:
 
 	if player_actual == null:
+		return
+
+	if not player_actual.visible:
 		return
 
 	var nivel: String = str(
@@ -257,27 +285,17 @@ func _cerrar_estado() -> void:
 func _actualizar_estado() -> void:
 
 	if mapa_actual == null:
-
 		return
 
-	var player = mapa_actual.get_node_or_null(
-		"player"
-	)
-
-	if player == null:
-
-		push_warning(
-			"No se encontró el Player para mostrar el estado."
-		)
-
+	if player_actual == null:
 		return
 
 	_actualizar_nivel(
-		player
+		player_actual
 	)
 
 	_actualizar_experiencia(
-		player
+		player_actual
 	)
 
 	_actualizar_inventario()

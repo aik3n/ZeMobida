@@ -1,5 +1,3 @@
-# archivo: pnj.gd
-
 extends CharacterBody2D
 
 @export var nombre: String = "PNJ"
@@ -34,12 +32,10 @@ func _ready():
 
 	sprite_2d.texture = sprite
 
-	var mapa_actual = get_tree().current_scene.get("mapa_actual")
+	var game = get_tree().current_scene
 
-	if mapa_actual != null:
-		player = mapa_actual.get_node_or_null(
-			"player"
-		)
+	if game != null:
+		player = game.get("player_actual")
 
 
 func _physics_process(_delta):
@@ -187,12 +183,9 @@ func get_dialogue_file() -> String:
 		return ""
 
 
-	var player_node = get_tree().current_scene.get("mapa_actual")
-
-	if player_node != null:
-		player_node = player_node.get_node_or_null(
-			"player"
-		)
+	var player_node = get_tree().current_scene.get(
+		"player_actual"
+	)
 
 
 	if player_node == null:
@@ -255,7 +248,7 @@ func get_dialogue_file() -> String:
 
 func _on_interaction_area_body_entered(body):
 
-	if body.name != "player":
+	if body.name != "Player" and body.name != "player":
 
 		return
 
@@ -283,7 +276,7 @@ func _on_interaction_area_body_entered(body):
 
 func _on_interaction_area_body_exited(body):
 
-	if body.name != "player":
+	if body.name != "Player" and body.name != "player":
 
 		return
 

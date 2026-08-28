@@ -1,4 +1,3 @@
-# archivo: dialogue_manager.gd
 extends Node
 
 
@@ -236,18 +235,15 @@ func _apply_effects(effects: Array):
 
 			"xp":
 				var game = get_tree().current_scene
-				var mapa_actual = game.get("mapa_actual")
 
-				if mapa_actual == null:
+				if game == null:
 					push_warning(
-						"No se encontró el mapa actual para aplicar XP."
+						"No se encontró Game para aplicar XP."
 					)
 
 					continue
 
-				var player = mapa_actual.get_node_or_null(
-					"player"
-				)
+				var player = game.get("player_actual")
 
 				if player == null:
 					push_warning(
@@ -354,18 +350,15 @@ func load_player_status() -> void:
 	file.close()
 
 	var game = get_tree().current_scene
-	var mapa_actual = game.get("mapa_actual")
 
-	if mapa_actual == null:
+	if game == null:
 		push_warning(
-			"No se encontró el mapa actual para cargar el estado."
+			"No se encontró Game para cargar el estado."
 		)
 
 		return
 
-	var player = mapa_actual.get_node_or_null(
-		"player"
-	)
+	var player = game.get("player_actual")
 
 	if player == null:
 		push_warning(
@@ -415,18 +408,15 @@ func load_player_status() -> void:
 
 func _save_player_status() -> void:
 	var game = get_tree().current_scene
-	var mapa_actual = game.get("mapa_actual")
 
-	if mapa_actual == null:
+	if game == null:
 		push_warning(
-			"No se encontró el mapa actual para guardar el estado."
+			"No se encontró Game para guardar el estado."
 		)
 
 		return
 
-	var player = mapa_actual.get_node_or_null(
-		"player"
-	)
+	var player = game.get("player_actual")
 
 	if player == null:
 		push_warning(
@@ -484,7 +474,7 @@ func _save_player_status() -> void:
 
 	print(
 		"Estado guardado. XP:",
-		player.xp,
+		 player.xp,
 		" Inventario:",
 		inventory
 	)
