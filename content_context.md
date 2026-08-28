@@ -10,6 +10,156 @@ VERSION: v0.0.1
 ESTADO: avance funcional probado y consolidado
 
 ==================================================
+METODOLOGIA OFICIAL DE TRABAJO
+==================================================
+
+Todo cambio en ZeMobida debe seguir obligatoriamente este
+flujo:
+
+PROPUESTA
+    ↓
+CAMBIO
+    ↓
+IMPLEMENTACION
+    ↓
+PRUEBA
+    ↓
+CONFIRMACION
+    ↓
+ACTUALIZACION DE content_context.md
+    ↓
+COMMIT
+
+
+1. PROPUESTA
+
+Antes de modificar código se define qué se quiere conseguir.
+
+Se analiza:
+
+- objetivo del cambio;
+- problema que se pretende solucionar;
+- arquitectura afectada;
+- posibles dependencias;
+- posibles consecuencias;
+- solución propuesta.
+
+En esta fase no se modifica el proyecto.
+
+
+2. CAMBIO
+
+Se determina exactamente qué elementos deben cambiar.
+
+Se identifican:
+
+- archivos;
+- escenas;
+- nodos;
+- scripts;
+- sistemas afectados.
+
+Se intenta limitar el alcance del cambio a lo estrictamente
+necesario.
+
+
+3. IMPLEMENTACION
+
+Se realizan los cambios definidos en la fase anterior.
+
+La implementación debe partir siempre del estado real del
+proyecto.
+
+No se deben inventar estructuras, referencias o código que
+no hayan sido comprobados.
+
+Debe conservarse toda funcionalidad existente que no forme
+parte del cambio.
+
+
+4. PRUEBA
+
+Se ejecuta el proyecto y se comprueba el comportamiento real.
+
+Se verifica:
+
+- que el cambio cumple el objetivo;
+- que las funcionalidades relacionadas continúan funcionando;
+- que no aparecen errores;
+- que no existen referencias rotas;
+- que la integración con el resto de sistemas es correcta.
+
+
+5. CONFIRMACION
+
+El cambio solamente se considera terminado cuando ha sido
+probado y confirmado como correcto.
+
+Hasta recibir la confirmación:
+
+- no se considera consolidado;
+- no debe registrarse como funcionalidad terminada;
+- no debe reflejarse en content_context.md como estado final.
+
+
+6. ACTUALIZACION DE content_context.md
+
+Una vez confirmado el cambio, se actualiza
+content_context.md.
+
+Debe registrarse con precisión:
+
+- qué se ha cambiado;
+- por qué se ha cambiado;
+- qué decisión arquitectónica se ha tomado;
+- qué archivos han sido afectados;
+- qué resultado se ha obtenido;
+- qué pruebas se han realizado;
+- cualquier problema encontrado y su solución;
+- el estado final del cambio.
+
+content_context.md no debe contener el código fuente completo.
+
+Su función es conservar la memoria técnica, arquitectónica y
+evolutiva del proyecto.
+
+
+7. COMMIT
+
+El commit se realiza después de actualizar
+content_context.md.
+
+De esta forma, el código y la memoria del proyecto quedan
+sincronizados en el mismo estado.
+
+Un commit representa un estado del proyecto que ha sido
+implementado, probado, confirmado y documentado.
+
+
+REGLA FUNDAMENTAL:
+
+content_context.md nunca debe adelantarse al estado real del
+proyecto.
+
+Una propuesta no es una funcionalidad implementada.
+
+Una implementación no es una funcionalidad confirmada.
+
+Solo después de la prueba y confirmación se registra un
+cambio como estado consolidado.
+
+
+OBJETIVO DE LA METODOLOGIA:
+
+Permitir que cualquier sesión futura pueda continuar el
+desarrollo de ZeMobida desde un estado conocido, probado y
+documentado, evitando suposiciones, pérdida de contexto o
+decisiones arquitectónicas contradictorias.
+
+
+==================================================
+
+==================================================
 1. PROPOSITO DE ESTE ARCHIVO
 ==================================================
 
@@ -710,6 +860,123 @@ Antes de comenzar el siguiente objetivo:
 - mantener las decisiones arquitectónicas establecidas.
 
 El siguiente avance funcional deberá registrarse aquí cuando haya sido implementado y probado correctamente.
+
+==================================================
+26. MEJORA DE UI DEL INVENTARIO
+==================================================
+
+OBJETIVO:
+
+Evitar que un inventario con muchos objetos haga crecer
+verticalmente el Label de inventario hasta salir del área
+visible del panel Estado.
+
+
+PROBLEMA ANTERIOR:
+
+DialogueManager.inventory se almacena como Array[String].
+
+Game mostraba todos los elementos concatenados en un único
+Label directamente dentro de UI/Estado/Panel.
+
+Cuando había suficientes elementos, el Label crecía
+verticalmente y el contenido podía salir de los límites
+visibles del panel.
+
+
+SOLUCION ADOPTADA:
+
+Se mantiene intacta la estructura de datos:
+
+DialogueManager.inventory
+    = Array[String]
+
+No se modifica la lógica del inventario.
+
+La representación visual se ha reorganizado utilizando:
+
+Panel
+└── Scroll
+    └── Inventario
+
+
+Tipos:
+
+Scroll      = ScrollContainer
+Inventario  = Label
+
+
+El ScrollContainer proporciona un área visual de tamaño
+limitado y permite desplazarse verticalmente cuando el
+contenido del inventario supera el espacio disponible.
+
+
+DECISION ARQUITECTONICA:
+
+La solución se limita a la presentación.
+
+No se introduce lógica de inventario en el ScrollContainer.
+
+No se modifica DialogueManager.inventory.
+
+Game continúa siendo responsable de presentar el inventario
+en el panel Estado.
+
+El Label continúa mostrando el contenido generado a partir
+del Array[String].
+
+
+ARCHIVOS MODIFICADOS:
+
+- escenas/Game.tscn
+- scripts/game.gd
+
+
+CAMBIO EN GAME.TSCN:
+
+El nodo Inventario dejó de ser hijo directo de Panel y pasó
+a estar contenido dentro de un ScrollContainer.
+
+
+CAMBIO EN GAME.GD:
+
+La referencia al Label de inventario fue actualizada para
+reflejar la nueva jerarquía de nodos.
+
+El método de actualización del inventario no necesitó
+cambios en su lógica.
+
+
+PRUEBAS:
+
+El cambio fue probado correctamente.
+
+Se comprobó:
+
+- visualización normal del inventario;
+- inventario con múltiples elementos;
+- aparición del desplazamiento vertical cuando es necesario;
+- acceso a los elementos inferiores;
+- lectura del último elemento;
+- mantenimiento de los límites del panel;
+- funcionamiento con pocos elementos;
+- funcionamiento del botón de cierre del panel Estado.
+
+
+RESULTADO:
+
+La mejora queda confirmada y se considera funcional.
+
+El inventario puede crecer sin provocar que su contenido
+salga del área visible del panel Estado.
+
+
+ESTADO:
+
+CAMBIO CONFIRMADO.
+
+
+==================================================
 
 
 ==================================================

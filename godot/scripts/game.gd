@@ -24,7 +24,7 @@ const ALDEA_SCENE := "res://escenas/aldea.tscn"
 @onready var estado_nivel: Label = $UI/Estado/Panel/Nivel
 @onready var estado_progreso: Label = $UI/Estado/Panel/Progreso
 @onready var estado_barra_xp: ProgressBar = $UI/Estado/Panel/BarraXP
-@onready var estado_inventario: Label = $UI/Estado/Panel/Inventario
+@onready var estado_inventario: Label = $UI/Estado/Panel/Scroll/Inventario
 
 
 var mapa_actual: Node = null

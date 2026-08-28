@@ -53,7 +53,6 @@ offset_bottom = 535.0
 mouse_filter = 2
 
 [node name="Panel" type="Panel" parent="UI/Estado" unique_id=1398691159]
-visible = false
 layout_mode = 0
 offset_left = 56.0
 offset_top = 45.0
@@ -91,16 +90,6 @@ offset_top = 45.0
 offset_right = 389.0
 offset_bottom = 72.0
 
-[node name="Inventario" type="Label" parent="UI/Estado/Panel" unique_id=1629305708]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 97.0
-offset_right = 281.0
-offset_bottom = 120.0
-text = "ejemplo1
-ejemplo2
-ejemplo3"
-
 [node name="Cerrar" type="Button" parent="UI/Estado/Panel" unique_id=853662798]
 layout_mode = 0
 offset_left = 352.0
@@ -108,3 +97,16 @@ offset_top = 7.0
 offset_right = 388.0
 offset_bottom = 38.0
 text = "X"
+
+[node name="Scroll" type="ScrollContainer" parent="UI/Estado/Panel" unique_id=416746288]
+layout_mode = 0
+offset_left = 35.0
+offset_top = 112.0
+offset_right = 210.0
+offset_bottom = 324.0
+
+[node name="Inventario" type="Label" parent="UI/Estado/Panel/Scroll" unique_id=1629305708]
+layout_mode = 2
+text = "ejemplo1
+ejemplo2
+ejemplo3"
