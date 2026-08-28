@@ -4,8 +4,8 @@ quieres comprar algo
 
 ?avion ?tren > TODO -- condiciones inventario, salta automaticamente a #TODO
 
-2 Comprar avion > AVION [+AvioN, xp+1]
-2 Comprar tren > TREN[+TrEn, xp+5]   --otro de comentario de guion
+2 Comprar charo > AVION [+AvioN,+charo, xp+1]
+2 Comprar juan > TREN[+TrEn,+juaN, xp+5]   --otro de comentario de guion
 
 # AVION 
 Aqui tienes tu bolsa..
