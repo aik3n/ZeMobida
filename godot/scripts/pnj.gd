@@ -1,4 +1,4 @@
-#archivo: pnj.gd
+# archivo: pnj.gd
 
 extends CharacterBody2D
 
@@ -21,10 +21,8 @@ var posicion_seguimiento: Vector2
 var posicion_seguimiento_guardada := false
 
 var siguiendo := false
-var a_distancia_segura := false
 
 const VELOCIDAD_SEGUIR := 100.0
-const DISTANCIA_PARAR := 80.0
 const DISTANCIA_REANUDAR := 120.0
 const DISTANCIA_LLEGADA := 5.0
 
@@ -54,7 +52,6 @@ func _physics_process(_delta):
 
 
 	match tipo_seguimiento:
-
 		TipoSeguimiento.NUNCA_SEGUIR:
 
 			velocity = Vector2.ZERO
@@ -87,28 +84,28 @@ func _physics_process(_delta):
 
 
 
+
 func _actualizar_seguimiento():
 
 	var nuevo_estado := DialogueManager.has_item(
 		nombre.to_lower()
 	)
 
-
 	# El seguimiento acaba de comenzar.
 	if nuevo_estado and not siguiendo:
 
 		posicion_seguimiento = global_position
 		posicion_seguimiento_guardada = true
-		a_distancia_segura = false
 
 
 	# El seguimiento acaba de terminar.
 	if not nuevo_estado and siguiendo:
 
-		a_distancia_segura = false
+		pass
 
 
 	siguiendo = nuevo_estado
+
 
 
 
@@ -119,30 +116,11 @@ func _seguir_player():
 	)
 
 
-	# El PNJ está dentro de la distancia segura.
-	# Permanece quieto hasta que el Player se aleja.
-	if a_distancia_segura:
-
-		if distancia > DISTANCIA_REANUDAR:
-
-			a_distancia_segura = false
-
-		else:
-
-			velocity = Vector2.ZERO
-			move_and_slide()
-
-			return
-
-
-	# El PNJ ha alcanzado la distancia mínima de seguimiento.
-	if distancia <= DISTANCIA_PARAR:
-
-		a_distancia_segura = true
+	# Si el PNJ ya está dentro de la distancia
+	# de reanudación, no se mueve.
+	if distancia <= DISTANCIA_REANUDAR:
 
 		velocity = Vector2.ZERO
-		move_and_slide()
-
 		return
 
 
@@ -151,8 +129,8 @@ func _seguir_player():
 	)
 
 	velocity = direccion * VELOCIDAD_SEGUIR
-
 	move_and_slide()
+
 
 
 
@@ -180,6 +158,7 @@ func volver_posicion_seguimiento():
 
 
 
+
 func get_map_name() -> String:
 
 	var mapa_actual = get_tree().current_scene.get("mapa_actual")
@@ -198,6 +177,7 @@ func get_map_name() -> String:
 
 
 
+
 func get_dialogue_file() -> String:
 
 	var map_name := get_map_name()
@@ -210,7 +190,6 @@ func get_dialogue_file() -> String:
 	var player_node = get_tree().current_scene.get("mapa_actual")
 
 	if player_node != null:
-
 		player_node = player_node.get_node_or_null(
 			"player"
 		)
@@ -273,6 +252,7 @@ func get_dialogue_file() -> String:
 
 
 
+
 func _on_interaction_area_body_entered(body):
 
 	if body.name != "player":
@@ -300,6 +280,7 @@ func _on_interaction_area_body_entered(body):
 
 
 
+
 func _on_interaction_area_body_exited(body):
 
 	if body.name != "player":
@@ -313,6 +294,7 @@ func _on_interaction_area_body_exited(body):
 	if DialogueManager.dialogue_active:
 
 		DialogueManager.end_dialogue()
+
 
 
 
