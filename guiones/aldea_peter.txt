@@ -2,7 +2,7 @@
 Hola, soy pedrusco.
 
 1 agur > AGUR [+pocion, xp+50]
-2 AH! vale, agur > AGUR [+pocion, xp-50]   --otro de comentario de guion
+2 AH! vale, agur > AGUR [+pocion,-charo, -jUAn, xp-50]   --otro de comentario de guion
 
 # AGUR
 Fin de la aventura. 
