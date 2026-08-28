@@ -1,4 +1,3 @@
-
 #archivo: game.gd
 extends Node
 
@@ -11,6 +10,12 @@ const ALDEA_SCENE := "res://escenas/aldea.tscn"
 
 @onready var ui: CanvasLayer = $UI
 
+# HUD general
+@onready var hud_nivel: Label = $UI/HUD/lbl_Nivel
+@onready var hud_progreso: Label = $UI/HUD/lbl_Progreso
+@onready var hud_barra_xp: ProgressBar = $UI/HUD/bar_Progreso
+
+# Panel de estado
 @onready var estado_panel: Panel = $UI/Estado/Panel
 @onready var boton_estado: Button = $UI/BotonEstado
 @onready var boton_cerrar: Button = $UI/Estado/Panel/Cerrar
@@ -23,6 +28,7 @@ const ALDEA_SCENE := "res://escenas/aldea.tscn"
 
 
 var mapa_actual: Node = null
+var player_actual: Node = null
 
 
 const NIVELES := {
@@ -69,6 +75,7 @@ func cargar_escena(
 		child.queue_free()
 
 	mapa_actual = null
+	player_actual = null
 
 	ui.visible = scene_path != BIENVENIDA_SCENE
 
@@ -95,7 +102,10 @@ func cargar_escena(
 	)
 
 	if scene_path != BIENVENIDA_SCENE:
+
 		DialogueManager.load_player_status()
+
+		_configurar_player()
 
 	if instance.has_signal("jugar"):
 
@@ -105,10 +115,127 @@ func cargar_escena(
 
 
 
+func _configurar_player() -> void:
+
+	if mapa_actual == null:
+		return
+
+	player_actual = mapa_actual.get_node_or_null(
+		"player"
+	)
+
+	if player_actual == null:
+
+		push_warning(
+			"No se encontró el Player para actualizar el HUD."
+		)
+
+		return
+
+	if player_actual.has_signal("xp_changed"):
+
+		player_actual.xp_changed.connect(
+			_actualizar_hud
+		)
+
+	_actualizar_hud()
+
+
+
 func ir_a_aldea() -> void:
 
 	cargar_escena(
 		ALDEA_SCENE
+	)
+
+
+
+func _actualizar_hud() -> void:
+
+	if player_actual == null:
+		return
+
+	var nivel: String = str(
+		player_actual.nivel
+	).to_lower()
+
+	var xp: int = int(
+		player_actual.xp
+	)
+
+	hud_nivel.text = nivel.to_upper()
+
+	if not NIVELES.has(nivel):
+
+		hud_progreso.text = "XP: %d" % xp
+
+		hud_barra_xp.min_value = 0
+		hud_barra_xp.max_value = 1
+		hud_barra_xp.value = 0
+
+		return
+
+	var indice := ORDEN_NIVELES.find(
+		nivel
+	)
+
+	if indice == -1:
+		return
+
+	var limite_superior: int = NIVELES[nivel]
+
+	var limite_inferior := 0
+
+	if indice > 0:
+
+		var nivel_anterior: String = (
+			ORDEN_NIVELES[indice - 1]
+		)
+
+		limite_inferior = (
+			NIVELES[nivel_anterior] + 1
+		)
+
+	var rango := (
+		limite_superior
+		- limite_inferior
+	)
+
+	if rango <= 0:
+
+		hud_progreso.text = (
+			"XP: %d / %d"
+			% [xp, limite_superior]
+		)
+
+		hud_barra_xp.min_value = 0
+		hud_barra_xp.max_value = 1
+		hud_barra_xp.value = 1
+
+		return
+
+	var progreso := (
+		xp - limite_inferior
+	)
+
+	progreso = clamp(
+		progreso,
+		0,
+		rango
+	)
+
+	hud_progreso.text = (
+		"XP: %d / %d"
+		% [xp, limite_superior]
+	)
+
+	hud_barra_xp.min_value = 0
+	hud_barra_xp.max_value = rango
+	hud_barra_xp.value = progreso
+
+	hud_barra_xp.tooltip_text = (
+		"%d / %d XP"
+		% [progreso, rango]
 	)
 
 
@@ -196,7 +323,6 @@ func _actualizar_experiencia(
 	)
 
 	if indice == -1:
-
 		return
 
 	var limite_superior: int = NIVELES[nivel]
@@ -250,6 +376,11 @@ func _actualizar_experiencia(
 	estado_barra_xp.max_value = rango
 	estado_barra_xp.value = progreso
 
+	estado_barra_xp.tooltip_text = (
+		"%d / %d XP"
+		% [progreso, rango]
+	)
+
 
 
 func _actualizar_inventario() -> void:
@@ -271,6 +402,7 @@ func _actualizar_inventario() -> void:
 	for item in inventario:
 
 		if not texto.is_empty():
+
 			texto += "\n"
 
 		texto += "- " + item

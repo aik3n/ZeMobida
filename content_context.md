@@ -1,1235 +1,717 @@
-# CONTEXTO MAESTRO DEL PROYECTO — ZeMobida
+Correcto. El content_context.me no debe convertirse en una copia de los scripts. Su función es conservar contexto, decisiones, arquitectura, estado, objetivos y metodología de trabajo. El código debe permanecer en los archivos del repositorio.
 
-VERSIÓN ACTUAL: 13
+Te dejo una versión más adecuada y limpia para usar como documento maestro:
 
-ESTADO: v12 estable cerrada. v13 en desarrollo.
+# ZeMobida — content_context.me
 
-Este documento es la fuente de contexto para continuar el desarrollo del proyecto en futuras conversaciones.
-
-El código actual de v13 es la fuente de verdad frente a versiones anteriores de este documento.
-
-==================================================
-
-1. ESTADO GENERAL DEL PROYECTO
-   ==================================================
-
-Proyecto realizado en Godot 4.7.
-
-La arquitectura actual separa:
-
-* Gestión general del juego: game.gd
-* Pantalla inicial: bienvenida.tscn + bienvenida.gd
-* Mapas cargados dinámicamente mediante game.gd
-* Player: player.gd
-* PNJ: pnj.gd
-* Sistema de diálogos: DialogueManager
-* Interfaz de diálogo: dialogue_ui.gd
-* Parser de guiones: DialogueParser
-* Validador de guiones: DialogueValidator
-* Sincronización de guiones desde GitHub: DialogueUpdater
-* UI global de estado dentro de Game/UI
+PROYECTO: ZeMobida
+REPOSITORIO: https://github.com/aik3n/ZeMobida
+VERSION: v0.0.1
+ESTADO: avance funcional probado y consolidado
 
 ==================================================
-2. ESCENAS PRINCIPALES
-======================
+1. PROPOSITO DE ESTE ARCHIVO
+==================================================
 
-game.tscn
+Este archivo es la memoria maestra del proyecto ZeMobida.
 
-Nodo raíz:
+Su objetivo es permitir que un chat nuevo pueda continuar el desarrollo comprendiendo:
+
+- qué es el proyecto;
+- cuál es su objetivo;
+- cuál es su arquitectura;
+- qué decisiones se han tomado;
+- qué funcionalidades están implementadas;
+- qué problemas se han resuelto;
+- qué elementos deben respetarse;
+- cuál es el estado actual;
+- cómo debe trabajarse en futuras modificaciones.
+
+Este archivo NO contiene el código fuente completo del proyecto.
+
+El código real se encuentra en el repositorio y debe estudiarse directamente cuando sea necesario.
+
+Este documento registra contexto, arquitectura, decisiones, estado y metodología de trabajo.
+
+
+==================================================
+2. OBJETIVO GENERAL DEL PROYECTO
+==================================================
+
+ZeMobida es un proyecto de videojuego desarrollado en Godot.
+
+El juego se estructura alrededor de mapas explorables, un Player, PNJ, conversaciones, decisiones, efectos de diálogo, experiencia, niveles e inventario.
+
+La arquitectura busca mantener separadas las responsabilidades para evitar que sistemas diferentes acumulen lógica que no les corresponde.
+
+Principio general:
+
+- Player mantiene el estado del jugador.
+- DialogueManager gestiona la lógica de diálogos y sus efectos.
+- DialogueUI muestra e interactúa con los diálogos.
+- Game coordina escenas y UI global.
+- HUD muestra información global y persistente del jugador.
+
+
+==================================================
+3. VERSION ACTUAL
+==================================================
+
+VERSION: v0.0.1
+
+Esta versión representa un primer avance arquitectónico y funcional consolidado.
+
+Objetivo principal de v0.0.1:
+
+Mover la información de nivel y progreso de experiencia desde la interfaz de diálogo hacia el HUD global de Game.
+
+Resultado:
+
+- Nivel y XP pertenecen ahora a la UI global de Game.
+- DialogueUI deja de gestionar nivel y XP.
+- dialogo.tscn deja de contener elementos visuales de nivel y XP.
+- El HUD se actualiza mediante la señal de XP del Player.
+- El sistema de diálogos continúa funcionando.
+- El inventario continúa funcionando.
+- El panel de Estado continúa funcionando.
+
+
+==================================================
+4. ARQUITECTURA GENERAL
+==================================================
+
+La arquitectura actual separa cuatro responsabilidades principales:
+
+GAME
+  Coordinación global del juego y de la UI.
+
+PLAYER
+  Estado y lógica propia del jugador.
+
+DIALOGUEMANAGER
+  Lógica del sistema de conversaciones, opciones, efectos e inventario.
+
+DIALOGUEUI
+  Presentación visual e interacción de los diálogos.
+
+La relación conceptual es:
+
+Player
+  |
+  | estado del jugador
+  v
+Game
+  |
+  +--> HUD global
+  |
+  +--> Estado / Inventario
+
+
+DialogueManager
+  |
+  v
+DialogueUI
+
+
+DialogueManager
+  |
+  | efectos de diálogo
+  v
+Player
+
+
+==================================================
+5. RESPONSABILIDAD DE GAME
+==================================================
+
+game.gd es el coordinador principal de la escena Game.
+
+Actualmente es responsable de:
+
+- cargar escenas;
+- gestionar SceneContainer;
+- mantener referencia al mapa actual;
+- localizar el Player del mapa actual;
+- mantener referencia al Player actual;
+- controlar la UI global;
+- controlar el HUD;
+- actualizar nivel y XP en el HUD;
+- controlar el panel de Estado;
+- actualizar nivel y XP del panel de Estado;
+- actualizar el inventario mostrado en Estado.
+
+Game NO debe convertirse en un contenedor indiscriminado de toda la lógica del juego.
+
+Su responsabilidad principal es coordinar el estado global y la UI global.
+
+
+==================================================
+6. RESPONSABILIDAD DE PLAYER
+==================================================
+
+Player es la fuente del estado relacionado directamente con el jugador.
+
+Entre otros datos:
+
+- nivel;
+- experiencia.
+
+Cuando la experiencia cambia, Player utiliza la señal:
+
+xp_changed
+
+El HUD no modifica directamente la XP.
+
+El flujo correcto es:
+
+Player cambia XP
+    |
+    v
+xp_changed
+    |
+    v
+Game
+    |
+    v
+HUD actualizado
+
+
+==================================================
+7. RESPONSABILIDAD DE DIALOGUEMANAGER
+==================================================
+
+DialogueManager es responsable de la lógica de los diálogos.
+
+Actualmente participa en:
+
+- gestión de conversaciones;
+- opciones;
+- selección de opciones;
+- efectos asociados a diálogos;
+- aplicación de efectos;
+- inventario;
+- carga del estado del jugador.
+
+DialogueManager puede provocar cambios en el Player mediante efectos de diálogo.
+
+Ejemplo conceptual:
+
+Diálogo
+  |
+  v
+DialogueManager
+  |
+  v
+efecto de XP
+  |
+  v
+Player
+  |
+  v
+xp_changed
+  |
+  v
+Game/HUD
+
+DialogueManager no debe encargarse de dibujar o gestionar el HUD global.
+
+
+==================================================
+8. RESPONSABILIDAD DE DIALOGUEUI
+==================================================
+
+dialogue_ui.gd gestiona exclusivamente la interfaz visual de los diálogos.
+
+Responsabilidades:
+
+- registrar la UI en DialogueManager;
+- mostrar y ocultar la ventana de diálogo;
+- mostrar nombre del interlocutor;
+- mostrar texto;
+- crear y mostrar opciones;
+- recibir la selección de una opción;
+- comunicar la selección a DialogueManager.
+
+DialogueUI NO debe gestionar:
+
+- nivel;
+- experiencia;
+- ProgressBar de XP;
+- HUD global;
+- inventario global;
+- estado del Player;
+- mapa actual.
+
+Esta separación se considera una decisión arquitectónica consolidada en v0.0.1.
+
+
+==================================================
+9. UI GLOBAL DE GAME
+==================================================
+
+La escena Game contiene una UI global mediante CanvasLayer.
+
+Estructura conceptual actual:
 
 Game
-├── SceneContainer
-└── UI
-└── Estado
-└── Panel
-├── Titulo
-├── Nivel
-├── Progreso
-├── BarraXP
-├── Inventario
-└── Cerrar
-└── BotonEstado
+|
++-- SceneContainer
+|
++-- UI
+    |
+    +-- BotonEstado
+    |
+    +-- HUD
+    |   |
+    |   +-- lbl_Nivel
+    |   +-- lbl_Progreso
+    |   +-- bar_Progreso
+    |
+    +-- Estado
+        |
+        +-- Panel
+            |
+            +-- Titulo
+            +-- Nivel
+            +-- Progreso
+            +-- BarraXP
+            +-- Inventario
+            +-- Cerrar
 
-Game utiliza game.gd.
-
-SceneContainer contiene dinámicamente la escena actualmente cargada.
-
-UI es un CanvasLayer permanente que pertenece a Game.
-
-==================================================
-3. BIENVENIDA
-=============
-
-bienvenida.tscn utiliza bienvenida.gd.
-
-Estructura actual:
-
-Inicio
-├── PanelGeneral
-└── PanelCargaEscenas
-└── btn_Aldea
-
-PanelGeneral:
-
-* Siempre permanece habilitado.
-* No participa en el bloqueo de sincronización.
-* En el futuro puede contener botones que deban permanecer siempre interactivos.
-
-PanelCargaEscenas:
-
-* Contiene actualmente los botones que cargan escenas.
-* Se bloquea mientras DialogueUpdater está sincronizando/preparando los guiones.
-* Se habilita cuando los guiones ya están disponibles.
-* En el futuro puede contener más botones para cargar mapas/escenas.
 
 ==================================================
-4. SINCRONIZACIÓN DE GUIONES Y BIENVENIDA
-=========================================
+10. HUD
+==================================================
 
-Durante el arranque, DialogueUpdater prepara los guiones.
+El HUD es la representación permanente y resumida del estado del jugador durante el juego de mapas.
 
-Mientras el proceso no haya terminado:
+Muestra:
 
-PanelCargaEscenas permanece deshabilitado.
+- nivel;
+- progreso de XP;
+- barra de progreso de XP.
 
-PanelGeneral permanece habilitado.
+El HUD pertenece a Game y no a DialogueUI.
 
-IMPORTANTE:
+Debe permanecer visible mientras el jugador está dentro de las escenas de juego/mapa.
 
-No se bloquea toda la escena de bienvenida.
+La actualización del HUD se realiza mediante eventos del Player, evitando polling continuo mediante _process().
 
-Solo se bloquea PanelCargaEscenas.
-
-Esto permite que en el futuro existan elementos interactivos independientes de la carga de mapas.
-
----
-
-## 4.1 guiones_disponibles
-
-DialogueUpdater tiene:
-
-var guiones_disponibles: bool = false
-
-Su significado es:
-
-"el juego ya dispone de guiones utilizables y puede continuar".
-
-Por tanto:
-
-guiones_disponibles = false
-
-significa que todavía se está preparando/sincronizando el contenido.
-
-guiones_disponibles = true
-
-significa que el juego ya puede continuar con los guiones disponibles.
-
-Esto ocurre tanto si:
-
-* GitHub funciona correctamente y se descargan los nuevos guiones.
-* GitHub falla y se conservan los guiones locales.
-* La sustitución de la carpeta falla y se conserva el estado local anterior.
-
----
-
-## 4.2 sync_failed
-
-DialogueUpdater mantiene también:
-
-var sync_failed: bool = false
-
-sync_failed y guiones_disponibles son conceptos diferentes.
-
-sync_failed:
-
-* Indica si la sincronización con GitHub ha fallado.
-
-guiones_disponibles:
-
-* Indica si el juego tiene contenido de diálogo utilizable y puede continuar.
-
-Ejemplo:
-
-GitHub falla:
-
-sync_failed = true
-guiones_disponibles = true
-
-El juego continúa utilizando los guiones locales.
-
----
-
-## 4.3 Señal de disponibilidad
-
-DialogueUpdater dispone de una señal:
-
-signal guiones_disponibles_changed
-
-Cuando los guiones pasan a estar disponibles:
-
-guiones_disponibles = true
-
-y se emite:
-
-guiones_disponibles_changed.emit()
-
-bienvenida.gd escucha esta señal para habilitar PanelCargaEscenas.
 
 ==================================================
-5. GAME.GD — SISTEMA DE ESCENAS
-===============================
-
-game.gd define:
-
-const BIENVENIDA_SCENE := "res://escenas/bienvenida.tscn"
-const ALDEA_SCENE := "res://escenas/aldea.tscn"
-
-La bienvenida se carga inicialmente.
-
-Al pulsar el botón de bienvenida se emite la señal jugar y se carga aldea.tscn.
-
-La arquitectura está preparada para añadir otros mapas en el futuro.
-
----
-
-## 5.1 Visibilidad de la UI global
-
-REGLA CERRADA:
-
-La UI global NO depende de que el mapa sea aldea.
-
-La condición utilizada es:
-
-ui.visible = scene_path != BIENVENIDA_SCENE
-
-Por tanto:
-
-bienvenida.tscn:
-UI oculta.
-
-cualquier otra escena:
-UI visible.
-
-Esta decisión queda cerrada y no debe modificarse salvo que se decida explícitamente una nueva arquitectura.
-
----
-
-## 5.2 cargar_escena()
-
-game.gd:
-
-* Elimina los hijos actuales de SceneContainer.
-* Establece mapa_actual.
-* Determina la visibilidad de la UI.
-* Carga e instancia la nueva escena.
-* Si no es bienvenida, guarda la instancia como mapa_actual.
-* Añade la instancia a SceneContainer.
-* Si no es bienvenida, carga el estado del jugador.
-* Conecta la señal jugar si la escena la tiene.
-
+11. ESTADO / INVENTARIO
 ==================================================
-6. PANEL DE ESTADO
-==================
 
-La UI global contiene:
+Game también contiene un panel de Estado que se abre mediante el botón INV.
 
-UI
-├── Estado
-│   └── Panel
-│       ├── Titulo
-│       ├── Nivel
-│       ├── Progreso
-│       ├── BarraXP
-│       ├── Inventario
-│       └── Cerrar
-│
-└── BotonEstado
-
-BotonEstado tiene actualmente el texto:
-
-INV
-
-El Panel de Estado empieza oculto.
-
-Al pulsar INV:
-
-* Se consulta el estado actual del Player.
-* Se actualiza nivel.
-* Se actualiza XP.
-* Se actualiza inventario.
-* Se muestra el panel.
-
-Al cerrar:
-
-* El panel simplemente se oculta.
-
----
-
-## 6.1 Regla de actualización
-
-REGLA CERRADA:
-
-El inventario NO necesita actualizarse mientras el panel está oculto.
-
-La actualización del estado es bajo demanda, al abrir el panel.
-
-La XP y el nivel mostrados por este panel también se leen al abrirlo.
-
-No se mantienen sincronizados continuamente mientras el panel está oculto.
-
-Esta decisión queda cerrada.
-
-IMPORTANTE:
-
-Esta regla corresponde al Panel de Estado de la UI global implementada en game.gd.
-
-No debe confundirse con la UI provisional de nivel/XP que existe actualmente dentro de dialogue_ui.gd.
-
----
-
-## 6.2 Datos mostrados
-
-Nivel:
-
-player.nivel
-
-Se muestra en mayúsculas.
-
-Experiencia:
-
-player.xp
-
-Progreso:
+El panel proporciona información más detallada que el HUD.
 
 Actualmente muestra:
 
-XP: 35 / 70
+- nivel;
+- progreso;
+- barra de XP;
+- inventario.
 
-La ProgressBar representa el progreso dentro del nivel actual.
+El inventario se obtiene desde DialogueManager.
 
-Inventario:
+El panel se muestra bajo demanda.
 
-Se obtiene directamente de:
+La existencia simultánea de:
 
-DialogueManager.inventory
+- HUD permanente;
+- Estado bajo demanda
 
-Cada objeto se muestra en una línea.
+es intencionada.
 
-Si no hay objetos:
+No representan dos sistemas diferentes de XP.
 
-Inventario vacío
+Representan dos vistas del mismo estado:
 
-==================================================
-7. INVENTARIO
-=============
+HUD
+  = información rápida y permanente.
 
-El inventario pertenece actualmente a DialogueManager:
+Estado
+  = información detallada bajo demanda.
 
-var inventory: Array[String] = []
-
-Los objetos se almacenan en minúsculas.
-
-Métodos existentes:
-
-has_item()
-add_item()
-remove_item()
-
-Los diálogos pueden modificar el inventario mediante:
-
-[+objeto]
-[-objeto]
-
-Las condiciones de diálogo pueden comprobar objetos.
-
-El Panel de Estado lee:
-
-DialogueManager.inventory
-
-y muestra los objetos mediante el Label Inventario.
-
-IMPORTANTE:
-
-Si se modifica el sistema de inventario, revisar conjuntamente:
-
-* DialogueManager
-* PNJ
-* diálogos
-* Panel de Estado
-* guardado/carga
 
 ==================================================
-8. XP Y NIVELES
-===============
+12. DIALOGO.TSCN
+==================================================
 
-player.gd contiene:
+La escena de diálogo anteriormente contenía elementos propios de nivel y XP.
 
-signal xp_changed
+Se consideró incorrecto porque nivel y XP son información global del jugador y no información específica de una conversación.
 
-@export_enum("a1", "a2", "b1", "b2", "c1")
-var nivel: String = "a1"
+En v0.0.1 fueron eliminados de dialogo.tscn:
 
-@export var xp: int = 0
+- Panel2
+- lbl_nivel
+- bar_progreso
 
-Límites:
+La escena de diálogo queda conceptualmente dedicada a:
 
-const NIVELES := {
-"a1": 70,
-"a2": 120,
-"b1": 340,
-"b2": 410,
-"c1": 740
-}
+- NameLabel;
+- DialogueText;
+- OptionsContainer.
 
-Orden:
+No deben volver a introducirse elementos de nivel o XP en dialogo.tscn sin una decisión arquitectónica nueva y explícita.
 
-const ORDEN_NIVELES := [
-"a1",
-"a2",
-"b1",
-"b2",
-"c1"
-]
-
-add_xp():
-
-* Modifica XP.
-* Recalcula nivel.
-* Emite xp_changed.
-
-El máximo actual de XP es:
-
-740
-
----
-
-## 8.1 Atención futura
-
-Las tablas NIVELES y ORDEN_NIVELES están duplicadas actualmente en:
-
-* player.gd
-* game.gd
-* dialogue_ui.gd
-
-No es un error actual.
-
-Es un punto de mantenimiento futuro.
-
-Si se modifica el sistema de niveles, hay que revisar las tres implementaciones.
-
-IMPORTANTE:
-
-DialogueManager NO posee una variable XP propia.
-
-DialogueManager aplica los efectos de XP sobre Player.
-
-El estado de XP y nivel pertenece a Player.
 
 ==================================================
-9. GUARDADO
-===========
-
-DialogueManager guarda:
-
-user://save/status.txt
-
-Actualmente se guardan:
-
-xp=...
-inventory=...
-
-El guardado se realiza al terminar un diálogo.
-
-Al cargar un mapa, game.gd ejecuta:
-
-DialogueManager.load_player_status()
-
-Después de cargar el estado, el Player recupera:
-
-* XP
-* nivel
-* inventario
-
+13. FLUJO DE XP
 ==================================================
-10. DIALOGUEMANAGER
-===================
 
-DialogueManager es un Autoload.
+El flujo actual y deseado es:
 
-Gestiona:
-
-* diálogo activo
-* nodo actual
-* archivo de diálogo
-* speaker
-* datos parseados
-* inventario
-* parser
-* validator
-* efectos
-* condiciones
-* saltos
-* RANDOM
-* aplicación de XP
-* guardado/carga
-
-Los diálogos se encuentran en:
-
-user://dialogues/
-
-Si un diálogo no existe o contiene errores, se intenta cargar:
-
-user://dialogues/fallo.txt
-
-IMPORTANTE:
-
-DialogueManager no permite iniciar un segundo diálogo mientras ya existe uno activo.
-
-Si:
-
-dialogue_active == true
-
-una nueva llamada a start_dialogue() se ignora.
-
-==================================================
-11. FORMATO DE DIÁLOGOS
-=======================
-
-DialogueParser reconoce:
-
-Etiquetas:
-
-#inicio
-
-Texto:
-
-Las líneas normales forman el texto del nodo.
-
-Condiciones:
-
-?objeto > nodo
-
-Las condiciones múltiples requieren todos los objetos indicados.
-
-Ejemplo:
-
-?llave ?guante > TODO
-
-Saltos:
-
-> nodo
-
-También existe:
-
-> RANDOM
-
-RANDOM es un comportamiento intencionado.
-
-Selecciona aleatoriamente otro nodo disponible distinto del nodo actual.
-
-Opciones:
-
-1 Texto de la opción > siguiente
-
-Efectos:
-
-[+objeto]
-[-objeto]
-[xp+20]
-[xp-10]
-
-Ejemplo:
-
-1 Completar misión > siguiente [xp+20]
-
-IMPORTANTE:
-
-> RANDOM y RANDOM utilizado como destino de una opción no deben considerarse automáticamente equivalentes.
-
-El comportamiento actualmente implementado distingue entre ambos casos.
-
-==================================================
-12. DIALOGUEVALIDATOR
-=====================
-
-Comprueba:
-
-* estructura de nodos
-* existencia de text
-* existencia de conditions
-* existencia de options
-* existencia de jump
-* destinos de condiciones
-* destinos de saltos
-* destinos de opciones
-* errores generados por el parser
-
-El Parser crea normalmente los campos estructurales básicos de los nodos.
-
-El Validator mantiene comprobaciones defensivas sobre esos campos y sobre los destinos.
-
-No modificar sin necesidad.
-
-Forma parte del sistema actual de validación.
-
-No modificar DialogueParser o DialogueValidator sin comprobar compatibilidad con los diálogos existentes.
-
-==================================================
-13. DIALOGUE_UI.GD
-==================
-
-Existe una UI de diálogo independiente.
-
-Actualmente contiene:
-
-* nombre del personaje
-* texto
-* opciones
-* nivel
-* barra de XP
-
-La parte provisional utiliza:
-
-Panel2/lbl_nivel
-Panel2/bar_progreso
-
-IMPORTANTE:
-
-La UI de nivel/XP dentro de dialogue_ui.gd sigue siendo PROVISIONAL.
-
-La UI global de estado implementada en game.gd NO sustituye oficialmente a esta UI provisional.
-
-No eliminar, fusionar ni rediseñar automáticamente esta parte.
-
-Su futuro se decidirá posteriormente.
-
-Actualmente dialogue_ui.gd está conectado a:
-
-player.xp_changed
-
-Por tanto, su parte provisional de XP/nivel puede actualizarse automáticamente cuando cambia la XP.
-
-Esto NO cambia la regla cerrada del Panel de Estado global.
-
-==================================================
-14. PNJ
-=======
-
-pnj.gd gestiona:
-
-* nombre
-* sprite
-* detección del Player
-* interacción
-* seguimiento del Player
-* regreso a posición
-* selección automática de diálogo
-
-Tipos de seguimiento:
-
-enum TipoSeguimiento {
-NUNCA_SEGUIR,
-SEGUIR_Y_QUEDARSE,
-SEGUIR_Y_VOLVER
-}
-
-El seguimiento depende actualmente de:
-
-DialogueManager.has_item(nombre.to_lower())
-
-Cuando empieza el seguimiento guarda la posición original.
-
-Cuando termina:
-
-* según el tipo puede quedarse;
-* o volver a su posición inicial.
-
----
-
-## 14.1 SEGUIMIENTO DEL PLAYER — REGLA CERRADA
-
-REGLA CERRADA:
-
-El seguimiento de PNJ utiliza una única distancia de control:
-
-const DISTANCIA_REANUDAR := 120.0
-
-La lógica es:
-
-Si la distancia entre PNJ y Player es MAYOR que DISTANCIA_REANUDAR:
-
-* el PNJ se mueve hacia el Player.
-
-Si la distancia es IGUAL O MENOR que DISTANCIA_REANUDAR:
-
-* el PNJ NO se mueve.
-* velocity se establece en Vector2.ZERO.
-
-Esto significa:
-
-Player > 120 px del PNJ
-→ PNJ sigue al Player.
-
-Player <= 120 px del PNJ
-→ PNJ se detiene.
-
-Esta solución se ha probado y funciona correctamente.
-
-IMPORTANTE:
-
-Se eliminó:
-
-* DISTANCIA_PARAR
-* a_distancia_segura
-
-No deben volver a introducirse para solucionar el problema de seguimiento salvo decisión explícita.
-
-No existe actualmente un sistema de:
-
-* NavigationAgent2D
-* pathfinding
-* navegación
-* evitación de obstáculos específica para seguidores
-
-No se debe complicar el sistema de seguimiento introduciendo navegación para este problema.
-
-La solución actual es intencionadamente sencilla.
-
----
-
-## 14.2 COLISIONES E INTERACCIÓN
-
-El PNJ sigue siendo un CharacterBody2D y mantiene sus colisiones físicas.
-
-Cuando el PNJ está dentro de DISTANCIA_REANUDAR:
-
-* no intenta alejarse del Player;
-* no intenta alcanzar una distancia física concreta;
-* simplemente deja de moverse.
-
-Esto permite que la colisión con el Player siga funcionando normalmente.
-
-La interacción con el Player se realiza mediante el Area2D de interacción del PNJ.
-
-No modificar las capas/máscaras de colisión ni el Area2D como solución al seguimiento salvo que exista un problema concreto independiente.
-
----
-
-## 14.3 Interacción
-
-Cuando el Player entra en el área de interacción:
-
-* player_nearby pasa a true.
-* Si no hay otro diálogo activo, se selecciona el archivo de diálogo.
-* Se inicia el diálogo correspondiente.
-
-Cuando el Player sale del área de interacción:
-
-* player_nearby pasa a false.
-* Si hay un diálogo activo, se termina el diálogo.
-
-Por tanto, salir físicamente del área del PNJ termina el diálogo actual.
-
----
-
-## 14.4 Selección de diálogos
-
-pnj.gd obtiene el nombre del mapa mediante:
-
-mapa_actual.scene_file_path
-
-Después busca dentro de:
-
-user://dialogues/
-
-en este orden:
-
-1. Diálogo específico del nivel:
-
-mapa_nombre_pnj_nivel.txt
-
-Conceptualmente:
-
-aldea_charo_a1.txt
-
-2. Diálogo genérico del PNJ:
-
-mapa_nombre_pnj.txt
-
-3. Diálogo genérico global:
-
-generico.txt
-
-==================================================
-15. DIALOGUEUPDATER
-===================
-
-DialogueUpdater es un Autoload.
-
-Configuración actual:
-
-GitHub user:
-
-aik3n
-
-GitHub repo:
-
-ZeMobida
-
-branch:
-
-main
-
-folder:
-
-guiones
-
-Descarga los .txt desde GitHub.
-
-Carpeta local definitiva:
-
-user://dialogues/
-
-Carpeta temporal:
-
-user://dialogues_temp/
-
-Copia de seguridad temporal:
-
-user://dialogues_backup/
-
-La sincronización está diseñada para que si falla la descarga o la sustitución se conserve la carpeta local anterior.
-
----
-
-## 15.1 Comportamiento ante errores
-
-Si GitHub no está disponible:
-
-* sync_failed = true
-* se conservan los guiones locales
-* guiones_disponibles = true
-* el juego puede continuar
-
-Si una descarga individual falla:
-
-* sync_failed = true
-* se conservan los guiones locales
-* guiones_disponibles = true
-* el juego puede continuar
-
-Si falla la sustitución de la carpeta:
-
-* sync_failed = true
-* se conserva la carpeta anterior
-* guiones_disponibles = true
-* el juego puede continuar
-
-Si todo funciona:
-
-* se sustituye la carpeta local por la nueva
-* guiones_disponibles = true
-* el juego puede continuar
-
-IMPORTANTE:
-
-guiones_disponibles representa disponibilidad de contenido, NO éxito de GitHub.
-
-sync_failed representa el resultado de la sincronización y es independiente de guiones_disponibles.
-
-==================================================
-16. PLAYER
-==========
-
-player.gd hereda de:
-
-CharacterBody2D
-
-Tiene:
-
-* movimiento por teclado
-* movimiento por pantalla/táctil
-* XP
-* nivel
-
-Movimiento mediante:
-
-ui_left
-ui_right
-ui_up
-ui_down
-
-También acepta:
-
-* click izquierdo
-* toque de pantalla
-
-para establecer destino.
-
-==================================================
-17. INPUT
-=========
-
-Actualmente project.godot contiene:
-
-ui_left
-ui_right
-ui_up
-ui_down
-
-con soporte para:
-
-* flechas
-* WASD
-* gamepad
-
-==================================================
-18. ARCHIVOS DE GUION ACTUALES
-==============================
-
-La carpeta remota de GitHub utilizada por DialogueUpdater es:
-
-guiones/
-
-Los archivos descargados se almacenan localmente en:
-
-user://dialogues/
-
-Debe considerarse el contenido actual de la carpeta guiones/ como fuente remota de los diálogos.
-
----
-
-## 18.1 generico.txt
-
-Contiene nodos genéricos utilizados como fallback.
-
-INICIO utiliza:
-
-> RANDOM
-
-RANDOM selecciona aleatoriamente otro nodo disponible distinto del nodo actual.
-
-Hay opciones comentadas en algunos nodos.
-
-Actualmente algunos nodos pueden ser terminales.
-
-Esto no se considera actualmente un error del sistema.
-
-Debe confirmarse en el futuro si estos nodos son intencionadamente terminales o si tendrán contenido adicional.
-
----
-
-## 18.2 fallo.txt
-
-Contiene:
-
-# ERROR
-
-Ha ocurrido un error en el guion.
-
-1 Continuar > FIN
-
-# FIN
-
-Fin.
-
-Se utiliza como diálogo de fallback cuando un guion no puede cargarse o validarse.
-
----
-
-## 18.3 diálogos específicos
-
-Los diálogos específicos de PNJ/nivel siguen la prioridad definida en pnj.gd:
-
-1. mapa_pnj_nivel.txt
-2. mapa_pnj.txt
-3. generico.txt
-
-Los nombres de objetos se normalizan a minúsculas mediante DialogueManager.
-
-==================================================
-19. AUTOLOADS
-=============
-
-project.godot contiene:
-
-[autoload]
-
+DialogueUI
+    |
+    v
 DialogueManager
-DialogueUpdater
+    |
+    | efecto de diálogo
+    v
+Player
+    |
+    | cambia XP
+    v
+xp_changed
+    |
+    v
+Game
+    |
+    +--> HUD
+    |
+    +--> Estado
 
-Los dos sistemas son globales.
+
+La UI no es responsable de modificar la XP.
+
+Player es la fuente del estado.
+
+Game es responsable de presentar ese estado en la UI global.
+
 
 ==================================================
-20. ESTADO DE LA UI GLOBAL
-==========================
+14. NIVELES ACTUALES
+==================================================
 
-Conceptualmente:
+Actualmente existen los siguientes niveles:
+
+A1
+A2
+B1
+B2
+C1
+
+Los límites actuales de XP son:
+
+A1 = 70
+A2 = 120
+B1 = 340
+B2 = 410
+C1 = 740
+
+El sistema utiliza un orden explícito de niveles.
+
+Estos valores no deben modificarse sin revisar previamente cómo está implementada la progresión del jugador.
+
+
+==================================================
+15. CARGA DE ESCENAS
+==================================================
+
+Game utiliza SceneContainer para cargar las escenas del juego.
+
+Actualmente existen como referencias principales:
+
+- bienvenida.tscn
+- aldea.tscn
+
+Flujo conceptual:
 
 Game
-│
-├── SceneContainer
-│
-└── UI
-│
-├── Estado
-│   └── Panel
-│       ├── Titulo
-│       ├── Nivel
-│       ├── Progreso
-│       ├── BarraXP
-│       ├── Inventario
-│       └── Cerrar
-│
-└── BotonEstado
+  |
+  v
+bienvenida
+  |
+  | Jugar
+  v
+aldea
+  |
+  v
+Player
 
-Hay dos conceptos independientes:
 
-UI.visible
+Cuando se carga una escena de juego:
 
-determina si la interfaz global existe visualmente.
+- se limpia la escena anterior;
+- se actualiza mapa_actual;
+- se instancia el nuevo mapa;
+- se carga el estado persistente del jugador;
+- se localiza el Player;
+- se conecta su señal xp_changed;
+- se actualiza inmediatamente el HUD.
 
-estado_panel.visible
-
-determina si el Panel de Estado está abierto.
-
-Esto permite:
-
-Bienvenida:
-UI oculta
-
-Mapa:
-UI visible
-Panel Estado oculto
-
-Mapa + INV:
-UI visible
-Panel Estado visible
 
 ==================================================
-21. CONEXIONES DEL PANEL DE ESTADO
-==================================
+16. DECISIONES ARQUITECTONICAS CONSOLIDADAS
+==================================================
 
-game.gd conecta actualmente:
+DECISION 1
+Nivel y XP pertenecen al HUD global de Game.
 
-boton_estado.pressed.connect(_abrir_estado)
-boton_cerrar.pressed.connect(_cerrar_estado)
+MOTIVO:
+Son información persistente del estado del jugador.
 
-No es necesario añadir conexiones equivalentes manualmente en el .tscn.
 
-Esta implementación funciona actualmente.
+DECISION 2
+DialogueUI no gestiona nivel ni XP.
 
-Si en el futuro se traslada la responsabilidad de la UI a otro script/sistema, habrá que revisar estas conexiones.
+MOTIVO:
+Evitar mezclar presentación de diálogos con estado global del jugador.
+
+
+DECISION 3
+El HUD se actualiza mediante xp_changed.
+
+MOTIVO:
+Usar una arquitectura orientada a eventos y evitar actualizaciones continuas innecesarias.
+
+
+DECISION 4
+Player es la fuente del estado de XP.
+
+MOTIVO:
+La UI debe presentar el estado, no convertirse en propietaria del mismo.
+
+
+DECISION 5
+Game coordina la presentación global.
+
+MOTIVO:
+Game es propietario de la UI global y conoce el mapa y Player actuales.
+
+
+DECISION 6
+El panel Estado conserva su propia representación de nivel y XP.
+
+MOTIVO:
+El HUD y Estado tienen funciones visuales diferentes.
+
+
+DECISION 7
+DialogueUI se mantiene independiente del Player.
+
+MOTIVO:
+Reducir acoplamiento y permitir que el sistema de diálogos sea reutilizable.
+
 
 ==================================================
-22. REGLAS CERRADAS
-===================
+17. CAMBIO REALIZADO EN v0.0.1
+==================================================
 
-Estas decisiones NO deben cambiarse accidentalmente:
+Antes:
 
-1. La UI global se oculta únicamente en bienvenida.tscn.
+dialogo.tscn
+  |
+  +-- diálogo
+  |
+  +-- nivel
+  |
+  +-- XP
 
-Condición:
 
-ui.visible = scene_path != BIENVENIDA_SCENE
+Después:
 
-2. La UI global no depende del nombre del mapa.
+Game
+  |
+  +-- HUD
+  |    |
+  |    +-- nivel
+  |    +-- XP
+  |
+  +-- Estado
+       |
+       +-- nivel
+       +-- XP
+       +-- inventario
 
-3. PanelGeneral de bienvenida siempre está habilitado.
 
-4. PanelCargaEscenas se bloquea durante la preparación/sincronización de guiones.
+DialogueUI
+  |
+  +-- solamente diálogo
 
-5. El juego no se bloquea indefinidamente si GitHub falla.
 
-6. Si GitHub falla, se utilizan los guiones locales.
+El cambio fue probado correctamente.
 
-7. guiones_disponibles representa disponibilidad de contenido y no exclusivamente éxito de GitHub.
-
-8. sync_failed indica fallo de sincronización y no impide necesariamente continuar.
-
-9. El Panel de Estado solo actualiza su contenido cuando se abre.
-
-10. No se actualiza innecesariamente el estado del Panel de Estado mientras está oculto.
-
-11. dialogue_ui.gd mantiene su implementación provisional de nivel/XP.
-
-12. No modificar sistemas no relacionados al realizar una mejora.
-
-13. El seguimiento de PNJ se detiene cuando la distancia al Player es <= DISTANCIA_REANUDAR.
-
-14. DISTANCIA_REANUDAR = 120.0 es la única distancia utilizada actualmente para decidir si el PNJ sigue al Player.
-
-15. DISTANCIA_PARAR ha sido eliminada.
-
-16. a_distancia_segura ha sido eliminada.
-
-17. El PNJ NO debe alejarse del Player como parte de la lógica normal de seguimiento.
-
-18. La colisión y el Area2D de interacción del PNJ deben seguir funcionando normalmente cuando el PNJ está cerca del Player.
-
-19. No introducir NavigationAgent2D, pathfinding o navegación para resolver el seguimiento de PNJ salvo decisión explícita.
-
-20. La solución de seguimiento actual se considera CERRADA.
 
 ==================================================
-23. VERSIÓN 12 — CAMBIOS REALIZADOS Y CERRADOS
-==============================================
+18. PRUEBAS REALIZADAS
+==================================================
 
-La versión 12 se considera ESTABLE.
+Se comprobó correctamente:
 
-Durante v12 se realizó la siguiente mejora:
+- arranque del proyecto;
+- entrada al mapa;
+- aparición del HUD;
+- visualización del nivel;
+- visualización del progreso;
+- funcionamiento de la barra XP;
+- apertura del panel INV;
+- cierre del panel INV;
+- visualización del inventario;
+- funcionamiento del diálogo;
+- funcionamiento de las opciones;
+- obtención de XP durante un diálogo;
+- actualización del HUD después de obtener XP;
+- eliminación de Panel2 de dialogo.tscn;
+- eliminación de lbl_nivel de dialogo.tscn;
+- eliminación de bar_progreso de dialogo.tscn.
 
-* Se modificó la pantalla de bienvenida para separar los elementos generales de los botones que cargan escenas.
-* Se creó/organizó PanelCargaEscenas.
-* btn_Aldea pasó a estar dentro de PanelCargaEscenas.
-* PanelGeneral permanece independiente y siempre habilitado.
-* PanelCargaEscenas se bloquea mientras se preparan los guiones.
-* Se introdujo guiones_disponibles en DialogueUpdater.
-* Se introdujo la señal guiones_disponibles_changed.
-* bienvenida.gd escucha la disponibilidad de los guiones.
-* Cuando los guiones están disponibles, PanelCargaEscenas se habilita.
-* Un fallo de GitHub no impide continuar.
-* Si falla GitHub, se conservan los guiones locales y PanelCargaEscenas termina habilitándose.
-* Se diferencia explícitamente entre sync_failed y guiones_disponibles.
+El sistema continúa funcionando después de eliminar los elementos de XP de la escena de diálogo.
 
-La versión 12 queda cerrada.
 
 ==================================================
-24. VERSIÓN 13 — CAMBIOS REALIZADOS Y CERRADOS
-==============================================
+19. PROBLEMA ENCONTRADO Y RESUELTO
+==================================================
 
-La versión 13 comienza desde el estado estable de v12.
+Durante la prueba posterior al cambio se observó inicialmente que el botón INV parecía no funcionar.
 
-Durante v13 se revisó y mejoró el seguimiento de PNJ.
+La causa no era el código.
 
-Problema detectado:
+El nodo Estado había quedado oculto en la escena durante la comprobación.
 
-Cuando un PNJ seguía al Player, podía quedarse físicamente bloqueado/pegado debido a que intentaba acercarse directamente al Player mediante move_and_slide().
+Se corrigió la prueba dejando la configuración correspondiente y se confirmó que el sistema de inventario funcionaba correctamente.
 
-Se probó inicialmente una solución basada en:
+Conclusión:
 
-* DISTANCIA_PARAR
-* a_distancia_segura
-* movimiento de alejamiento cuando el PNJ estaba demasiado cerca
+No existe actualmente un problema conocido con el botón INV.
 
-Esta solución fue descartada.
-
-Motivo:
-
-Cuando el PNJ se alejaba automáticamente del Player al entrar en DISTANCIA_PARAR, podía interferir con la colisión y con el Area2D de interacción, provocando que no pudiera iniciarse correctamente el diálogo.
-
-Solución definitiva:
-
-El seguimiento se simplificó.
-
-Nueva lógica:
-
-Si:
-
-distancia > DISTANCIA_REANUDAR
-
-el PNJ sigue al Player.
-
-Si:
-
-distancia <= DISTANCIA_REANUDAR
-
-el PNJ se detiene.
-
-La constante utilizada es:
-
-const DISTANCIA_REANUDAR := 120.0
-
-Se eliminaron:
-
-const DISTANCIA_PARAR := 80.0
-
-y:
-
-var a_distancia_segura := false
-
-La nueva lógica no intenta mantener una distancia física exacta respecto al Player.
-
-El PNJ simplemente deja de moverse cuando entra en el radio de 120 px.
-
-Esto permite que:
-
-* la colisión física continúe funcionando;
-* el PNJ pueda entrar en el área de interacción;
-* el diálogo pueda iniciarse;
-* el seguimiento siga siendo sencillo;
-* no sea necesario introducir navegación.
-
-La solución fue probada y funciona correctamente.
-
-ESTADO:
-
-CERRADO.
-
-No volver a introducir la solución de alejamiento salvo decisión explícita.
 
 ==================================================
-25. PUNTOS A PRESTAR ATENCIÓN EN EL FUTURO
-==========================================
+20. ESTADO ACTUAL
+==================================================
 
-1. Futuro de la UI provisional de dialogue_ui.gd.
+v0.0.1 está considerada una versión funcional y probada.
 
-2. Duplicación de NIVELES y ORDEN_NIVELES entre varios scripts.
+La reorganización de nivel/XP está terminada.
 
-3. Confirmar en el futuro si los nodos terminales de generico.txt son intencionados.
+Actualmente:
 
-4. Mantener separadas las responsabilidades de:
+- HUD global funcionando;
+- nivel funcionando;
+- XP funcionando;
+- barra XP funcionando;
+- actualización mediante xp_changed funcionando;
+- diálogos funcionando;
+- opciones de diálogo funcionando;
+- inventario funcionando;
+- panel Estado funcionando;
+- separación Game / DialogueUI establecida;
+- restos de XP eliminados de dialogo.tscn.
 
-   * sync_failed
-   * guiones_disponibles
-
-5. No convertir guiones_disponibles en una variable que represente exclusivamente el éxito de GitHub.
-
-6. No bloquear PanelGeneral durante la sincronización.
-
-7. Si se añaden nuevos botones de carga de escenas, deben estar dentro de PanelCargaEscenas o del sistema equivalente que se decida explícitamente.
-
-8. Mantener la UI global independiente de ALDEA_SCENE y de cualquier otro mapa concreto.
-
-9. No modificar DialogueParser o DialogueValidator sin comprobar compatibilidad con los guiones existentes.
-
-10. Si se modifica el sistema de niveles, revisar player.gd, game.gd y dialogue_ui.gd.
-
-11. Si se modifica el sistema de inventario, revisar DialogueManager, PNJ, diálogos y Panel de Estado.
-
-12. Si se modifica la sincronización, comprobar siempre los tres escenarios:
-
-    * sincronización correcta;
-    * fallo de GitHub;
-    * fallo de sustitución.
-
-13. Si se modifica el seguimiento de PNJ, respetar la decisión CERRADA actual antes de introducir una arquitectura más compleja.
-
-14. No reintroducir DISTANCIA_PARAR ni a_distancia_segura sin una decisión explícita.
 
 ==================================================
-26. PRINCIPIO DE TRABAJO
-========================
+21. ARCHIVOS RELEVANTES PARA ESTE SISTEMA
+==================================================
+
+Escenas:
+
+- escenas/game.tscn
+- escena de diálogo correspondiente a dialogo.tscn
+- escenas de mapas, especialmente aldea.tscn
+- bienvenida.tscn
+
+Scripts:
+
+- scripts/game.gd
+- scripts/dialogue_ui.gd
+- script del Player
+- DialogueManager
+
+Los nombres y rutas reales deben comprobarse en el repositorio antes de modificar archivos.
+
+
+==================================================
+22. METODOLOGIA DE TRABAJO
+==================================================
 
 Antes de modificar código:
 
-* Revisar la arquitectura existente.
-* Identificar exactamente qué archivos necesita el nuevo cambio.
-* Evitar modificar sistemas no relacionados.
-* Mantener compatibilidad con diálogos, inventario, XP, guardado y carga de mapas.
-* Mantener dialogue_ui.gd como implementación provisional hasta que se decida su futuro.
-* Mantener la UI global independiente de nombres concretos de mapas.
-* No actualizar innecesariamente el estado cuando el Panel de Estado está oculto.
-* Entregar archivos completos cuando se solicite código modificado.
-* No deshacer decisiones marcadas como CERRADAS.
-* No considerar definitiva ninguna parte marcada como PROVISIONAL.
-* Tratar el código actual de v13 como fuente de verdad frente a versiones anteriores del contexto.
-* Mantener las soluciones sencillas cuando resuelvan correctamente el problema.
-* No introducir sistemas de navegación, pathfinding u otras arquitecturas complejas si una solución local y sencilla es suficiente.
-* Antes de cambiar una decisión CERRADA, explicar el motivo y esperar confirmación explícita.
+1. Estudiar el archivo real.
+2. Estudiar las escenas relacionadas.
+3. Identificar dependencias.
+4. Determinar qué sistema debe ser responsable de la funcionalidad.
+5. Evitar duplicar responsabilidades.
+6. Hacer el cambio mínimo necesario.
+7. Probar la funcionalidad.
+8. Comprobar que no se ha roto ninguna funcionalidad existente.
+9. Registrar el avance en content_context.me.
+10. Solo después considerar cerrada la versión o avance.
 
-La nueva versión debe partir EXACTAMENTE de este estado.
+No reconstruir scripts completos basándose en suposiciones cuando el archivo real puede ser consultado.
+
+Cuando se solicite un script completo, debe generarse a partir de la versión real del archivo.
+
 
 ==================================================
-FIN DEL CONTEXTO MAESTRO
-========================
+23. PRINCIPIO DE CONSERVACION
+==================================================
+
+No modificar sistemas que no sean necesarios para resolver el objetivo actual.
+
+Especialmente:
+
+- no modificar Player sin necesidad;
+- no modificar DialogueManager sin necesidad;
+- no introducir lógica global en DialogueUI;
+- no duplicar sistemas de XP;
+- no eliminar funcionalidades existentes sin comprobar sus referencias.
+
+La arquitectura debe evolucionar de forma incremental.
+
+
+==================================================
+24. REGISTRO DE VERSIONES
+==================================================
+
+v0.0.1
+
+Objetivo:
+Separar la visualización global de nivel/XP del sistema de diálogos.
+
+Cambios:
+- HUD global de Game utilizado para nivel y XP.
+- actualización mediante xp_changed;
+- DialogueUI liberado de la responsabilidad de nivel/XP;
+- eliminado Panel2 de dialogo.tscn;
+- eliminado lbl_nivel de dialogo.tscn;
+- eliminado bar_progreso de dialogo.tscn.
+
+Resultado:
+Funcionalidad probada correctamente.
+
+
+==================================================
+25. SIGUIENTE CONTINUACION
+==================================================
+
+El proyecto debe continuar desde el estado v0.0.1.
+
+No se debe volver a implementar el cambio de HUD/XP ya realizado.
+
+Antes de comenzar el siguiente objetivo:
+
+- revisar este documento;
+- revisar el estado actual del repositorio;
+- identificar exactamente qué se quiere modificar;
+- estudiar los archivos afectados;
+- mantener las decisiones arquitectónicas establecidas.
+
+El siguiente avance funcional deberá registrarse aquí cuando haya sido implementado y probado correctamente.
+
+
+==================================================
+FIN DE content_context.me
+==================================================

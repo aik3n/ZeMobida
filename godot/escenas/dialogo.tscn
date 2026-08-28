@@ -36,20 +36,3 @@ offset_left = 6.0
 offset_top = 148.0
 offset_right = 287.0
 offset_bottom = 268.0
-
-[node name="Panel2" type="Panel" parent="." unique_id=471406636]
-offset_right = 690.0
-offset_bottom = 58.0
-
-[node name="lbl_nivel" type="Label" parent="Panel2" unique_id=1726548261]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
-text = "Ni"
-
-[node name="bar_progreso" type="ProgressBar" parent="Panel2" unique_id=2039539946]
-layout_mode = 0
-offset_left = 160.0
-offset_top = 9.0
-offset_right = 436.0
-offset_bottom = 36.0
