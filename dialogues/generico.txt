@@ -1,0 +1,29 @@
+-- archivo: generico.txt
+# INICIO
+
+--Estás en una encrucijada.
+> RANDOM
+--1 Seguir adelante > RANDOM
+
+
+# BOSQUE
+Has llegado al bosque.
+4 Entrar > AGUR
+
+# CUEVA
+Has encontrado una cueva.
+--1 Entrar > AGUR
+
+# CASTILLO
+Ante ti aparece un castillo.
+--1 Entrar > AGUR
+
+# NAVE
+Ante ti aparece un nave.
+
+
+# CASA
+Ante ti aparece un casa.
+
+# AGUR
+agur.

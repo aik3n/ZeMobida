@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://c4kp2s7k8fxen"]
+
+[ext_resource type="PackedScene" uid="uid://2wm1dpb4cadp" path="res://escenas/player.tscn" id="1_cbt4w"]
+[ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="2_jns4i"]
+[ext_resource type="PackedScene" uid="uid://20u5n35rocug" path="res://escenas/dialogo.tscn" id="3_c2j3b"]
+[ext_resource type="Texture2D" uid="uid://ddxmxgyyfy8mn" path="res://icon.svg" id="4_87o4k"]
+
+[node name="aldea" type="Node2D" unique_id=493802413]
+
+[node name="Dialogo_Canvas" parent="." unique_id=2027231516 instance=ExtResource("3_c2j3b")]
+
+[node name="player" parent="." unique_id=750046266 instance=ExtResource("1_cbt4w")]
+position = Vector2(429, 252)
+
+[node name="juan" parent="." unique_id=1491293733 instance=ExtResource("2_jns4i")]
+position = Vector2(171, 116)
+nombre = "juan"
+sprite = ExtResource("4_87o4k")
+tipo_seguimiento = 1
+
+[node name="charo" parent="." unique_id=1247965314 instance=ExtResource("2_jns4i")]
+position = Vector2(102, 331)
+nombre = "charo"
+sprite = ExtResource("4_87o4k")
+
+[node name="luis" parent="." unique_id=552112840 instance=ExtResource("2_jns4i")]
+position = Vector2(719, 303)
+nombre = "luis"
+sprite = ExtResource("4_87o4k")
+tipo_seguimiento = 0
+
+[node name="peter" parent="." unique_id=187825920 instance=ExtResource("2_jns4i")]
+position = Vector2(705, 158)
+nombre = "peter"
+sprite = ExtResource("4_87o4k")

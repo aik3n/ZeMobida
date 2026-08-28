@@ -1,0 +1,81 @@
+[gd_scene format=3 uid="uid://cj06c3bvafhnx"]
+
+[ext_resource type="Script" uid="uid://bhpw0vpm6snge" path="res://scripts/game.gd" id="1_o2scj"]
+
+[node name="Game" type="Node" unique_id=1004767549]
+script = ExtResource("1_o2scj")
+
+[node name="SceneContainer" type="Node" parent="." unique_id=1111760830]
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=178145642]
+
+[node name="Estado" type="Control" parent="UI" unique_id=1736404976]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 512.0
+offset_bottom = 535.0
+mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="UI/Estado" unique_id=1398691159]
+visible = false
+layout_mode = 0
+offset_left = 56.0
+offset_top = 45.0
+offset_right = 456.0
+offset_bottom = 475.0
+
+[node name="Titulo" type="Label" parent="UI/Estado/Panel" unique_id=228474769]
+layout_mode = 0
+offset_left = 17.0
+offset_top = 11.0
+offset_right = 134.0
+offset_bottom = 34.0
+text = "Titulo"
+
+[node name="Nivel" type="Label" parent="UI/Estado/Panel" unique_id=790334932]
+layout_mode = 0
+offset_left = 25.0
+offset_top = 44.0
+offset_right = 65.0
+offset_bottom = 67.0
+text = "nivel"
+
+[node name="Progreso" type="Label" parent="UI/Estado/Panel" unique_id=1817732566]
+layout_mode = 0
+offset_left = 285.0
+offset_top = 10.0
+offset_right = 325.0
+offset_bottom = 33.0
+text = "prog"
+
+[node name="BarraXP" type="ProgressBar" parent="UI/Estado/Panel" unique_id=893934345]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 45.0
+offset_right = 389.0
+offset_bottom = 72.0
+
+[node name="Inventario" type="Label" parent="UI/Estado/Panel" unique_id=1629305708]
+layout_mode = 0
+offset_left = 19.0
+offset_top = 97.0
+offset_right = 281.0
+offset_bottom = 120.0
+text = "ejemplo1
+ejemplo2
+ejemplo3"
+
+[node name="Cerrar" type="Button" parent="UI/Estado/Panel" unique_id=853662798]
+layout_mode = 0
+offset_left = 352.0
+offset_top = 7.0
+offset_right = 388.0
+offset_bottom = 38.0
+text = "X"
+
+[node name="BotonEstado" type="Button" parent="UI" unique_id=2034402367]
+offset_left = 352.0
+offset_top = 6.0
+offset_right = 388.0
+offset_bottom = 38.0
+text = "INV"

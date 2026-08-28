@@ -1,0 +1,31 @@
+Proyecto: ZeMobida, desarrollado en Godot 4.7. Es un juego educativo basado en exploración, PNJ, diálogos, inventario y progresión por XP/niveles. La versión estable actual es la 12 y, a partir de ahora, comenzamos la versión 13.
+
+Arquitectura general
+game.gd: controla el flujo principal, carga dinámica de escenas mediante SceneContainer, mapa_actual y la UI global.
+bienvenida.tscn / bienvenida.gd: pantalla inicial. Los botones que cargan mapas están dentro de PanelCargaEscenas.
+player.gd: movimiento, XP y niveles A1 → C1.
+pnj.gd: PNJ, interacción, seguimiento y selección automática de diálogos.
+DialogueManager: Autoload que gestiona diálogos, inventario, condiciones, efectos, XP y guardado/carga.
+dialogue_ui.gd: interfaz de diálogo, actualmente con elementos de XP/nivel provisionales.
+DialogueParser: interpreta los archivos .txt de diálogos.
+DialogueValidator: valida la estructura y destinos de los diálogos.
+DialogueUpdater: Autoload que sincroniza los guiones .txt desde GitHub.
+Game/UI: UI global de estado con nivel, XP e inventario.
+Reglas importantes
+La UI global permanece oculta únicamente en bienvenida.tscn:
+ui.visible = scene_path != BIENVENIDA_SCENE
+PanelGeneral de la bienvenida siempre está habilitado.
+PanelCargaEscenas contiene los botones que cargan mapas y es el panel que se deshabilita mientras los guiones todavía no están disponibles.
+La variable conceptual utilizada para controlar esto es guiones_disponibles.
+guiones_disponibles significa que el juego ya puede continuar porque:
+los guiones se han descargado correctamente, o
+la sincronización ha fallado y se utilizarán los guiones locales.
+Por tanto, un fallo de sincronización no bloquea el juego si existen guiones locales utilizables.
+No confundir guiones_disponibles con "sincronización correcta".
+El estado de la versión 12 se considera estable y no debe deshacerse ninguna decisión ya cerrada.
+La versión 13 debe partir exactamente de este estado.
+Antes de modificar código, revisar cómo encaja el cambio con la arquitectura existente y modificar únicamente los archivos necesarios.
+Cuando se solicite código modificado, entregar los archivos completos en texto codigo.
+
+
+

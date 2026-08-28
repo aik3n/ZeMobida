@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://20u5n35rocug"]
+
+[ext_resource type="Script" uid="uid://bow6kmegnlxqm" path="res://scripts/dialogue_ui.gd" id="1_l0sow"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6v2ab"]
+
+[node name="DialogueUI" type="CanvasLayer" unique_id=2027231516]
+script = ExtResource("1_l0sow")
+
+[node name="Panel" type="Panel" parent="." unique_id=1311012228]
+offset_left = 23.0
+offset_top = 347.0
+offset_right = 1082.0
+offset_bottom = 623.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_6v2ab")
+
+[node name="NameLabel" type="Label" parent="Panel" unique_id=1183654783]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 4.0
+offset_right = 203.0
+offset_bottom = 27.0
+text = "kaixo"
+
+[node name="DialogueText" type="Label" parent="Panel" unique_id=2064739650]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 55.0
+offset_right = 50.0
+offset_bottom = 78.0
+text = "ops"
+
+[node name="OptionsContainer" type="VBoxContainer" parent="Panel" unique_id=499011989]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 148.0
+offset_right = 287.0
+offset_bottom = 268.0
+
+[node name="Panel2" type="Panel" parent="." unique_id=471406636]
+offset_right = 690.0
+offset_bottom = 58.0
+
+[node name="lbl_nivel" type="Label" parent="Panel2" unique_id=1726548261]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Ni"
+
+[node name="bar_progreso" type="ProgressBar" parent="Panel2" unique_id=2039539946]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 9.0
+offset_right = 436.0
+offset_bottom = 36.0

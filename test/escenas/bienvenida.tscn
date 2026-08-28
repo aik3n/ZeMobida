@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://diplle3q6f52e"]
+
+[ext_resource type="Script" uid="uid://buic8l4pj5del" path="res://scripts/bienvenida.gd" id="1_hpq5i"]
+
+[node name="Inicio" type="Control" unique_id=1229451743]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hpq5i")
+
+[node name="PanelGeneral" type="Panel" parent="." unique_id=2123154516]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 180.0
+offset_right = 246.0
+offset_bottom = 363.0
+
+[node name="PanelCargaEscenas" type="Panel" parent="." unique_id=105727122]
+layout_mode = 0
+offset_left = 193.0
+offset_top = 65.0
+offset_right = 652.0
+offset_bottom = 329.0
+
+[node name="btn_Aldea" type="Button" parent="PanelCargaEscenas" unique_id=1387758120]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 39.0
+offset_right = 422.0
+offset_bottom = 99.0
+text = "Carga Aldea"
