@@ -151,3 +151,46 @@ Además de las pruebas generales, comprobar:
 ### Efectos asociados al texto
 
 Una línea de texto puede terminar en un bloque de efectos, por ejemplo `Has elegido bien [xp+30]`. El parser separa el texto de los efectos y `DialogueManager` los aplica únicamente cuando el nodo alcanza la fase de presentación.
+
+
+## Backlog técnico
+
+La lista priorizada de mejoras y riesgos pendientes se mantiene en `docs/AUDIT.md`, sección **Backlog de auditoría completa — 2026-08-29**.
+
+Los puntos se resolverán individualmente siguiendo el ciclo:
+
+```text
+especificar → implementar → probar en runtime → documentar → cerrar
+```
+
+
+## Exportación Android y sincronización de guiones
+
+El preset Android debe mantener:
+
+```text
+permissions/internet=true
+```
+
+`DialogueUpdater` utiliza `HTTPRequest` para consultar y descargar los guiones desde GitHub. En una instalación Android nueva no existe todavía `user://dialogues/`, por lo que el permiso de Internet es necesario para obtener la caché inicial.
+
+
+### Descubrimiento de mapas en exportación
+
+Los recursos bajo `res://mapas/` se enumeran con `ResourceLoader.list_directory()` y no con `DirAccess`. Esto es necesario porque los recursos pueden quedar remapeados en el PCK de una build exportada, mientras `ResourceLoader` conserva sus nombres originales.
+
+El contrato sigue siendo el mismo: sólo se descubren escenas `.tscn` directamente dentro de `res://mapas/`.
+
+
+### Validación Android completada
+
+Validado en dispositivo Android:
+
+- acceso a GitHub mediante `HTTPRequest`;
+- descarga inicial de guiones;
+- disponibilidad de caché runtime;
+- descubrimiento de mapas exportados mediante `ResourceLoader.list_directory()`;
+- visualización del carrusel;
+- carga del mapa seleccionado.
+
+La funcionalidad está confirmada. Los ajustes de maquetación/responsive se tratarán por separado.

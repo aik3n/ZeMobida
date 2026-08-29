@@ -60,19 +60,18 @@ func _input(event: InputEvent) -> void:
 func _discover_maps() -> void:
 	mapas.clear()
 
-	var dir := DirAccess.open(MAPS_FOLDER)
-	if dir == null:
-		return
+	# ResourceLoader conserva los nombres originales de los recursos
+	# también en builds exportadas. DirAccess sobre res:// puede no
+	# devolver los .tscn porque Godot remapea recursos dentro del PCK.
+	var entries := ResourceLoader.list_directory(MAPS_FOLDER)
 
-	dir.list_dir_begin()
-	var file_name := dir.get_next()
+	for file_name in entries:
+		if file_name.ends_with("/"):
+			continue
 
-	while not file_name.is_empty():
-		if not dir.current_is_dir() and file_name.to_lower().ends_with(".tscn"):
+		if file_name.to_lower().ends_with(".tscn"):
 			mapas.append(MAPS_FOLDER + file_name)
-		file_name = dir.get_next()
 
-	dir.list_dir_end()
 	mapas.sort_custom(_sort_map_paths)
 
 
