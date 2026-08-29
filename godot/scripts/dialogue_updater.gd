@@ -10,9 +10,8 @@ const SETTINGS_KEY_UPDATE_ON_START: String = "update_on_start"
 
 # CONFIGURACIÓN GITHUB
 const GITHUB_USER: String = "aik3n"
-const GITHUB_REPO: String = "ZeMobida"
+const GITHUB_REPO: String = "ZeMobida_guiones"
 const GITHUB_BRANCH: String = "main"
-const GITHUB_FOLDER: String = "guiones"
 
 # Tiempo máximo de sincronización al iniciar.
 const SYNC_TIMEOUT_SECONDS: float = 30.0
@@ -162,7 +161,6 @@ func _download_from_github() -> void:
 		+ "/"
 		+ GITHUB_REPO
 		+ "/contents/"
-		+ GITHUB_FOLDER
 		+ "?ref="
 		+ GITHUB_BRANCH
 	)

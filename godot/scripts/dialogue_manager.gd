@@ -155,7 +155,7 @@ func show_node(node_name: String):
 	var jump: String = node["jump"]
 
 	if not jump.is_empty():
-		if jump == "RANDOM":
+		if jump == "random":
 			var random_node := _get_random_node()
 
 			if random_node.is_empty():
@@ -200,10 +200,12 @@ func select_option(option: Dictionary):
 				candidate["effects"]
 			)
 
-			show_node(
-				candidate["next"]
-			)
+			var next: String = candidate["next"]
 
+			if next.is_empty():
+				return
+
+			show_node(next)
 			return
 
 
@@ -211,7 +213,7 @@ func _get_random_node() -> String:
 	var available: Array[String] = []
 
 	for node_name in dialogue_data.keys():
-		if node_name == current_node:
+		if node_name.to_lower() == current_node.to_lower():
 			continue
 
 		available.append(node_name)

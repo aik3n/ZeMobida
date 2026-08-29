@@ -45,7 +45,7 @@ El inventario forma parte del estado del jugador y puede cambiar mediante diálo
 ## ADR-009 — Dialogue content can be synchronized from GitHub
 **Status:** Accepted
 
-`guiones/` puede sincronizarse desde GitHub hacia `user://dialogues/`.
+Los guiones se sincronizan desde el repositorio independiente `aik3n/ZeMobida_guiones` hacia `user://dialogues/`.
 
 ## ADR-010 — NPC dialogue resolution uses map, NPC and Player level
 **Status:** Accepted
@@ -97,7 +97,7 @@ Se reducen descargas, se mantiene el último contenido válido y el arranque no 
 La implementación fue probada en ejecución el 2026-08-29 y se confirmó su funcionamiento.
 
 ## ADR-014 — `guiones/` is repository content, not the runtime cache
-**Status:** Accepted
+**Status:** Superseded by ADR-018
 
 ### Context
 
@@ -178,3 +178,72 @@ No se implementa migración ni compatibilidad con `user://save/status.txt`; el f
 ### Consequences
 
 Se elimina el formato de guardado específico de XP/inventario y se reduce la duplicación de código de lectura/escritura de estado. El archivo sigue siendo legible y editable con las herramientas de Godot. La persistencia continúa separando responsabilidades por sección, aunque comparta soporte físico.
+
+## ADR-017 — Nueva sintaxis simplificada para los guiones
+**Status:** Accepted
+
+### Context
+
+El formato anterior utilizaba opciones numeradas y una sintaxis que mezclaba varios conceptos en una misma línea. Se aprobó una sintaxis más sencilla basada en el primer carácter de cada línea, manteniendo los guiones como texto plano UTF-8 fácil de editar y versionar.
+
+### Decision
+
+La nueva sintaxis utiliza:
+
+```text
+texto → texto del PNJ
+#     → nodo
+?     → condición
+>     → salto
+=     → opción
+[ ]   → efectos
+'     → comentario
+```
+
+Las condiciones consecutivas de una línea se combinan con AND. Un salto sin condiciones es incondicional. `RANDOM` selecciona un nodo distinto del actual. Una opción sin salto tiene destino `null`. Los efectos se asocian a la transición de la opción. Sin una condición, salto u opción que cambie explícitamente el destino, el nodo actual permanece activo; no existe avance automático al siguiente nodo físico. Las etiquetas de nodo se comparan sin distinguir mayúsculas/minúsculas.
+
+Las opciones se presentan al jugador en orden aleatorio; su orden en el archivo no tiene significado para la presentación.
+
+### Consequences
+
+El parser, validador y runtime se adaptan a esta sintaxis. Los guiones se mantienen fuera del repositorio principal, en el repositorio dedicado. La validación avanzada de errores se mantiene como responsabilidad del validador y no se incorpora complejidad adicional al formato.
+
+
+## ADR-018 — Separar los guiones del repositorio principal
+**Status:** Accepted
+
+### Context
+
+Los `.txt` de diálogo se mantenían dentro del mismo repositorio que el proyecto Godot, aunque el runtime ya los trataba como contenido remoto sincronizable y utilizaba `user://dialogues/` como caché local.
+
+Mantener una copia de los guiones en el repositorio principal y otra fuente remota crea dos posibles fuentes de verdad.
+
+### Decision
+
+Los guiones se versionan exclusivamente en el repositorio:
+
+```text
+aik3n/ZeMobida_guiones
+```
+
+Los archivos `.txt` están directamente en la raíz de ese repositorio.
+
+`DialogueUpdater` consulta la rama `main` de ese repositorio mediante la API Contents de GitHub, descarga sólo los `.txt` necesarios, valida el conjunto temporal y actualiza `user://dialogues/` únicamente si la sincronización es válida.
+
+El repositorio principal `aik3n/ZeMobida` no contiene una carpeta `guiones/` ni una copia empaquetada de esos archivos.
+
+### Consequences
+
+Existe una única fuente de verdad para el contenido narrativo.
+
+El mecanismo local permanece sin cambios:
+
+```text
+aik3n/ZeMobida_guiones
+        ↓
+user://dialogues/
+        ↓
+runtime
+```
+
+`user://dialogues_manifest.json` sigue siendo metadato local de sincronización y `user://settings.cfg` mantiene la preferencia de actualización.

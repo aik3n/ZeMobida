@@ -6,10 +6,14 @@ extends CanvasLayer
 
 @onready var name_label: Label = $PanelTexto/NameLabel
 @onready var dialogue_text: Label = $PanelTexto/DialogueText
+@onready var options_indicator: Label = $PanelTexto/OptionsIndicator
 
 @onready var options_container: VBoxContainer = (
 	$PanelOpciones/OptionsContainer
 )
+
+
+var _has_options := false
 
 
 func _ready() -> void:
@@ -18,17 +22,20 @@ func _ready() -> void:
 
 	panel_texto.visible = false
 	panel_opciones.visible = false
+	options_indicator.visible = false
 
 
 func show_dialogue() -> void:
 
 	panel_texto.visible = true
+	panel_opciones.visible = false
 
 
 func hide_dialogue() -> void:
 
 	panel_texto.visible = false
 	panel_opciones.visible = false
+	options_indicator.visible = false
 
 
 func show_text(
@@ -42,16 +49,22 @@ func show_text(
 
 func show_options(options: Array) -> void:
 
-	for child in options_container.get_children():
+	# Al mostrar un nodo nuevo, el panel de opciones empieza oculto.
+	panel_opciones.visible = false
 
+	for child in options_container.get_children():
 		child.queue_free()
 
-	if options.is_empty():
+	_has_options = not options.is_empty()
+	options_indicator.visible = _has_options
 
-		panel_opciones.visible = false
+	if not _has_options:
 		return
 
-	for option in options:
+	var shuffled_options: Array = options.duplicate()
+	shuffled_options.shuffle()
+
+	for option in shuffled_options:
 
 		var button := Button.new()
 
@@ -67,8 +80,7 @@ func show_options(options: Array) -> void:
 
 func toggle_options() -> void:
 
-	if options_container.get_child_count() == 0:
-
+	if not _has_options:
 		panel_opciones.visible = false
 		return
 

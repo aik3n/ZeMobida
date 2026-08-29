@@ -64,15 +64,13 @@ Consulta [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 - [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)
 - [`docs/AUDIT.md`](docs/AUDIT.md)
 
-## Hallazgos principales
+## Estado del audit
 
-1. Android tiene Internet desactivado aunque el juego usa HTTP para GitHub.
-2. La sincronización depende de la rama mutable `main`.
-3. El contenido descargado no se valida completamente antes de activarse.
-4. No se detectan ciclos automáticos de diálogo.
-5. Persisten valores de prototipo y una ruta local absoluta.
-6. El package Android es un placeholder.
-7. No se observa una suite automatizada de CI/tests.
+Desde el audit inicial se han resuelto varios puntos: sincronización incremental, validación del conjunto temporal antes de activar guiones, fallback a caché, persistencia unificada, selección dinámica de mapas y separación de los guiones en `aik3n/ZeMobida_guiones`.
+
+Siguen pendientes de revisión antes de una release la referencia mutable `main` para contenido, la detección de ciclos automáticos de diálogo, algunos metadatos de distribución y una suite automatizada de tests/CI.
+
+Consulta [`docs/AUDIT.md`](docs/AUDIT.md) para el estado actual.
 
 ## Licencia
 

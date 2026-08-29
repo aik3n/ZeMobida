@@ -37,7 +37,6 @@ ZeMobida is an open-source Godot game built around exploration, NPC interaction,
 │   ├── scripts/
 │   ├── project.godot
 │   └── export_presets.cfg
-├── guiones/
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── AUDIT.md
@@ -82,7 +81,7 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Dialogue format
 
-Dialogue lives in `guiones/*.txt`. See [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md).
+Dialogue content lives in the separate repository `aik3n/ZeMobida_guiones`; `.txt` files are stored at its root. See [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md).
 
 ## Development
 
@@ -102,9 +101,11 @@ See [`docs/AUDIT.md`](docs/AUDIT.md).
 
 ## Known limitations
 
-The audited revision has important release blockers: Android Internet permission is disabled despite online synchronization; remote content follows mutable `main`; downloaded content is not validated as a complete set before activation; automatic dialogue cycles are not detected; prototype metadata and a machine-specific path remain; and no visible automated CI/test suite was found.
+Several findings from the original audit have since been addressed, including incremental dialogue synchronization, temporary-set validation, cache fallback, unified persistence, dynamic map selection and separation of dialogue content into its own repository.
 
-These findings refer specifically to the original audit baseline and should be revalidated against later code changes.
+Remaining areas to review before release include the mutable `main` reference used for dialogue content, automatic dialogue-cycle detection, distribution metadata and automated tests/CI.
+
+See [`docs/AUDIT.md`](docs/AUDIT.md) for the current status.
 
 ## License
 

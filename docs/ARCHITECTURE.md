@@ -30,10 +30,10 @@ DialogueUpdater (autoload)
 
 ## Contenido
 
-- `guiones/`: contenido de diálogo versionado en el repositorio.
+- `aik3n/ZeMobida_guiones`: repositorio independiente que contiene los `.txt` de diálogo en su raíz.
 - `user://dialogues/`: caché local utilizada por el runtime.
 
-GitHub es la fuente de actualización. La caché local permite continuar jugando cuando GitHub no está disponible.
+El repositorio de guiones en GitHub es la fuente de verdad del contenido. El repositorio principal no contiene una copia de los `.txt`. La caché local permite continuar jugando cuando GitHub no está disponible.
 
 ## Sincronización
 

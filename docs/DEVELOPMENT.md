@@ -6,7 +6,7 @@
 ## Reglas
 
 - El código implementado es la fuente de verdad del comportamiento.
-- `guiones/` es contenido versionado.
+- Los guiones se versionan en el repositorio independiente `aik3n/ZeMobida_guiones`.
 - `user://dialogues/` es la caché utilizada por runtime.
 - Una actualización fallida nunca debe destruir una caché válida.
 
@@ -72,7 +72,7 @@ Comprobar:
 
 ## Desarrollo de guiones
 
-Antes de modificar `guiones/`:
+Antes de modificar los `.txt` de `aik3n/ZeMobida_guiones`:
 1. comprobar `DIALOGUE_FORMAT.md`;
 2. verificar destinos;
 3. verificar condiciones y efectos;

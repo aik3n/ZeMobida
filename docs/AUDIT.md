@@ -54,7 +54,7 @@ Algunas partes dependen de nombres concretos y búsquedas dinámicas.
 
 La documentación actual refleja el comportamiento implementado, incluyendo sincronización por SHA, opción de usuario, timeout, validación previa y fallback a caché.
 
-El contenido de `guiones/` del repositorio es contenido versionado; `user://dialogues/` es la caché runtime.
+Los guiones se versionan exclusivamente en `aik3n/ZeMobida_guiones`; `user://dialogues/` es la caché runtime. El repositorio principal ya no contiene la carpeta `guiones/`.
 
 
 ## Selección de mapas — implementación
@@ -104,3 +104,31 @@ Para obtener `Preview`, el selector carga e instancia temporalmente la escena de
 Se consolidó la persistencia de preferencias y estado de partida en `user://settings.cfg`. `DialogueManager` guarda XP e inventario en `[player]`, mientras que el updater y el selector de mapas conservan sus secciones `[dialogues]` y `[maps]`. El manifest de guiones continúa separado por ser metadato de sincronización.
 
 No se mantiene compatibilidad con el antiguo `user://save/status.txt`; la especificación vigente utiliza exclusivamente `user://settings.cfg`.
+
+## Nuevo formato de guiones — especificación
+
+La sintaxis basada en `#`, `?`, `>`, `=`, `[ ]` y `'`, junto con la presentación aleatoria de opciones, quedó aprobada en ADR-017 y posteriormente implementada y validada en runtime.
+
+
+## Nuevo formato de guiones — implementación
+
+La nueva sintaxis ha sido implementada en parser, validator, runtime e interfaz. El contenido narrativo se mantiene ya con esta sintaxis en el repositorio dedicado `aik3n/ZeMobida_guiones`.
+
+Las opciones se presentan en orden aleatorio.
+
+**Estado:** implementación completada y validada manualmente en runtime. No existe avance automático entre nodos. El clic sobre el panel del PNJ sólo muestra u oculta las opciones.
+
+### Corrección de interacción del diálogo
+
+Se eliminó el avance de nodo mediante clic. El panel de texto sólo alterna la visibilidad de las opciones. Se añadió un indicador `▼` visible únicamente cuando el nodo actual contiene opciones. Validado manualmente en runtime.
+
+
+## Separación del repositorio de guiones
+
+`DialogueUpdater` apunta a `aik3n/ZeMobida_guiones`, rama `main`, leyendo los `.txt` directamente desde la raíz del repositorio.
+
+Se ha eliminado `guiones/` del repositorio principal para evitar dos fuentes de verdad.
+
+La lógica de SHA, manifest, carpeta temporal, validación y fallback a `user://dialogues/` no cambia.
+
+**Estado:** implementado y validado manualmente en runtime.
