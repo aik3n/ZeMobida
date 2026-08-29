@@ -27,6 +27,7 @@ var downloaded_files: Dictionary = {}
 var active_requests: Array[HTTPRequest] = []
 
 var sync_failed: bool = false
+var cache_needs_replace: bool = false
 var guiones_disponibles: bool = false
 var sincronizando: bool = false
 var actualizar_guiones_al_iniciar: bool = true
@@ -144,6 +145,7 @@ func _download_from_github() -> void:
 	downloaded_files.clear()
 	pending_downloads = 0
 	sync_failed = false
+	cache_needs_replace = false
 	sincronizando = true
 	_sync_finished = false
 
@@ -310,7 +312,7 @@ func _on_github_list_received(
 	if github_files.is_empty():
 		sync_failed = true
 		push_warning(
-			"GitHub no contiene guiones válidos. "
+			"GitHub no contiene archivos .txt. "
 			+ "Se mantendrán los guiones locales."
 		)
 		_delete_temp_folder()
@@ -336,10 +338,14 @@ func _on_github_list_received(
 		_finish_synchronization(true)
 		return
 
+	cache_needs_replace = (
+		not changed_files.is_empty()
+		or _local_file_set_differs_from_remote()
+	)
+
 	pending_downloads = changed_files.size()
 
 	if pending_downloads == 0:
-		_delete_temp_folder()
 		_finish_synchronization(false)
 		return
 
@@ -465,7 +471,21 @@ func _finish_synchronization(failed: bool) -> void:
 		sincronizacion_completada.emit()
 		return
 
-	if pending_downloads == 0 and _temp_contains_valid_dialogues():
+	if cache_needs_replace:
+		# El updater valida la integridad de la sincronización:
+		# el temporal debe contener exactamente los .txt publicados.
+		# No interpreta ni valida la sintaxis de los guiones.
+		if not _temp_file_set_matches_remote():
+			sync_failed = true
+			push_warning(
+				"El conjunto descargado está incompleto. "
+				+ "Se conserva la carpeta local."
+			)
+			_delete_temp_folder()
+			_marcar_guiones_disponibles()
+			sincronizacion_completada.emit()
+			return
+
 		if not _replace_local_folder():
 			sync_failed = true
 			push_warning(
@@ -477,47 +497,62 @@ func _finish_synchronization(failed: bool) -> void:
 			sincronizacion_completada.emit()
 			return
 
-	# Sin cambios: la caché actual ya es la versión remota conocida.
-	if pending_downloads == 0:
-		_delete_temp_folder()
 		_marcar_guiones_disponibles()
 		sincronizacion_completada.emit()
 		return
 
+	# Sin cambios de contenido ni de conjunto de archivos.
+	_delete_temp_folder()
 	_marcar_guiones_disponibles()
 	sincronizacion_completada.emit()
 
 
-func _temp_contains_valid_dialogues() -> bool:
+func _local_file_set_differs_from_remote() -> bool:
+
+	var dir := DirAccess.open(LOCAL_FOLDER)
+
+	if dir == null:
+		return true
+
+	var local_files: Array[String] = []
+
+	for file_name in dir.get_files():
+		if file_name.ends_with(".txt"):
+			local_files.append(file_name)
+
+	var remote_files: Array[String] = []
+
+	for file_name in github_file_names:
+		remote_files.append(file_name)
+
+	local_files.sort()
+	remote_files.sort()
+
+	return local_files != remote_files
+
+
+func _temp_file_set_matches_remote() -> bool:
 
 	var dir := DirAccess.open(TEMP_FOLDER)
+
 	if dir == null:
 		return false
 
-	var parser := DialogueParser.new()
-	var validator := DialogueValidator.new()
-	var files := dir.get_files()
-	var found := false
+	var temp_files: Array[String] = []
 
-	for file_name in files:
-		if not file_name.ends_with(".txt"):
-			continue
+	for file_name in dir.get_files():
+		if file_name.ends_with(".txt"):
+			temp_files.append(file_name)
 
-		found = true
-		var file := FileAccess.open(TEMP_FOLDER + file_name, FileAccess.READ)
-		if file == null:
-			return false
+	var remote_files: Array[String] = []
 
-		var text := file.get_as_text()
-		file.close()
+	for file_name in github_file_names:
+		remote_files.append(file_name)
 
-		var dialogue := parser.parse(text)
-		if not validator.validate(dialogue, parser.errors):
-			for error in validator.errors:
-				push_warning("Guion inválido %s: %s" % [file_name, error])
-			return false
+	temp_files.sort()
+	remote_files.sort()
 
-	return found
+	return temp_files == remote_files
 
 
 func _marcar_guiones_disponibles() -> void:
@@ -559,9 +594,6 @@ func _save_manifest() -> bool:
 
 
 func _replace_local_folder() -> bool:
-
-	if not _temp_contains_valid_dialogues():
-		return false
 
 	var backup_path := "user://dialogues_backup/"
 	_delete_folder(backup_path)

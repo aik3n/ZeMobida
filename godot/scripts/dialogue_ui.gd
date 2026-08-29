@@ -27,8 +27,14 @@ func _ready() -> void:
 
 func show_dialogue() -> void:
 
+	var starting_dialogue := not panel_texto.visible
+
 	panel_texto.visible = true
-	panel_opciones.visible = false
+
+	# El panel de opciones sólo se fuerza a oculto cuando empieza
+	# realmente un diálogo, no en cada cambio de nodo.
+	if starting_dialogue:
+		panel_opciones.visible = false
 
 
 func hide_dialogue() -> void:
@@ -36,6 +42,7 @@ func hide_dialogue() -> void:
 	panel_texto.visible = false
 	panel_opciones.visible = false
 	options_indicator.visible = false
+	_has_options = false
 
 
 func show_text(
@@ -49,16 +56,17 @@ func show_text(
 
 func show_options(options: Array) -> void:
 
-	# Al mostrar un nodo nuevo, el panel de opciones empieza oculto.
-	panel_opciones.visible = false
-
 	for child in options_container.get_children():
+		# Se retira inmediatamente del contenedor para que las opciones
+		# antiguas no convivan un frame con las del nuevo nodo.
+		options_container.remove_child(child)
 		child.queue_free()
 
 	_has_options = not options.is_empty()
 	options_indicator.visible = _has_options
 
 	if not _has_options:
+		panel_opciones.visible = false
 		return
 
 	var shuffled_options: Array = options.duplicate()

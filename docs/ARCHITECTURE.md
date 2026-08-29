@@ -45,7 +45,7 @@ Actualizar guiones al iniciar: Sí / No
 
 Con `Sí`, antes de permitir entrar al mapa se consulta GitHub, se obtiene el `sha` de cada archivo y se compara con el manifest local. Sólo se descargan archivos nuevos o modificados.
 
-Los cambios se descargan temporalmente y se validan antes de activar la nueva colección. Si hay error o timeout, se conserva la caché anterior.
+Los cambios se descargan temporalmente y se comprueba que el conjunto de `.txt` descargado coincide con el conjunto remoto antes de activar la nueva colección. El updater no valida el contenido de los guiones. Si hay error o timeout, se conserva la caché anterior.
 
 El timeout global es configurable y vale `30.0` segundos por defecto.
 

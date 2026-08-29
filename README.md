@@ -101,7 +101,7 @@ See [`docs/AUDIT.md`](docs/AUDIT.md).
 
 ## Known limitations
 
-Several findings from the original audit have since been addressed, including incremental dialogue synchronization, temporary-set validation, cache fallback, unified persistence, dynamic map selection and separation of dialogue content into its own repository.
+Several findings from the original audit have since been addressed, including incremental dialogue synchronization, temporary-set integrity checking, cache fallback, unified persistence, dynamic map selection and separation of dialogue content into its own repository.
 
 Remaining areas to review before release include the mutable `main` reference used for dialogue content, automatic dialogue-cycle detection, distribution metadata and automated tests/CI.
 

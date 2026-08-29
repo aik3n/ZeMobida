@@ -33,6 +33,9 @@ func _validate_node_structure(node_name: String, node: Dictionary) -> void:
 	if not node.has("text"):
 		_error(node_name, "falta 'text'")
 
+	if not node.has("effects"):
+		_error(node_name, "faltan 'effects'")
+
 	if not node.has("conditions"):
 		_error(node_name, "faltan 'conditions'")
 

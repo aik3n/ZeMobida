@@ -173,6 +173,10 @@ func show_node(node_name: String):
 		return
 
 	if dialogue_ui != null:
+		_apply_effects(
+			node["effects"]
+		)
+
 		dialogue_ui.show_dialogue()
 
 		dialogue_ui.show_text(

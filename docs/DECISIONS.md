@@ -153,7 +153,7 @@ No existe metadata adicional obligatoria para que un mapa sea seleccionable.
 
 ### Verification
 
-La implementación requiere prueba runtime en Godot. La revisión estática confirma el flujo y las responsabilidades descritas.
+La implementación fue validada manualmente en runtime en Godot.
 
 
 ## ADR-016 — Consolidate local settings and player state in one ConfigFile
@@ -200,7 +200,7 @@ texto → texto del PNJ
 '     → comentario
 ```
 
-Las condiciones consecutivas de una línea se combinan con AND. Un salto sin condiciones es incondicional. `RANDOM` selecciona un nodo distinto del actual. Una opción sin salto tiene destino `null`. Los efectos se asocian a la transición de la opción. Sin una condición, salto u opción que cambie explícitamente el destino, el nodo actual permanece activo; no existe avance automático al siguiente nodo físico. Las etiquetas de nodo se comparan sin distinguir mayúsculas/minúsculas.
+Las condiciones consecutivas de una línea se combinan con AND. Un salto sin condiciones es incondicional. `RANDOM` selecciona un nodo distinto del actual. Una opción sin salto tiene destino `null`. Los efectos pueden asociarse a la transición de una opción o al texto mostrado por un nodo. Sin una condición, salto u opción que cambie explícitamente el destino, el nodo actual permanece activo; no existe avance automático al siguiente nodo físico. Las etiquetas de nodo se comparan sin distinguir mayúsculas/minúsculas.
 
 Las opciones se presentan al jugador en orden aleatorio; su orden en el archivo no tiene significado para la presentación.
 
@@ -228,7 +228,7 @@ aik3n/ZeMobida_guiones
 
 Los archivos `.txt` están directamente en la raíz de ese repositorio.
 
-`DialogueUpdater` consulta la rama `main` de ese repositorio mediante la API Contents de GitHub, descarga sólo los `.txt` necesarios, valida el conjunto temporal y actualiza `user://dialogues/` únicamente si la sincronización es válida.
+`DialogueUpdater` consulta la rama `main` de ese repositorio mediante la API Contents de GitHub, descarga sólo los `.txt` necesarios y sustituye `user://dialogues/` únicamente cuando la transferencia completa termina correctamente. No valida la sintaxis de los guiones; esa responsabilidad pertenece a `DialogueManager` al iniciar cada diálogo.
 
 El repositorio principal `aik3n/ZeMobida` no contiene una carpeta `guiones/` ni una copia empaquetada de esos archivos.
 

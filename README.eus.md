@@ -20,6 +20,6 @@ Dokumentazio nagusia:
 - [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)
 - [`docs/AUDIT.md`](docs/AUDIT.md)
 
-Hasierako ikuskapeneko hainbat puntu dagoeneko konpondu dira: elkarrizketen sinkronizazio inkrementala, aldi baterako multzoaren balidazioa, cache-rako fallback-a, persistentzia bateratua, mapa-hautaketa dinamikoa eta gidoiak `aik3n/ZeMobida_guiones` biltegi bereizian mantentzea. Release baten aurretik berrikusteko geratzen dira `main` erreferentzia mutagarria, elkarrizketa-ziklo automatikoen detekzioa, banaketa-metadata eta test/CI automatizatuak.
+Hasierako ikuskapeneko hainbat puntu dagoeneko konpondu dira: elkarrizketen sinkronizazio inkrementala, aldi baterako fitxategi-multzoaren osotasun-egiaztapena, cache-rako fallback-a, persistentzia bateratua, mapa-hautaketa dinamikoa eta gidoiak `aik3n/ZeMobida_guiones` biltegi bereizian mantentzea. Release baten aurretik berrikusteko geratzen dira `main` erreferentzia mutagarria, elkarrizketa-ziklo automatikoen detekzioa, banaketa-metadata eta test/CI automatizatuak.
 
 GNU GPL v3.0.

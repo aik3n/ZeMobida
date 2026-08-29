@@ -33,6 +33,7 @@ func parse(text: String) -> Dictionary:
 
 			entry = {
 				"text": "",
+				"effects": [],
 				"conditions": [],
 				"options": [],
 				"jump": ""
@@ -51,9 +52,12 @@ func parse(text: String) -> Dictionary:
 			"=":
 				entry["options"].append(_parse_option(line))
 			"[":
-				errors.append("Efectos sin opción en #%s: %s" % [label, line])
+				errors.append(
+					"Efectos sin texto u opción en #%s: %s"
+					% [label, line]
+				)
 			_:
-				_add_text(entry, line)
+				_parse_text_line(entry, line)
 
 	if not label.is_empty():
 		dialogue[label] = entry
@@ -218,6 +222,31 @@ func _parse_effects(text: String) -> Array:
 			errors.append("Efecto desconocido: %s" % effect)
 
 	return result
+
+
+func _parse_text_line(entry: Dictionary, line: String) -> void:
+	var text := line
+	var bracket := line.rfind("[")
+
+	if bracket >= 0:
+		if not line.ends_with("]"):
+			errors.append("Texto: efecto sin ']': %s" % line)
+			return
+
+		var effect_text := line.substr(
+			bracket + 1,
+			line.length() - bracket - 2
+		)
+
+		var effects := _parse_effects(effect_text)
+		entry["effects"].append_array(effects)
+		text = line.substr(0, bracket).strip_edges()
+
+	if text.is_empty():
+		errors.append("Línea de texto sin texto: %s" % line)
+		return
+
+	_add_text(entry, text)
 
 
 func _add_text(entry: Dictionary, line: String) -> void:

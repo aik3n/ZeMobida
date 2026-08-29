@@ -2,7 +2,7 @@
 
 ## Estado
 
-**Especificación implementada — pendiente de validación runtime.**
+**Especificación implementada y validada en runtime.**
 
 Esta versión sustituye la sintaxis anterior de opciones numeradas y está implementada en parser, validador, runtime e interfaz.
 
@@ -184,7 +184,7 @@ Pueden combinarse varios efectos separados por comas:
 = Comprar objeto > TIENDA [+objeto, -moneda, xp+5]
 ```
 
-Los efectos pertenecen a la transición de la opción.
+Los efectos pueden asociarse a una opción o al texto mostrado por un nodo.
 
 Los efectos definidos actualmente son:
 
@@ -194,6 +194,17 @@ Los efectos definidos actualmente son:
 - `xp-N`
 
 ---
+
+### Efectos en texto del PNJ
+
+Los efectos pueden escribirse al final de una línea de texto:
+
+```text
+Has elegido bien [xp+30]
+Gracias por ayudarme [+llave, xp+5]
+```
+
+El bloque `[ ]` no forma parte del texto mostrado. Sus efectos se ejecutan cuando el nodo llega realmente a mostrarse. Si una condición o un salto automático desvía el flujo antes de mostrar el nodo, esos efectos no se ejecutan.
 
 ## 9. Flujo entre nodos
 
@@ -226,23 +237,24 @@ Una opción sin destino tampoco cambia de nodo:
 
 Pulsar el panel de texto del PNJ **no cambia de nodo**. Sólo muestra u oculta el panel de opciones.
 
----
 
 ## 9.1. Panel de opciones
 
-El panel de opciones está oculto por defecto.
+El panel de opciones empieza oculto al iniciar un diálogo.
 
 Cuando el nodo actual contiene opciones:
 
 - aparece el indicador `▼` en el panel de texto del PNJ;
-- pulsar el panel de texto muestra u oculta el panel de opciones.
+- pulsar el panel de texto muestra u oculta el panel de opciones;
+- si el jugador cambia a otro nodo que también tiene opciones, se conserva el estado abierto/cerrado del panel.
 
-Cuando el nodo no contiene opciones:
+Cuando el nodo nuevo no contiene opciones:
 
 - el indicador `▼` se oculta;
-- el panel de opciones permanece oculto.
+- el panel de opciones se oculta.
 
-Cuando se oculta el panel de texto del PNJ, también se oculta el panel de opciones.
+Ocultar o finalizar el diálogo oculta también el panel de opciones. El clic sobre el panel del PNJ nunca cambia de nodo.
+
 
 
 ## 10. Ejemplo completo
@@ -322,9 +334,9 @@ El formato no incorpora identificadores numéricos para las opciones.
 
 GitHub proporciona un SHA por archivo. El updater compara esos SHA con el manifest local y descarga únicamente archivos nuevos o modificados.
 
-Los cambios se descargan temporalmente, se validan y sólo después se activan.
+Los cambios se descargan temporalmente. Antes de sustituir la caché, `DialogueUpdater` comprueba que el temporal contiene exactamente el conjunto de archivos `.txt` publicado por GitHub y que la transferencia no ha fallado.
 
-El cambio de formato debe actualizar conjuntamente parser, validador y runtime antes de considerar migrados los guiones existentes.
+`DialogueUpdater` no parsea ni valida el contenido de los guiones. La validación sintáctica y semántica se realiza en `DialogueManager` cuando se inicia cada diálogo; si falla, se usa `fallo.txt` como fallback.
 
 
 ## 14. Implementación
@@ -339,3 +351,4 @@ La sintaxis descrita en este documento está implementada en:
 Los guiones se mantienen en el repositorio independiente `aik3n/ZeMobida_guiones`, en la raíz del repositorio.
 
 Las etiquetas de nodo se normalizan para que sean case-insensitive y las opciones se mezclan antes de mostrarse al jugador.
+

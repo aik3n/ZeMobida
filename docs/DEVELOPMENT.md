@@ -1,6 +1,6 @@
 # ZeMobida — Development Guide
 
-**Estado:** sincronización de guiones validada en ejecución el 2026-08-29.  
+**Estado:** sincronización de guiones validada en ejecución el 2026-08-29. El subsistema de diálogo y su interacción de opciones también fueron validados en runtime tras la revisión final.  
 **Godot:** 4.7.
 
 ## Reglas
@@ -44,14 +44,14 @@ Timeout global:
 const SYNC_TIMEOUT_SECONDS: float = 30.0
 ```
 
-Ante timeout, error de red, descarga o validación, se conserva la caché anterior.
+Ante timeout, error de red, descarga incompleta, escritura fallida o sustitución fallida, se conserva la caché anterior.
 
 Con `No`, no se contacta con GitHub.
 
 ## Regla de actualización segura
 
 ```text
-descargar → temporal → validar → activar
+descargar/copiar → temporal → comprobar conjunto de archivos → activar
 ```
 
 Nunca borrar la caché activa antes de saber que la nueva colección es válida.
@@ -143,3 +143,11 @@ Además de las pruebas generales, comprobar:
 - último mapa eliminado → primer mapa;
 - añadir un nuevo `.tscn` → aparece sin modificar el selector;
 - `JUGAR` → `Game` carga la escena seleccionada.
+
+### Responsabilidad de validación
+
+`DialogueUpdater` no valida la sintaxis de los `.txt`; sólo sincroniza el conjunto remoto. `DialogueManager` valida el archivo cuando inicia el diálogo y recurre a `fallo.txt` si el guion es inválido.
+
+### Efectos asociados al texto
+
+Una línea de texto puede terminar en un bloque de efectos, por ejemplo `Has elegido bien [xp+30]`. El parser separa el texto de los efectos y `DialogueManager` los aplica únicamente cuando el nodo alcanza la fase de presentación.

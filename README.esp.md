@@ -66,7 +66,7 @@ Consulta [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Estado del audit
 
-Desde el audit inicial se han resuelto varios puntos: sincronización incremental, validación del conjunto temporal antes de activar guiones, fallback a caché, persistencia unificada, selección dinámica de mapas y separación de los guiones en `aik3n/ZeMobida_guiones`.
+Desde el audit inicial se han resuelto varios puntos: sincronización incremental, comprobación de integridad del conjunto temporal antes de activar la caché, fallback a caché, persistencia unificada, selección dinámica de mapas y separación de los guiones en `aik3n/ZeMobida_guiones`.
 
 Siguen pendientes de revisión antes de una release la referencia mutable `main` para contenido, la detección de ciclos automáticos de diálogo, algunos metadatos de distribución y una suite automatizada de tests/CI.
 

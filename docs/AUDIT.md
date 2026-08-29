@@ -11,7 +11,7 @@ La sincronización de guiones ahora incluye:
 - manifest local con SHA por archivo;
 - descargas incrementales;
 - almacenamiento temporal;
-- validación antes de activar;
+- comprobación del conjunto descargado antes de activar;
 - conservación de caché anterior ante fallo;
 - timeout global configurable de 30 segundos por defecto;
 - comprobación antes de permitir entrar al mapa.
@@ -52,7 +52,7 @@ Algunas partes dependen de nombres concretos y búsquedas dinámicas.
 
 ## Estado documental
 
-La documentación actual refleja el comportamiento implementado, incluyendo sincronización por SHA, opción de usuario, timeout, validación previa y fallback a caché.
+La documentación actual refleja el comportamiento implementado, incluyendo sincronización por SHA, opción de usuario, timeout, comprobación de integridad del conjunto descargado y fallback a caché.
 
 Los guiones se versionan exclusivamente en `aik3n/ZeMobida_guiones`; `user://dialogues/` es la caché runtime. El repositorio principal ya no contiene la carpeta `guiones/`.
 
@@ -78,9 +78,9 @@ Se ha sustituido el botón específico de `aldea` por un carrusel instanciado en
 
 La estructura `res://mapas/` permite incorporar nuevas escenas de mapa sin modificar el código del selector, siempre que sean `.tscn` directamente dentro de esa carpeta.
 
-### Pendiente de validación runtime
+### Validación runtime
 
-La implementación debe probarse en Godot con los casos descritos en `DEVELOPMENT.md`. No se considera verificado por una mera revisión estática del código.
+La implementación del selector de mapas fue validada manualmente en Godot con los casos descritos en `DEVELOPMENT.md`.
 
 ### Riesgos conocidos
 
@@ -129,6 +129,49 @@ Se eliminó el avance de nodo mediante clic. El panel de texto sólo alterna la 
 
 Se ha eliminado `guiones/` del repositorio principal para evitar dos fuentes de verdad.
 
-La lógica de SHA, manifest, carpeta temporal, validación y fallback a `user://dialogues/` no cambia.
+La lógica de SHA, manifest, carpeta temporal y fallback a la caché anterior ante fallos de transferencia se mantiene. El updater no valida el contenido de los guiones; `DialogueManager` lo valida al abrirlos y usa `fallo.txt` como fallback.
 
 **Estado:** implementado y validado manualmente en runtime.
+
+## Efectos en texto del PNJ
+
+El formato admite efectos al final de líneas de texto, por ejemplo `Has elegido bien [xp+30]`. El parser los acumula como efectos del nodo y el runtime los ejecuta sólo si el nodo llega a mostrarse, después de resolver condiciones y saltos automáticos.
+
+**Estado:** implementado y validado manualmente en runtime.
+
+### Persistencia visual del panel de opciones
+
+El panel de opciones sólo empieza oculto al iniciar el diálogo. `show_dialogue()` ya no lo cierra en cada cambio de nodo; su estado abierto/cerrado se conserva entre nodos con opciones y se oculta cuando el nuevo nodo no contiene opciones.
+
+**Estado:** implementado y validado manualmente en runtime.
+
+
+## Revisión profunda del subsistema de diálogo
+
+Se corrigieron dos problemas de estado:
+
+- `show_dialogue()` cerraba el panel de opciones en cada cambio de nodo aunque el nuevo nodo tuviera opciones;
+- los botones antiguos permanecían en el contenedor hasta final de frame al regenerar opciones.
+
+También se reforzó la integridad de sincronización: el updater compara el conjunto local/remoto de nombres `.txt` y comprueba que el temporal coincide exactamente con el conjunto remoto antes de sustituir la caché. Esto permite propagar correctamente eliminaciones de archivos remotos sin validar el contenido del guion.
+
+**Estado:** correcciones implementadas y validadas manualmente en runtime.
+
+
+## Validación runtime final del subsistema de diálogo
+
+Se validó manualmente el comportamiento conjunto del sistema de diálogo tras la revisión profunda:
+
+- el panel de opciones comienza oculto al iniciar el diálogo;
+- su estado abierto/cerrado se conserva al cambiar entre nodos que contienen opciones;
+- se oculta cuando el nuevo nodo no tiene opciones;
+- el indicador `▼` refleja la disponibilidad de opciones;
+- el clic sobre el panel del PNJ sólo muestra u oculta las opciones y nunca cambia de nodo;
+- las opciones se presentan en orden aleatorio;
+- los efectos asociados a opciones y a texto del PNJ se aplican en el momento definido por el formato;
+- no existe avance automático entre nodos;
+- `DialogueUpdater` valida la integridad de la transferencia y del conjunto de archivos, pero no interpreta el contenido;
+- `DialogueManager` valida el guion cuando se inicia y utiliza `fallo.txt` como fallback;
+- altas, cambios y eliminaciones de `.txt` remotos se reflejan correctamente en la caché local.
+
+**Estado:** validado manualmente en runtime.
