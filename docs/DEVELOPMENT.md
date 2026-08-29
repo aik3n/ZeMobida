@@ -121,6 +121,9 @@ La escena puede contener un nodo opcional `Preview`. Si el nodo es `Sprite2D` o 
 ### Persistencia
 
 El último mapa se guarda al pulsar `JUGAR`, no al desplazarse por el carrusel. Se almacena como ruta de escena en `user://settings.cfg`.
+XP e inventario también se almacenan en `user://settings.cfg`; no se contempla migración desde formatos anteriores.
+
+La persistencia de jugador comparte ese mismo archivo. La XP y el inventario se guardan en la sección `[player]`; no se crea un archivo de partida separado.
 
 Al iniciar se intenta recuperar esa ruta. Si el archivo ya no existe, se selecciona el primer mapa disponible.
 

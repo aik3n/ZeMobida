@@ -95,3 +95,12 @@ Actualmente sólo se descubren `.tscn` directamente dentro de `res://mapas/`, no
 Para obtener `Preview`, el selector carga e instancia temporalmente la escena del mapa. Esto funciona para el contrato actual, pero puede ser innecesario si los mapas futuros tienen inicialización pesada.
 
 **Recomendación:** si aparece ese problema, sustituirlo por lectura de metadatos o un recurso de preview dedicado.
+
+
+## Persistencia consolidada — 2026-08-29
+
+**Estado: implementado y validado en ejecución el 2026-08-29.**
+
+Se consolidó la persistencia de preferencias y estado de partida en `user://settings.cfg`. `DialogueManager` guarda XP e inventario en `[player]`, mientras que el updater y el selector de mapas conservan sus secciones `[dialogues]` y `[maps]`. El manifest de guiones continúa separado por ser metadato de sincronización.
+
+No se mantiene compatibilidad con el antiguo `user://save/status.txt`; la especificación vigente utiliza exclusivamente `user://settings.cfg`.

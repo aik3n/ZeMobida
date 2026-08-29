@@ -17,8 +17,10 @@ var _validator := DialogueValidator.new()
 const DIALOGUE_FOLDER := "user://dialogues/"
 const DIALOGUE_ERROR_FILE := "user://dialogues/fallo.txt"
 
-const SAVE_FOLDER := "user://save/"
-const SAVE_FILE := "user://save/status.txt"
+const SETTINGS_FILE := "user://settings.cfg"
+const PLAYER_SECTION := "player"
+const PLAYER_KEY_XP := "xp"
+const PLAYER_KEY_INVENTORY := "inventory"
 
 
 func _ready() -> void:
@@ -307,47 +309,22 @@ func end_dialogue():
 
 
 func load_player_status() -> void:
-	var file := FileAccess.open(
-		SAVE_FILE,
-		FileAccess.READ
-	)
+	var config := ConfigFile.new()
+	var error := config.load(SETTINGS_FILE)
 
-	if file == null:
+	if error == ERR_FILE_NOT_FOUND:
 		print(
-			"No existe partida guardada. "
+			"No existe estado guardado. "
 			+ "Se utilizarán los valores iniciales."
 		)
-
 		return
 
-	var status: Dictionary = {}
+	if error != OK:
+		push_warning(
+			"No se pudo cargar el estado del jugador."
+		)
+		return
 
-	while not file.eof_reached():
-		var line: String = file.get_line().strip_edges()
-
-		if line.is_empty():
-			continue
-
-		if line.begins_with("#"):
-			continue
-
-		var separator: int = line.find("=")
-
-		if separator == -1:
-			continue
-
-		var key: String = line.substr(
-			0,
-			separator
-		).strip_edges()
-
-		var value: String = line.substr(
-			separator + 1
-		).strip_edges()
-
-		status[key] = value
-
-	file.close()
 
 	var game = get_tree().current_scene
 
@@ -355,7 +332,6 @@ func load_player_status() -> void:
 		push_warning(
 			"No se encontró Game para cargar el estado."
 		)
-
 		return
 
 	var player = game.get("player_actual")
@@ -364,11 +340,16 @@ func load_player_status() -> void:
 		push_warning(
 			"No se encontró el Player para cargar el estado."
 		)
-
 		return
 
-	if status.has("xp"):
-		var saved_xp: int = int(status["xp"])
+	if config.has_section_key(PLAYER_SECTION, PLAYER_KEY_XP):
+		var saved_xp: int = int(
+			config.get_value(
+				PLAYER_SECTION,
+				PLAYER_KEY_XP,
+				0
+			)
+		)
 
 		player.xp = clamp(
 			saved_xp,
@@ -381,16 +362,15 @@ func load_player_status() -> void:
 
 	inventory.clear()
 
-	if status.has("inventory"):
-		var saved_items: PackedStringArray = str(
-			status["inventory"]
-		).split(
-			",",
-			false
-		)
+	var saved_inventory = config.get_value(
+		PLAYER_SECTION,
+		PLAYER_KEY_INVENTORY,
+		PackedStringArray()
+	)
 
-		for item in saved_items:
-			var clean_item: String = item.strip_edges().to_lower()
+	if saved_inventory is Array or saved_inventory is PackedStringArray:
+		for item in saved_inventory:
+			var clean_item: String = str(item).strip_edges().to_lower()
 
 			if clean_item.is_empty():
 				continue
@@ -413,7 +393,6 @@ func _save_player_status() -> void:
 		push_warning(
 			"No se encontró Game para guardar el estado."
 		)
-
 		return
 
 	var player = game.get("player_actual")
@@ -422,59 +401,40 @@ func _save_player_status() -> void:
 		push_warning(
 			"No se encontró el Player para guardar el estado."
 		)
-
 		return
 
-	var dir := DirAccess.open(
-		"user://"
-	)
+	var config := ConfigFile.new()
+	var load_error := config.load(SETTINGS_FILE)
 
-	if dir == null:
+	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
 		push_error(
-			"No se puede acceder a user://"
+			"No se pudo cargar la configuración para guardar el estado."
 		)
-
 		return
 
-	if not dir.dir_exists("save"):
-		var error := dir.make_dir("save")
-
-		if error != OK:
-			push_error(
-				"No se pudo crear la carpeta de guardado."
-			)
-
-			return
-
-	var file := FileAccess.open(
-		SAVE_FILE,
-		FileAccess.WRITE
+	config.set_value(
+		PLAYER_SECTION,
+		PLAYER_KEY_XP,
+		player.xp
 	)
 
-	if file == null:
+	config.set_value(
+		PLAYER_SECTION,
+		PLAYER_KEY_INVENTORY,
+		PackedStringArray(inventory)
+	)
+
+	var error := config.save(SETTINGS_FILE)
+
+	if error != OK:
 		push_error(
-			"No se pudo abrir el archivo de guardado."
+			"No se pudo guardar el estado del jugador."
 		)
-
 		return
-
-	file.store_line(
-		"# Estado de la partida"
-	)
-
-	file.store_line(
-		"xp=" + str(player.xp)
-	)
-
-	file.store_line(
-		"inventory=" + ",".join(inventory)
-	)
-
-	file.close()
 
 	print(
 		"Estado guardado. XP:",
-		 player.xp,
+		player.xp,
 		" Inventario:",
 		inventory
 	)

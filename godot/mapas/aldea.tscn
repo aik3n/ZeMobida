@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://c4kp2s7k8fxen"]
 
 [ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="2_jns4i"]
-[ext_resource type="Texture2D" uid="uid://di4y2fkshmt31" path="res://art/preview/aldea.PNG" id="3_sru6s"]
 [ext_resource type="Texture2D" uid="uid://ddxmxgyyfy8mn" path="res://icon.svg" id="4_87o4k"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xw7ts"]
@@ -31,12 +30,6 @@ position = Vector2(705, 158)
 nombre = "peter"
 sprite = ExtResource("4_87o4k")
 
-[node name="paco" parent="." unique_id=1383033262 instance=ExtResource("2_jns4i")]
-position = Vector2(458, 430)
-nombre = "paco"
-sprite = ExtResource("4_87o4k")
-tipo_seguimiento = 0
-
 [node name="SpawnPlayer" type="Marker2D" parent="." unique_id=957641453]
 position = Vector2(567, 301)
 
@@ -46,7 +39,8 @@ position = Vector2(567, 301)
 position = Vector2(480.5, 118.5)
 shape = SubResource("RectangleShape2D_xw7ts")
 
-[node name="Preview" type="Sprite2D" parent="." unique_id=1403445782]
-visible = false
-position = Vector2(-392, -130)
-texture = ExtResource("3_sru6s")
+[node name="paco" parent="." unique_id=1383033262 instance=ExtResource("2_jns4i")]
+position = Vector2(458, 430)
+nombre = "paco"
+sprite = ExtResource("4_87o4k")
+tipo_seguimiento = 0

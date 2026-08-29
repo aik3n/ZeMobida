@@ -67,11 +67,22 @@ generico.txt
 
 ## Persistencia
 
+La configuración y el estado persistente del jugador se almacenan en un único archivo Godot `ConfigFile`:
+
 ```text
-user://save/status.txt
+user://settings.cfg
 ```
 
-XP determina el nivel y el inventario forma parte del estado persistente.
+Las secciones tienen responsabilidades separadas:
+
+```text
+[dialogues]  → preferencia de actualización de guiones
+[maps]       → último mapa jugado
+[player]     → XP e inventario
+```
+
+`DialogueManager` mantiene la persistencia de XP e inventario, pero comparte el archivo con las preferencias del updater y el último mapa. El manifest de guiones sigue siendo un archivo independiente porque representa metadatos de sincronización, no configuración ni estado de partida.
+
 
 ## Pendientes conocidos
 

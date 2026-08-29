@@ -57,9 +57,9 @@ generico.txt
 ```
 
 ## ADR-011 — Save data uses a simple human-readable text format
-**Status:** Accepted
+**Status:** Superseded by ADR-016
 
-El estado se guarda en `user://save/status.txt`.
+El estado se guardaba originalmente en `user://save/status.txt`. La decisión fue reemplazada al consolidar la persistencia local en `user://settings.cfg`.
 
 ## ADR-012 — Architectural changes should be incremental
 **Status:** Accepted
@@ -154,3 +154,27 @@ No existe metadata adicional obligatoria para que un mapa sea seleccionable.
 ### Verification
 
 La implementación requiere prueba runtime en Godot. La revisión estática confirma el flujo y las responsabilidades descritas.
+
+
+## ADR-016 — Consolidate local settings and player state in one ConfigFile
+**Status:** Accepted
+
+### Context
+
+El proyecto utilizaba `user://settings.cfg` para preferencias del actualizador de guiones y el último mapa, mientras que XP e inventario se almacenaban aparte en `user://save/status.txt`. Esto obligaba a mantener dos formatos y dos mecanismos de persistencia locales.
+
+### Decision
+
+Se utiliza un único archivo `user://settings.cfg` para configuración y estado persistente. Las secciones son:
+
+- `[dialogues]`: actualización automática de guiones.
+- `[maps]`: último mapa jugado.
+- `[player]`: XP e inventario.
+
+El manifest `user://dialogues_manifest.json` permanece separado porque es metadato de sincronización de contenido.
+
+No se implementa migración ni compatibilidad con `user://save/status.txt`; el formato antiguo queda fuera de la especificación vigente.
+
+### Consequences
+
+Se elimina el formato de guardado específico de XP/inventario y se reduce la duplicación de código de lectura/escritura de estado. El archivo sigue siendo legible y editable con las herramientas de Godot. La persistencia continúa separando responsabilidades por sección, aunque comparta soporte físico.
