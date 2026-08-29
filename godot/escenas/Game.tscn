@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bhpw0vpm6snge" path="res://scripts/game.gd" id="1_o2scj"]
 [ext_resource type="PackedScene" uid="uid://2wm1dpb4cadp" path="res://escenas/player.tscn" id="2_c27xj"]
+[ext_resource type="PackedScene" uid="uid://20u5n35rocug" path="res://escenas/dialogo.tscn" id="3_ah5is"]
 
 [node name="Game" type="Node" unique_id=1004767549]
 script = ExtResource("1_o2scj")
@@ -9,9 +10,11 @@ script = ExtResource("1_o2scj")
 [node name="SceneContainer" type="Node" parent="." unique_id=1111760830]
 
 [node name="Player" parent="." unique_id=750046266 instance=ExtResource("2_c27xj")]
+visible = false
 position = Vector2(429, 252)
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=178145642]
+visible = false
 
 [node name="BotonEstado" type="Button" parent="UI" unique_id=2034402367]
 offset_left = 595.0
@@ -114,3 +117,5 @@ layout_mode = 2
 text = "ejemplo1
 ejemplo2
 ejemplo3"
+
+[node name="Dialogo" parent="." unique_id=2027231516 instance=ExtResource("3_ah5is")]

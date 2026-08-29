@@ -1,12 +1,9 @@
 [gd_scene format=3 uid="uid://c4kp2s7k8fxen"]
 
 [ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="2_jns4i"]
-[ext_resource type="PackedScene" uid="uid://20u5n35rocug" path="res://escenas/dialogo.tscn" id="3_c2j3b"]
 [ext_resource type="Texture2D" uid="uid://ddxmxgyyfy8mn" path="res://icon.svg" id="4_87o4k"]
 
 [node name="aldea" type="Node2D" unique_id=493802413]
-
-[node name="Dialogo_Canvas" parent="." unique_id=2027231516 instance=ExtResource("3_c2j3b")]
 
 [node name="juan" parent="." unique_id=1491293733 instance=ExtResource("2_jns4i")]
 position = Vector2(171, 116)

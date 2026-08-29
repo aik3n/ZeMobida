@@ -1,7 +1,9 @@
 extends CharacterBody2D
 
+
 @export var nombre: String = "PNJ"
 @export var sprite: Texture2D
+
 
 enum TipoSeguimiento {
 	NUNCA_SEGUIR,
@@ -9,7 +11,9 @@ enum TipoSeguimiento {
 	SEGUIR_Y_VOLVER
 }
 
+
 @export var tipo_seguimiento: TipoSeguimiento = TipoSeguimiento.SEGUIR_Y_VOLVER
+
 
 var player_nearby := false
 
@@ -20,6 +24,7 @@ var posicion_seguimiento_guardada := false
 
 var siguiendo := false
 
+
 const VELOCIDAD_SEGUIR := 100.0
 const DISTANCIA_REANUDAR := 120.0
 const DISTANCIA_LLEGADA := 5.0
@@ -28,26 +33,25 @@ const DISTANCIA_LLEGADA := 5.0
 @onready var sprite_2d: Sprite2D = $Sprite2D
 
 
-func _ready():
+func _ready() -> void:
 
 	sprite_2d.texture = sprite
 
-	var game = get_tree().current_scene
+	var game := get_tree().current_scene
 
 	if game != null:
-		player = game.get("player_actual")
+		player = game.get_node_or_null("Player")
 
 
-func _physics_process(_delta):
+func _physics_process(_delta: float) -> void:
 
 	if player == null:
 		return
 
-
 	_actualizar_seguimiento()
 
-
 	match tipo_seguimiento:
+
 		TipoSeguimiento.NUNCA_SEGUIR:
 
 			velocity = Vector2.ZERO
@@ -79,9 +83,7 @@ func _physics_process(_delta):
 				velocity = Vector2.ZERO
 
 
-
-
-func _actualizar_seguimiento():
+func _actualizar_seguimiento() -> void:
 
 	var nuevo_estado := DialogueManager.has_item(
 		nombre.to_lower()
@@ -93,24 +95,19 @@ func _actualizar_seguimiento():
 		posicion_seguimiento = global_position
 		posicion_seguimiento_guardada = true
 
-
 	# El seguimiento acaba de terminar.
 	if not nuevo_estado and siguiendo:
 
 		pass
 
-
 	siguiendo = nuevo_estado
 
 
-
-
-func _seguir_player():
+func _seguir_player() -> void:
 
 	var distancia := global_position.distance_to(
 		player.global_position
 	)
-
 
 	# Si el PNJ ya está dentro de la distancia
 	# de reanudación, no se mueve.
@@ -119,30 +116,25 @@ func _seguir_player():
 		velocity = Vector2.ZERO
 		return
 
-
 	var direccion := global_position.direction_to(
 		player.global_position
 	)
 
 	velocity = direccion * VELOCIDAD_SEGUIR
+
 	move_and_slide()
 
 
-
-
-func volver_posicion_seguimiento():
+func volver_posicion_seguimiento() -> void:
 
 	var distancia := global_position.distance_to(
 		posicion_seguimiento
 	)
 
-
 	if distancia <= DISTANCIA_LLEGADA:
 
 		velocity = Vector2.ZERO
-
 		return
-
 
 	var direccion := global_position.direction_to(
 		posicion_seguimiento
@@ -153,11 +145,19 @@ func volver_posicion_seguimiento():
 	move_and_slide()
 
 
-
-
 func get_map_name() -> String:
 
-	var mapa_actual = get_tree().current_scene.get("mapa_actual")
+	var game := get_tree().current_scene
+
+	if game == null:
+
+		push_error(
+			"No se encontró Game."
+		)
+
+		return ""
+
+	var mapa_actual = game.get("mapa_actual")
 
 	if mapa_actual == null:
 
@@ -172,8 +172,6 @@ func get_map_name() -> String:
 	return scene_path.get_file().get_basename()
 
 
-
-
 func get_dialogue_file() -> String:
 
 	var map_name := get_map_name()
@@ -182,11 +180,19 @@ func get_dialogue_file() -> String:
 
 		return ""
 
+	var game := get_tree().current_scene
 
-	var player_node = get_tree().current_scene.get(
-		"player_actual"
+	if game == null:
+
+		push_error(
+			"No se encontró Game."
+		)
+
+		return ""
+
+	var player_node: Node = game.get_node_or_null(
+		"Player"
 	)
-
 
 	if player_node == null:
 
@@ -196,12 +202,10 @@ func get_dialogue_file() -> String:
 
 		return ""
 
-
 	var base_name := "%s_%s" % [
 		map_name,
 		nombre
 	]
-
 
 	# Primero busca el diálogo específico del nivel.
 	var level_file := "%s_%s.txt" % [
@@ -209,17 +213,14 @@ func get_dialogue_file() -> String:
 		player_node.nivel
 	]
 
-
 	if FileAccess.file_exists(
 		"user://dialogues/" + level_file
 	):
 
 		return level_file
 
-
 	# Después busca el diálogo específico del NPC.
 	var generic_file := "%s.txt" % base_name
-
 
 	if FileAccess.file_exists(
 		"user://dialogues/" + generic_file
@@ -227,14 +228,12 @@ func get_dialogue_file() -> String:
 
 		return generic_file
 
-
 	# Finalmente busca el diálogo genérico.
 	if FileAccess.file_exists(
 		"user://dialogues/generico.txt"
 	):
 
 		return "generico.txt"
-
 
 	push_error(
 		"No existe diálogo para: "
@@ -244,27 +243,21 @@ func get_dialogue_file() -> String:
 	return ""
 
 
+func _on_interaction_area_body_entered(body: Node) -> void:
 
-
-func _on_interaction_area_body_entered(body):
-
-	if body.name != "Player" and body.name != "player":
+	if body.name != "Player":
 
 		return
 
-
 	player_nearby = true
-
 
 	if not DialogueManager.dialogue_active:
 
 		var dialogue_file := get_dialogue_file()
 
-
 		if dialogue_file.is_empty():
 
 			return
-
 
 		DialogueManager.start_dialogue(
 			"user://dialogues/" + dialogue_file,
@@ -272,25 +265,19 @@ func _on_interaction_area_body_entered(body):
 		)
 
 
+func _on_interaction_area_body_exited(body: Node) -> void:
 
-
-func _on_interaction_area_body_exited(body):
-
-	if body.name != "Player" and body.name != "player":
+	if body.name != "Player":
 
 		return
 
-
 	player_nearby = false
-
 
 	if DialogueManager.dialogue_active:
 
 		DialogueManager.end_dialogue()
 
 
-
-
-func _on_interaction_area_area_exited(area):
+func _on_interaction_area_area_exited(_area: Area2D) -> void:
 
 	pass

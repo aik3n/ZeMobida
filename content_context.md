@@ -2,7 +2,7 @@
 
 PROYECTO: ZeMobida
 REPOSITORIO: https://github.com/aik3n/ZeMobida
-VERSION: v0.0.2
+VERSION: v0.0.3
 ESTADO: avance funcional probado y consolidado
 
 
@@ -160,7 +160,8 @@ decisiones arquitectónicas contradictorias.
 
 Este archivo es la memoria maestra del proyecto ZeMobida.
 
-Su objetivo es permitir que un chat nuevo pueda continuar el desarrollo comprendiendo:
+Su objetivo es permitir que un chat nuevo pueda continuar el
+desarrollo comprendiendo:
 
 - qué es el proyecto;
 - cuál es su objetivo;
@@ -174,9 +175,11 @@ Su objetivo es permitir que un chat nuevo pueda continuar el desarrollo comprend
 
 Este archivo NO contiene el código fuente completo del proyecto.
 
-El código real se encuentra en el repositorio y debe estudiarse directamente cuando sea necesario.
+El código real se encuentra en el repositorio y debe estudiarse
+directamente cuando sea necesario.
 
-Este documento registra contexto, arquitectura, decisiones, estado y metodología de trabajo.
+Este documento registra contexto, arquitectura, decisiones,
+estado y metodología de trabajo.
 
 
 ==================================================
@@ -185,49 +188,45 @@ Este documento registra contexto, arquitectura, decisiones, estado y metodologí
 
 ZeMobida es un proyecto de videojuego desarrollado en Godot.
 
-El juego se estructura alrededor de mapas explorables, un Player, PNJ, conversaciones, decisiones, efectos de diálogo, experiencia, niveles e inventario.
+El juego se estructura alrededor de mapas explorables, un
+Player persistente, PNJ, conversaciones, decisiones, efectos
+de diálogo, experiencia, niveles e inventario.
 
-La arquitectura busca mantener separadas las responsabilidades para evitar que sistemas diferentes acumulen lógica que no les corresponde.
+La arquitectura busca mantener separadas las responsabilidades
+para evitar que sistemas diferentes acumulen lógica que no les
+corresponde.
 
 Principio general:
 
 - Player mantiene el estado del jugador.
 - DialogueManager gestiona la lógica de diálogos y sus efectos.
 - DialogueUI muestra e interactúa con los diálogos.
-- Game coordina escenas y UI global.
-- HUD muestra información global y persistente del jugador.
+- Game coordina escenas, Player persistente y UI global.
+- Los mapas contienen el entorno y sus elementos propios.
 
 
 ==================================================
 3. VERSION ACTUAL
 ==================================================
 
-VERSION: v0.0.2
+VERSION: v0.0.3
 
-Esta versión representa un avance arquitectónico y funcional
-consolidado sobre la versión anterior.
+Esta versión representa un avance funcional y arquitectónico
+consolidado.
 
-Objetivos principales de v0.0.2:
+Cambios principales consolidados hasta v0.0.3:
 
-- mantener el HUD global de nivel y XP;
-- mantener el inventario dentro de un área desplazable;
-- convertir al Player en una única entidad persistente
-  propiedad de Game;
-- permitir que cada mapa defina su propio punto de aparición
-  mediante SpawnPlayer.
-
-Resultado:
-
-- Nivel y XP pertenecen a la UI global de Game.
-- DialogueUI deja de gestionar nivel y XP.
-- El inventario dispone de ScrollContainer.
-- Existe una única instancia persistente del Player durante
-  la partida.
-- Los mapas ya no contienen una instancia propia del Player.
-- Cada mapa utiliza SpawnPlayer como punto de aparición.
-- El Player se recoloca al cargar un nuevo mapa.
-- El Player solamente permanece visible cuando existe un mapa
-  de juego cargado.
+- separación del HUD de XP y nivel respecto a DialogueUI;
+- inventario dentro de un ScrollContainer;
+- Player único y persistente propiedad de Game;
+- SpawnPlayer mediante Marker2D en los mapas;
+- Player visible y activo únicamente cuando existe un mapa;
+- DialogueUI como elemento común de Game;
+- separación visual entre texto y opciones de diálogo;
+- mostrar/ocultar opciones mediante interacción con el panel
+  de texto;
+- ocultación de opciones al terminar el diálogo;
+- ocultación de opciones cuando un nodo no contiene opciones.
 
 
 ==================================================
@@ -237,55 +236,182 @@ Resultado:
 La arquitectura actual separa las responsabilidades principales:
 
 GAME
-  Coordinación global del juego, Player persistente,
-  mapas y UI global.
+  Coordinación global del juego, mapas, Player persistente y UI.
 
 PLAYER
   Estado y lógica propia del jugador.
 
 DIALOGUEMANAGER
-  Lógica del sistema de conversaciones, opciones, efectos,
-  inventario y persistencia del estado.
+  Lógica de conversaciones, opciones, efectos, inventario y
+  persistencia del estado.
 
 DIALOGUEUI
   Presentación visual e interacción de los diálogos.
 
 MAPA
-  Entorno del juego, PNJ, objetos, escenario y SpawnPlayer.
-
-La relación conceptual es:
-
-Game
-  |
-  +-- Player
-  |
-  +-- SceneContainer
-  |     |
-  |     +-- mapa_actual
-  |           |
-  |           +-- SpawnPlayer
-  |           +-- PNJ
-  |           +-- objetos
-  |           +-- escenario
-  |
-  +-- UI
-
-
-DialogueManager
-  |
-  v
-DialogueUI
-
-
-DialogueManager
-  |
-  | efectos
-  v
-Player
+  Entorno actual del jugador, PNJ, objetos, escenario y
+  SpawnPlayer.
 
 
 ==================================================
-5. RESPONSABILIDAD DE GAME
+5. ESTRUCTURA ACTUAL DE GAME
+==================================================
+
+La estructura conceptual actual es:
+
+Game
+|
++-- SceneContainer
+|   |
+|   +-- mapa_actual
+|       |
+|       +-- SpawnPlayer
+|       +-- PNJ
+|       +-- objetos
+|       +-- escenario
+|
++-- Player
+|
++-- UI
+|   |
+|   +-- BotonEstado
+|   +-- HUD
+|   |   |
+|   |   +-- lbl_Nivel
+|   |   +-- lbl_Progreso
+|   |   +-- bar_Progreso
+|   |
+|   +-- Estado
+|       |
+|       +-- Panel
+|           +-- Titulo
+|           +-- Nivel
+|           +-- Progreso
+|           +-- BarraXP
+|           +-- Scroll
+|           |   +-- Inventario
+|           +-- Cerrar
+|
++-- Dialogo
+
+
+==================================================
+6. PLAYER PERSISTENTE
+==================================================
+
+El Player es una única instancia persistente propiedad de Game.
+
+El Player NO pertenece a los mapas.
+
+Los mapas no contienen una instancia propia del Player.
+
+Game mantiene directamente la referencia:
+
+Game/Player
+
+
+Esto permite conservar la misma instancia del personaje al
+cambiar entre mapas.
+
+El Player mantiene su estado durante la partida, incluyendo:
+
+- nivel;
+- XP;
+- inventario mediante el sistema correspondiente;
+- estado propio del personaje;
+- posición actual;
+- cualquier otra información persistente.
+
+
+DECISION ARQUITECTONICA:
+
+El Player representa al personaje real y persistente.
+
+El mapa representa únicamente el entorno en el que se encuentra
+el Player.
+
+
+==================================================
+7. SPAWNPLAYER
+==================================================
+
+Cada mapa puede contener un nodo:
+
+SpawnPlayer
+
+Tipo:
+
+Marker2D
+
+
+SpawnPlayer representa exclusivamente la posición donde debe
+aparecer el Player al cargar el mapa.
+
+SpawnPlayer NO es un Player.
+
+SpawnPlayer NO contiene lógica del personaje.
+
+SpawnPlayer NO modifica el sprite del Player.
+
+
+Flujo:
+
+Game carga mapa
+    |
+    v
+localiza SpawnPlayer
+    |
+    v
+obtiene su posición
+    |
+    v
+coloca Game/Player
+    |
+    v
+activa y hace visible el Player
+
+
+DECISION ARQUITECTONICA:
+
+La posición del Player pertenece al sistema de transición entre
+Game y el mapa.
+
+La apariencia y lógica del personaje pertenecen exclusivamente
+al Player persistente.
+
+
+==================================================
+8. VISIBILIDAD Y ACTIVACION DEL PLAYER
+==================================================
+
+El Player debe existir durante toda la partida, pero solamente
+debe ser visible y estar activo cuando existe un mapa de juego.
+
+Cuando se encuentra en bienvenida u otra escena que no sea un
+mapa:
+
+- Player.visible = false;
+- se desactiva su procesamiento físico;
+- se desactiva su procesamiento de input correspondiente.
+
+Cuando se carga un mapa:
+
+- se localiza SpawnPlayer;
+- se coloca el Player;
+- se hace visible;
+- se reactiva su procesamiento físico;
+- se reactiva su procesamiento de input.
+
+
+Si el mapa no contiene SpawnPlayer:
+
+- el Player permanece oculto;
+- el Player permanece desactivado;
+- se genera una advertencia.
+
+
+==================================================
+9. RESPONSABILIDAD DE GAME
 ==================================================
 
 game.gd es el coordinador principal de la escena Game.
@@ -296,8 +422,8 @@ Actualmente es responsable de:
 - gestionar SceneContainer;
 - mantener referencia al mapa actual;
 - mantener referencia al Player persistente;
-- colocar el Player en el SpawnPlayer del mapa;
-- controlar la visibilidad del Player según exista un mapa;
+- colocar el Player en SpawnPlayer;
+- controlar la visibilidad y activación del Player;
 - controlar la UI global;
 - controlar el HUD;
 - actualizar nivel y XP en el HUD;
@@ -305,38 +431,33 @@ Actualmente es responsable de:
 - actualizar nivel y XP del panel de Estado;
 - actualizar el inventario mostrado en Estado.
 
-Game NO debe convertirse en un contenedor indiscriminado de toda
-la lógica del juego.
+
+Game NO debe convertirse en un contenedor indiscriminado de
+toda la lógica del juego.
 
 Su responsabilidad principal es coordinar el estado global,
-el Player persistente, el mapa actual y la UI global.
+las escenas, el Player persistente y la UI global.
 
 
 ==================================================
-6. RESPONSABILIDAD DE PLAYER
+10. RESPONSABILIDAD DE PLAYER
 ==================================================
 
-Player es la única instancia real del personaje durante la
-partida.
+Player es la fuente del estado relacionado directamente con el
+jugador.
 
-Player pertenece a Game y no a un mapa concreto.
-
-Entre otros datos conserva:
+Entre otros datos:
 
 - nivel;
 - experiencia;
-- inventario o referencias relacionadas si corresponden;
-- estado propio del personaje;
-- posición actual;
-- cualquier otra información persistente del jugador.
+- estado propio del personaje.
 
 Cuando la experiencia cambia, Player utiliza la señal:
 
 xp_changed
 
-El HUD no modifica directamente la XP.
 
-El flujo correcto es:
+Flujo:
 
 Player cambia XP
     |
@@ -350,213 +471,11 @@ Game
 HUD actualizado
 
 
-==================================================
-7. PLAYER PERSISTENTE
-==================================================
-
-A partir de v0.0.2 existe una única instancia del Player
-durante la partida.
-
-El Player es hijo directo de Game.
-
-Estructura conceptual:
-
-Game
-|
-+-- Player
-|
-+-- SceneContainer
-|
-+-- UI
-
-
-Los mapas NO contienen una instancia real del Player.
-
-Antes:
-
-Game
-|
-+-- SceneContainer
-|    |
-|    +-- Aldea
-|         |
-|         +-- player
-|
-+-- UI
-
-
-Ahora:
-
-Game
-|
-+-- Player
-|
-+-- SceneContainer
-|    |
-|    +-- Aldea
-|         |
-|         +-- SpawnPlayer
-|
-+-- UI
-
-
-El mismo Player se conserva cuando se descarga un mapa y se
-carga otro.
-
-Esto permite conservar el estado del personaje durante las
-transiciones.
+La UI no modifica directamente la XP.
 
 
 ==================================================
-8. RESPONSABILIDAD DE SPAWNPLAYER
-==================================================
-
-Cada mapa proporciona un nodo:
-
-SpawnPlayer
-
-Tipo:
-
-Marker2D
-
-
-SpawnPlayer solamente representa una posición de aparición.
-
-No contiene lógica de Player.
-
-No contiene una segunda instancia del personaje.
-
-No cambia el sprite del Player.
-
-El flujo es:
-
-Game carga mapa
-    |
-    v
-Game localiza SpawnPlayer
-    |
-    v
-Game obtiene su posición
-    |
-    v
-Game coloca Player persistente
-    |
-    v
-Player aparece en el mapa
-
-
-Ejemplo:
-
-Aldea
-|
-+-- SpawnPlayer
-+-- PNJ
-+-- objetos
-+-- escenario
-
-
-==================================================
-9. VISIBILIDAD DEL PLAYER
-==================================================
-
-El Player pertenece permanentemente a Game, pero no debe ser
-visible cuando no existe un mapa de juego cargado.
-
-Por tanto:
-
-- en bienvenida.tscn el Player permanece oculto;
-- al cargar un mapa el Player se hace visible;
-- al cambiar de mapa el mismo Player continúa utilizándose;
-- la posición del Player se actualiza utilizando SpawnPlayer.
-
-Esto permite mantener una instancia persistente sin mostrarla
-fuera del contexto de juego.
-
-
-==================================================
-10. RESPONSABILIDAD DEL MAPA
-==================================================
-
-El mapa representa exclusivamente el entorno donde se encuentra
-el Player.
-
-El mapa contiene elementos propios como:
-
-- escenario;
-- PNJ;
-- objetos;
-- elementos interactivos;
-- puntos de entrada/salida;
-- SpawnPlayer;
-- otros elementos específicos de la zona.
-
-El mapa NO es propietario del Player.
-
-Esto permite intercambiar mapas sin reconstruir el personaje.
-
-
-==================================================
-11. CAMBIO DE MAPA
-==================================================
-
-El flujo actual conceptual es:
-
-1. Game conserva el Player.
-2. Game elimina el mapa anterior.
-3. Game carga el nuevo mapa.
-4. Game añade el nuevo mapa a SceneContainer.
-5. Game localiza SpawnPlayer.
-6. Game coloca el Player en la posición de SpawnPlayer.
-7. Game hace visible el Player.
-8. El Player continúa siendo la misma instancia.
-
-Ejemplo:
-
-Aldea
-  |
-  | cambio de mapa
-  v
-Bosque
-
-Durante todo el proceso:
-
-Player
-  = misma instancia.
-
-
-==================================================
-12. ENTRADAS MULTIPLES
-==================================================
-
-Se contempla como posibilidad futura que un mapa tenga varios
-puntos de entrada.
-
-Ejemplo:
-
-Aldea
-|
-+-- EntradaInicial
-+-- EntradaDesdeBosque
-+-- EntradaDesdeCiudad
-
-
-Esta funcionalidad todavía NO está implementada.
-
-La arquitectura actual utiliza un único:
-
-SpawnPlayer
-
-por mapa.
-
-En el futuro podría evolucionar hacia un sistema de puntos
-de entrada identificados según el mapa de procedencia.
-
-No debe considerarse una funcionalidad consolidada hasta que
-sea propuesta, implementada, probada y confirmada.
-
-
-==================================================
-13. RESPONSABILIDAD DE DIALOGUEMANAGER
+11. RESPONSABILIDAD DE DIALOGUEMANAGER
 ==================================================
 
 DialogueManager es responsable de la lógica de los diálogos.
@@ -569,13 +488,13 @@ Actualmente participa en:
 - efectos asociados a diálogos;
 - aplicación de efectos;
 - inventario;
-- guardado del estado del jugador;
-- carga del estado del jugador.
+- carga y guardado del estado del jugador.
+
 
 DialogueManager puede provocar cambios en el Player mediante
 efectos de diálogo.
 
-Ejemplo conceptual:
+Ejemplo:
 
 Diálogo
   |
@@ -583,7 +502,7 @@ Diálogo
 DialogueManager
   |
   v
-efecto de XP
+efecto XP
   |
   v
 Player
@@ -600,77 +519,247 @@ HUD global.
 
 
 ==================================================
-14. RESPONSABILIDAD DE DIALOGUEUI
+12. RESPONSABILIDAD DE DIALOGUEUI
 ==================================================
 
-dialogue_ui.gd gestiona exclusivamente la interfaz visual de
-los diálogos.
+DialogueUI gestiona exclusivamente la interfaz visual de los
+diálogos.
 
-Responsabilidades:
+Actualmente es un elemento común de Game.
+
+No pertenece a un mapa concreto.
+
+Estructura conceptual:
+
+Game
+|
++-- Dialogo
+    |
+    +-- PanelTexto
+    |   |
+    |   +-- NameLabel
+    |   +-- DialogueText
+    |
+    +-- PanelOpciones
+        |
+        +-- OptionsContainer
+
+
+DialogueUI es responsable de:
 
 - registrar la UI en DialogueManager;
-- mostrar y ocultar la ventana de diálogo;
-- mostrar nombre del interlocutor;
-- mostrar texto;
-- crear y mostrar opciones;
-- recibir la selección de una opción;
-- comunicar la selección a DialogueManager.
+- mostrar y ocultar el diálogo;
+- mostrar el nombre del interlocutor;
+- mostrar el texto;
+- crear y mostrar las opciones;
+- ocultar las opciones;
+- mostrar/ocultar las opciones mediante interacción;
+- comunicar la selección de opciones a DialogueManager.
+
 
 DialogueUI NO debe gestionar:
 
 - nivel;
 - experiencia;
-- ProgressBar de XP;
 - HUD global;
 - inventario global;
-- estado del Player;
+- estado persistente del Player;
 - mapa actual.
 
-Esta separación se considera una decisión arquitectónica
-consolidada.
+
+==================================================
+13. DIALOGO COMO ELEMENTO GLOBAL
+==================================================
+
+El diálogo se considera una funcionalidad común a todos los
+mapas.
+
+Por ello, DialogueUI se encuentra dentro de Game.
+
+Los mapas no deben contener una instancia propia de DialogueUI.
+
+Los PNJ utilizan DialogueManager para iniciar diálogos y la
+interfaz común de Game se encarga de mostrarlos.
+
+
+Esto permite que:
+
+- cualquier mapa pueda utilizar diálogos;
+- cualquier PNJ pueda iniciar un diálogo;
+- la UI de diálogo no dependa de un mapa concreto;
+- no existan múltiples instancias innecesarias de DialogueUI.
 
 
 ==================================================
-15. UI GLOBAL DE GAME
+14. INTERFAZ DE DIALOGOS
 ==================================================
 
-La escena Game contiene una UI global mediante CanvasLayer.
+La interfaz de diálogo se separó en dos paneles independientes.
 
-Estructura conceptual actual:
+PanelTexto
+  |
+  +-- NameLabel
+  +-- DialogueText
+
+
+PanelOpciones
+  |
+  +-- OptionsContainer
+
+
+El objetivo es separar visualmente:
+
+- contenido del diálogo;
+- opciones disponibles.
+
+
+El panel de opciones puede mostrarse u ocultarse mediante una
+interacción con la zona de texto.
+
+
+==================================================
+15. COMPORTAMIENTO DEL PANEL DE OPCIONES
+==================================================
+
+Cuando comienza un diálogo:
+
+- PanelTexto se muestra;
+- PanelOpciones comienza oculto.
+
+
+Cuando el usuario interactúa con la zona de texto:
+
+- si existen opciones, PanelOpciones cambia entre visible y
+  oculto.
+
+
+Si el nodo actual no tiene opciones:
+
+- PanelOpciones permanece oculto.
+
+
+Cuando termina completamente el diálogo:
+
+- PanelTexto se oculta;
+- PanelOpciones se oculta.
+
+
+Esto garantiza que el siguiente diálogo siempre comienza con
+las opciones ocultas.
+
+
+==================================================
+16. FINALIZACION DEL DIALOGO
+==================================================
+
+El diálogo termina cuando el Player deja de estar en contacto
+con el área de interacción del PNJ.
+
+El PNJ utiliza la variable:
+
+player_nearby
+
+
+Flujo conceptual:
+
+Player entra en área del PNJ
+    |
+    v
+player_nearby = true
+    |
+    v
+se inicia diálogo
+
+
+Player sale del área del PNJ
+    |
+    v
+player_nearby = false
+    |
+    v
+DialogueManager.end_dialogue()
+    |
+    v
+DialogueUI.hide_dialogue()
+    |
+    +--> PanelTexto oculto
+    |
+    +--> PanelOpciones oculto
+
+
+==================================================
+17. RELACION PNJ - PLAYER
+==================================================
+
+Los PNJ ya no buscan el Player dentro del mapa.
+
+Anteriormente la arquitectura utilizaba conceptualmente:
 
 Game
-|
-+-- Player
-|
-+-- SceneContainer
-|
-+-- UI
-    |
-    +-- BotonEstado
-    |
-    +-- HUD
-    |   |
-    |   +-- lbl_Nivel
-    |   +-- lbl_Progreso
-    |   +-- bar_Progreso
-    |
-    +-- Estado
-        |
-        +-- Panel
-            |
-            +-- Titulo
-            +-- Nivel
-            +-- Progreso
-            +-- BarraXP
-            +-- Scroll
-            |   |
-            |   +-- Inventario
-            |
-            +-- Cerrar
+  |
+  +-- mapa_actual
+      |
+      +-- player
+
+
+La arquitectura actual utiliza:
+
+Game
+  |
+  +-- Player
+
+
+Por tanto, los PNJ obtienen el Player directamente desde Game.
+
+
+Esto permite que los PNJ funcionen correctamente con el Player
+persistente.
 
 
 ==================================================
-16. HUD
+18. FLUJO DE CAMBIO DE MAPA
+==================================================
+
+El flujo actual es:
+
+Game
+  |
+  v
+cargar_escena()
+  |
+  v
+desactivar Player
+  |
+  v
+eliminar mapa anterior
+  |
+  v
+cargar nuevo mapa
+  |
+  v
+mapa_actual = nuevo mapa
+  |
+  v
+buscar SpawnPlayer
+  |
+  v
+colocar Player
+  |
+  v
+hacer visible Player
+  |
+  v
+activar Player
+  |
+  v
+actualizar HUD
+
+
+El Player NO se destruye durante el cambio de mapa.
+
+
+==================================================
+19. HUD
 ==================================================
 
 El HUD es la representación permanente y resumida del estado
@@ -682,39 +771,50 @@ Muestra:
 - progreso de XP;
 - barra de progreso de XP.
 
+
 El HUD pertenece a Game y no a DialogueUI.
 
-Debe permanecer visible mientras el jugador está dentro de
-las escenas de juego/mapa.
 
-La actualización del HUD se realiza mediante eventos del
-Player, evitando polling continuo mediante _process().
+La actualización se realiza mediante eventos del Player.
+
+No se utiliza polling continuo mediante _process() para
+actualizar el HUD.
 
 
 ==================================================
-17. ESTADO / INVENTARIO
+20. ESTADO / INVENTARIO
 ==================================================
 
 Game contiene un panel de Estado que se abre mediante el botón
 INV.
 
-Actualmente muestra:
+El panel muestra:
 
 - nivel;
 - progreso;
 - barra de XP;
 - inventario.
 
+
 El inventario se obtiene desde:
 
 DialogueManager.inventory
 
-El inventario continúa almacenándose como:
+
+El inventario continúa siendo:
 
 Array[String]
 
 
-La representación visual utiliza:
+No se ha introducido lógica de inventario en la UI.
+
+
+==================================================
+21. SCROLL DEL INVENTARIO
+==================================================
+
+Para evitar que una lista grande de objetos salga del área
+visible del panel Estado se utiliza:
 
 Panel
 └── Scroll
@@ -727,58 +827,29 @@ Scroll      = ScrollContainer
 Inventario  = Label
 
 
-El ScrollContainer limita el área visible y permite desplazarse
-verticalmente cuando el contenido supera el espacio disponible.
-
-No se modifica la estructura de datos del inventario para
-resolver este problema.
+El ScrollContainer proporciona un área visual limitada y
+permite desplazamiento vertical cuando el contenido supera el
+espacio disponible.
 
 
-==================================================
-18. DIALOGO.TSCN
-==================================================
+La solución afecta únicamente a la presentación.
 
-La escena de diálogo anteriormente contenía elementos propios
-de nivel y XP.
-
-Se consideró incorrecto porque nivel y XP son información global
-del jugador y no información específica de una conversación.
-
-En v0.0.1 fueron eliminados:
-
-- Panel2
-- lbl_nivel
-- bar_progreso
-
-La escena de diálogo queda conceptualmente dedicada a:
-
-- NameLabel;
-- DialogueText;
-- OptionsContainer.
-
-No deben volver a introducirse elementos de nivel o XP en
-dialogo.tscn sin una decisión arquitectónica nueva y explícita.
+No modifica la estructura de datos del inventario.
 
 
 ==================================================
-19. FLUJO DE XP
+22. FLUJO DE XP
 ==================================================
 
-El flujo actual y deseado es:
+El flujo actual es:
 
-DialogueUI
-    |
-    v
 DialogueManager
     |
-    | efecto de diálogo
+    | efecto de XP
     v
 Player
     |
-    | cambia XP
-    v
-xp_changed
-    |
+    | xp_changed
     v
 Game
     |
@@ -795,7 +866,7 @@ Game es responsable de presentar ese estado en la UI global.
 
 
 ==================================================
-20. NIVELES ACTUALES
+23. NIVELES ACTUALES
 ==================================================
 
 Actualmente existen los siguientes niveles:
@@ -806,7 +877,8 @@ B1
 B2
 C1
 
-Los límites actuales de XP son:
+
+Límites actuales de XP:
 
 A1 = 70
 A2 = 120
@@ -814,152 +886,177 @@ B1 = 340
 B2 = 410
 C1 = 740
 
-El sistema utiliza un orden explícito de niveles.
 
-Estos valores no deben modificarse sin revisar previamente cómo
-está implementada la progresión del jugador.
-
-
-==================================================
-21. CARGA DE ESCENAS
-==================================================
-
-Game utiliza SceneContainer para cargar las escenas del juego.
-
-Actualmente existen como referencias principales:
-
-- bienvenida.tscn
-- aldea.tscn
-
-Flujo conceptual:
-
-Game
-  |
-  v
-bienvenida
-  |
-  | Jugar
-  v
-aldea
-  |
-  v
-SpawnPlayer
-  |
-  v
-Player persistente
-
-
-Cuando se carga una escena de juego:
-
-- se limpia la escena anterior;
-- se actualiza mapa_actual;
-- se instancia el nuevo mapa;
-- se carga el estado persistente del jugador;
-- se localiza SpawnPlayer;
-- se coloca el Player;
-- se hace visible el Player;
-- se actualiza el HUD.
+Estos valores no deben modificarse sin revisar previamente
+cómo está implementada la progresión del jugador.
 
 
 ==================================================
-22. DECISIONES ARQUITECTONICAS CONSOLIDADAS
+24. DECISIONES ARQUITECTONICAS CONSOLIDADAS
 ==================================================
 
 DECISION 1
+
 Nivel y XP pertenecen al HUD global de Game.
 
 MOTIVO:
+
 Son información persistente del estado del jugador.
 
 
 DECISION 2
+
 DialogueUI no gestiona nivel ni XP.
 
 MOTIVO:
-Evitar mezclar presentación de diálogos con estado global del
-jugador.
+
+Evitar mezclar presentación de diálogos con estado global.
 
 
 DECISION 3
+
 El HUD se actualiza mediante xp_changed.
 
 MOTIVO:
-Usar una arquitectura orientada a eventos y evitar
-actualizaciones continuas innecesarias.
+
+Utilizar una arquitectura orientada a eventos.
 
 
 DECISION 4
+
 Player es la fuente del estado de XP.
 
 MOTIVO:
-La UI debe presentar el estado, no convertirse en propietaria
-del mismo.
+
+La UI debe presentar el estado, no ser propietaria del mismo.
 
 
 DECISION 5
+
 Game coordina la presentación global.
 
 MOTIVO:
-Game es propietario de la UI global y coordina el Player y el
-mapa actual.
+
+Game es propietario de la UI global y del Player persistente.
 
 
 DECISION 6
+
 El panel Estado conserva su propia representación de nivel y XP.
 
 MOTIVO:
-El HUD y Estado tienen funciones visuales diferentes.
+
+HUD y Estado tienen funciones visuales diferentes.
 
 
 DECISION 7
+
 DialogueUI se mantiene independiente del Player.
 
 MOTIVO:
-Reducir acoplamiento y permitir que el sistema de diálogos sea
-reutilizable.
+
+Reducir acoplamiento y permitir reutilización del sistema de
+diálogos.
 
 
 DECISION 8
-Player es una única entidad persistente propiedad de Game.
+
+Player es una única instancia persistente propiedad de Game.
 
 MOTIVO:
+
 El personaje representa al mismo jugador durante toda la
-partida y su estado debe conservarse al cambiar de mapa.
+partida y su estado debe mantenerse al cambiar de mapa.
 
 
 DECISION 9
-Los mapas no contienen una instancia real del Player.
+
+Los mapas no contienen una instancia del Player.
 
 MOTIVO:
-Evitar duplicación del personaje y separar al jugador del
-entorno.
+
+El mapa representa el entorno, no al personaje persistente.
 
 
 DECISION 10
-Cada mapa utiliza SpawnPlayer como Marker2D.
+
+Los mapas utilizan SpawnPlayer como Marker2D.
 
 MOTIVO:
+
 Separar la posición de aparición de la entidad Player.
 
 
 DECISION 11
-El Player permanece oculto cuando no existe un mapa de juego.
+
+SpawnPlayer no controla la apariencia del Player.
 
 MOTIVO:
-Player pertenece a Game y persiste durante la partida, pero
-solo debe ser visible dentro del contexto de un mapa.
+
+El sprite y la lógica pertenecen exclusivamente al Player.
 
 
 DECISION 12
-SpawnPlayer no modifica el sprite ni la apariencia del Player.
+
+El Player solo es visible y está activo cuando existe un mapa
+cargado.
 
 MOTIVO:
-El sprite pertenece exclusivamente al Player persistente y
-no es responsabilidad del punto de aparición.
+
+Evitar que el personaje aparezca o procese lógica durante
+escenas que no son mapas.
+
+
+DECISION 13
+
+DialogueUI pertenece a Game y es común a todos los mapas.
+
+MOTIVO:
+
+Los diálogos son una funcionalidad transversal del juego y no
+pertenecen a un mapa específico.
+
+
+DECISION 14
+
+Texto y opciones de diálogo se presentan en paneles separados.
+
+MOTIVO:
+
+Permitir una interfaz más flexible y controlar
+independientemente la visibilidad de las opciones.
+
+
+DECISION 15
+
+PanelOpciones comienza oculto en cada diálogo.
+
+MOTIVO:
+
+Las opciones deben mostrarse únicamente cuando corresponda.
+
+
+DECISION 16
+
+PanelOpciones se oculta al finalizar el diálogo.
+
+MOTIVO:
+
+Garantizar que el siguiente diálogo comience con una interfaz
+limpia.
+
+
+DECISION 17
+
+Si un nodo no tiene opciones, PanelOpciones permanece oculto.
+
+MOTIVO:
+
+No mostrar un panel vacío.
 
 
 ==================================================
-23. CAMBIO REALIZADO EN v0.0.1
+25. CAMBIO CONSOLIDADO EN v0.0.1
 ==================================================
 
 Objetivo:
@@ -967,14 +1064,14 @@ Objetivo:
 Separar la visualización global de nivel/XP del sistema de
 diálogos.
 
+
 Cambios:
 
-- HUD global de Game utilizado para nivel y XP.
+- HUD global de Game utilizado para nivel y XP;
 - actualización mediante xp_changed;
 - DialogueUI liberado de la responsabilidad de nivel/XP;
-- eliminado Panel2 de dialogo.tscn;
-- eliminado lbl_nivel de dialogo.tscn;
-- eliminado bar_progreso de dialogo.tscn.
+- eliminación de elementos de XP de dialogo.tscn.
+
 
 Resultado:
 
@@ -982,336 +1079,267 @@ Funcionalidad probada correctamente.
 
 
 ==================================================
-24. MEJORA DE UI DEL INVENTARIO
+26. CAMBIO CONSOLIDADO EN v0.0.2
 ==================================================
 
-OBJETIVO:
+Objetivo:
 
-Evitar que un inventario con muchos objetos haga crecer
-verticalmente el Label de inventario hasta salir del área
-visible del panel Estado.
+Mejorar la arquitectura del Player y la presentación del
+inventario.
 
 
-PROBLEMA:
+Cambios:
 
-DialogueManager.inventory se almacena como Array[String].
+- Player convertido en instancia única persistente de Game;
+- Player eliminado de los mapas;
+- añadido SpawnPlayer como Marker2D en los mapas;
+- Game coloca el Player en SpawnPlayer al cargar el mapa;
+- Player oculto y desactivado cuando no existe un mapa;
+- Player visible y activo únicamente durante los mapas;
+- PNJ adaptados para localizar el Player persistente;
+- inventario introducido dentro de ScrollContainer.
 
-Game mostraba todos los elementos concatenados en un único
-Label directamente dentro de Panel.
 
-Cuando había suficientes elementos, el Label podía crecer
-verticalmente y salir de los límites visibles del panel.
+Resultado:
 
+La arquitectura de Player persistente y SpawnPlayer fue
+probada correctamente.
 
-SOLUCION:
-
-Se mantiene intacta la estructura de datos:
-
-DialogueManager.inventory
-    = Array[String]
-
-La representación visual utiliza:
-
-Panel
-└── Scroll
-    └── Inventario
-
-
-Tipos:
-
-Scroll      = ScrollContainer
-Inventario  = Label
-
-
-El ScrollContainer proporciona un área visual limitada y
-permite desplazarse verticalmente cuando el contenido supera
-el espacio disponible.
-
-
-DECISION ARQUITECTONICA:
-
-La solución se limita a la presentación.
-
-No se introduce lógica de inventario en el ScrollContainer.
-
-No se modifica DialogueManager.inventory.
-
-Game continúa siendo responsable de presentar el inventario
-en el panel Estado.
-
-
-ARCHIVOS AFECTADOS:
-
-- escenas/Game.tscn
-- scripts/game.gd
-
-
-PRUEBAS:
-
-Se comprobó:
-
-- visualización normal del inventario;
-- inventario con múltiples elementos;
-- aparición del desplazamiento vertical;
-- acceso a los elementos inferiores;
-- lectura del último elemento;
-- mantenimiento de los límites del panel;
-- funcionamiento con pocos elementos;
-- funcionamiento del botón de cierre del panel Estado.
-
-RESULTADO:
-
-La mejora queda confirmada y se considera funcional.
-
-
-==================================================
-25. PLAYER PERSISTENTE Y SPAWN POR MAPA
-==================================================
-
-OBJETIVO:
-
-Convertir al Player en una única entidad persistente propiedad
-de Game y eliminar la dependencia de que cada mapa contenga su
-propia instancia del personaje.
-
-
-PROBLEMA ANTERIOR:
-
-Cada mapa podía contener su propia instancia del Player.
-
-Conceptualmente:
-
-Game
-|
-+-- SceneContainer
-|    |
-|    +-- Aldea
-|         |
-|         +-- player
-|
-+-- UI
-
-Esto implicaba crear una instancia diferente del personaje al
-cambiar de mapa, aunque conceptualmente se trata del mismo
-jugador.
-
-
-SOLUCION IMPLEMENTADA:
-
-El Player pasó a ser una instancia persistente hija directa de
-Game.
-
-Los mapas dejaron de contener una instancia real del Player.
-
-Arquitectura actual:
-
-Game
-|
-+-- Player
-|
-+-- SceneContainer
-|    |
-|    +-- mapa_actual
-|         |
-|         +-- SpawnPlayer
-|         +-- PNJ
-|         +-- escenario
-|         +-- objetos
-|
-+-- UI
-
-
-SpawnPlayer es un Marker2D.
-
-Su única responsabilidad es indicar dónde debe colocarse el
-Player al cargar el mapa.
-
-
-COMPORTAMIENTO:
-
-Al cargar un mapa:
-
-1. Game conserva el Player existente.
-2. Game descarga el mapa anterior.
-3. Game carga el nuevo mapa.
-4. Game localiza SpawnPlayer.
-5. Game obtiene su posición.
-6. Game coloca el Player persistente en dicha posición.
-7. Game hace visible el Player.
-
-
-Al cargar una escena que no representa un mapa de juego, como
-bienvenida.tscn:
-
-- el Player permanece oculto.
-
-
-ESTADO DEL PLAYER:
-
-No se crea un nuevo Player al cambiar de mapa.
-
-El mismo Player conserva su estado entre mapas.
-
-Entre otros datos:
-
-- nivel;
-- XP;
-- estado propio;
-- posición;
-- demás información persistente que corresponda.
-
-
-SPRITE:
-
-El sprite real pertenece al Player.
-
-SpawnPlayer no tiene sprite de personaje y no modifica la
-apariencia del Player.
-
-
-ARCHIVOS AFECTADOS:
-
-- escenas/game.tscn
-- scripts/game.gd
-- escenas/aldea.tscn
-- scripts relacionados con Player/PJ según referencias existentes
-
-
-DEPENDENCIAS REVISADAS:
-
-Se revisaron las dependencias relacionadas con:
-
-- Player;
-- Game;
-- mapas;
-- PNJ;
-- DialogueManager;
-- HUD;
-- diálogos;
-- XP;
-- carga del estado del jugador;
-- visibilidad del Player;
-- SpawnPlayer.
-
-
-AJUSTES REALIZADOS:
-
-Las referencias que anteriormente buscaban el Player dentro
-del mapa fueron adaptadas al nuevo modelo en los sistemas
-necesarios.
-
-Game mantiene una referencia directa al Player persistente.
-
-Los sistemas que necesitan acceder al Player deben utilizar la
-instancia persistente correspondiente y no asumir que el Player
-es hijo del mapa.
-
-
-PROBLEMA ENCONTRADO:
-
-Durante la implementación apareció un error relacionado con
-la visibilidad de un nodo nulo:
-
-"Invalid assignment of property or key 'visible' with value of
-type 'bool' on a base object of type 'null instance'."
-
-
-La causa estaba relacionada con la referencia al Player antes
-de que existiera correctamente en la nueva estructura.
-
-
-También se comprobó inicialmente que el Player no aparecía al
-cargar el mapa.
-
-La causa fue la ausencia/configuración incorrecta del punto
-SpawnPlayer necesario para posicionar al Player persistente.
-
-
-SOLUCION:
-
-Se incorporó SpawnPlayer como Marker2D en el mapa y Game utiliza
-su posición para colocar el Player al cargarlo.
-
-También se controla correctamente la visibilidad del Player
-según exista un mapa de juego cargado.
-
-
-PRUEBAS:
-
-El cambio fue probado correctamente.
-
-Se comprobó:
-
-- carga de bienvenida;
-- Player oculto fuera del mapa;
-- entrada al mapa;
-- aparición correcta del Player;
-- posición inicial mediante SpawnPlayer;
-- funcionamiento del movimiento;
-- funcionamiento del mapa;
-- persistencia de la misma instancia del Player;
-- funcionamiento del HUD;
-- funcionamiento de XP;
-- funcionamiento de diálogos;
-- funcionamiento de PNJ;
-- funcionamiento del inventario;
-- funcionamiento del panel Estado.
-
-
-RESULTADO:
-
-El Player persistente y el sistema SpawnPlayer funcionan
+El inventario con múltiples elementos también fue probado
 correctamente.
 
-El cambio queda CONFIRMADO y consolidado en v0.0.2.
+
+==================================================
+27. CAMBIO CONSOLIDADO EN v0.0.3
+==================================================
+
+Objetivo:
+
+Separar visualmente el texto y las opciones de los diálogos y
+convertir DialogueUI en un elemento común a todos los mapas.
+
+
+Cambios:
+
+- DialogueUI trasladado conceptualmente a Game como elemento
+  global;
+- eliminado el concepto de DialogueUI perteneciente a un mapa;
+- PanelTexto separado de PanelOpciones;
+- PanelTexto contiene NameLabel y DialogueText;
+- PanelOpciones contiene OptionsContainer;
+- PanelOpciones comienza oculto;
+- interacción sobre la zona de texto permite mostrar u ocultar
+  las opciones;
+- cuando el nodo no tiene opciones, PanelOpciones permanece
+  oculto;
+- al finalizar el diálogo, PanelOpciones se oculta;
+- siguiente diálogo comienza con las opciones ocultas;
+- PNJ continúan iniciando los diálogos mediante
+  DialogueManager.
+
+
+Resultado:
+
+El nuevo diseño de diálogo fue probado correctamente y se
+considera funcional.
 
 
 ==================================================
-26. ESTADO ACTUAL
+28. PRUEBAS REALIZADAS
 ==================================================
 
-v0.0.2 está considerada una versión funcional y probada.
+Se comprobó correctamente:
+
+- arranque del proyecto;
+- entrada al mapa;
+- aparición del Player mediante SpawnPlayer;
+- Player persistente entre cargas de escena;
+- Player oculto cuando no existe un mapa;
+- Player activo únicamente cuando existe un mapa;
+- funcionamiento del HUD;
+- visualización del nivel;
+- visualización del progreso;
+- funcionamiento de la barra XP;
+- apertura del panel INV;
+- cierre del panel INV;
+- visualización del inventario;
+- desplazamiento del inventario;
+- funcionamiento de los diálogos;
+- funcionamiento de las opciones;
+- obtención de XP mediante diálogos;
+- actualización del HUD después de obtener XP;
+- interacción con PNJ;
+- seguimiento de PNJ;
+- finalización del diálogo al salir de la zona de interacción;
+- ocultación del PanelOpciones al terminar el diálogo;
+- ocultación del PanelOpciones cuando el nodo no tiene opciones;
+- mostrar/ocultar opciones mediante interacción con PanelTexto;
+- nuevo diálogo comenzando con PanelOpciones oculto.
+
+
+==================================================
+29. PROBLEMAS ENCONTRADOS Y RESUELTOS
+==================================================
+
+PROBLEMA 1:
+
+El Player no aparecía al cargar el mapa después de convertirlo
+en persistente.
+
+
+CAUSA:
+
+El Player necesitaba recibir la posición del nuevo
+SpawnPlayer del mapa.
+
+
+SOLUCION:
+
+Game localiza SpawnPlayer y coloca allí el Player antes de
+activarlo.
+
+
+--------------------------------------------------
+
+
+PROBLEMA 2:
+
+Se produjo un error al intentar modificar la propiedad
+visible de una referencia nula.
+
+
+CAUSA:
+
+La referencia al Player no estaba correctamente establecida
+en la nueva arquitectura.
+
+
+SOLUCION:
+
+Game mantiene una referencia directa a:
+
+Game/Player
+
+
+--------------------------------------------------
+
+
+PROBLEMA 3:
+
+Los PNJ seguían buscando el Player dentro del mapa.
+
+
+CAUSA:
+
+El código anterior correspondía a la arquitectura en la que
+cada mapa contenía su propio Player.
+
+
+SOLUCION:
+
+Los PNJ obtienen el Player directamente desde Game.
+
+
+--------------------------------------------------
+
+
+PROBLEMA 4:
+
+Las opciones del diálogo no eran visibles.
+
+
+CAUSA:
+
+La posición del panel/contenedor de opciones era incorrecta.
+
+
+SOLUCION:
+
+La posición fue corregida visualmente en la escena.
+
+
+--------------------------------------------------
+
+
+PROBLEMA 5:
+
+El panel de opciones podía permanecer visible al terminar
+un diálogo.
+
+
+SOLUCION:
+
+DialogueUI oculta PanelOpciones al ejecutar
+hide_dialogue().
+
+
+--------------------------------------------------
+
+
+PROBLEMA 6:
+
+Los nodos sin opciones podían dejar un panel vacío visible.
+
+
+SOLUCION:
+
+show_options() mantiene PanelOpciones oculto cuando el array
+de opciones está vacío.
+
+
+==================================================
+30. ESTADO ACTUAL
+==================================================
+
+v0.0.3 está considerada una versión funcional, probada y
+consolidada.
+
 
 Actualmente:
 
+- Player único y persistente;
+- Player propiedad de Game;
+- Player separado de los mapas;
+- SpawnPlayer funcionando;
+- Player oculto cuando no hay mapa;
+- Player activado únicamente cuando hay mapa;
+- PNJ compatibles con Player persistente;
 - HUD global funcionando;
 - nivel funcionando;
 - XP funcionando;
 - barra XP funcionando;
 - actualización mediante xp_changed funcionando;
 - diálogos funcionando;
-- opciones de diálogo funcionando;
+- DialogueUI común a todos los mapas;
+- texto y opciones separados;
+- opciones mostrables/ocultables;
+- opciones ocultas cuando no existen;
+- opciones ocultas al terminar el diálogo;
 - inventario funcionando;
-- inventario con ScrollContainer funcionando;
-- panel Estado funcionando;
-- Player persistente funcionando;
-- Player propiedad de Game;
-- Player oculto cuando no hay mapa;
-- Player visible cuando hay mapa;
-- SpawnPlayer funcionando;
-- posición del Player determinada por SpawnPlayer;
-- mapas sin instancia propia del Player;
-- separación Game / DialogueUI establecida;
-- restos de XP eliminados de dialogo.tscn.
+- ScrollContainer de inventario funcionando;
+- panel Estado funcionando.
 
 
 ==================================================
-27. ARCHIVOS RELEVANTES PARA ESTE SISTEMA
+31. ARCHIVOS RELEVANTES
 ==================================================
 
-Escenas:
+Escenas principales:
 
 - escenas/game.tscn
 - escenas/aldea.tscn
+- escenas/dialogo.tscn
+- escenas/player.tscn
+- escenas/pnj.tscn
 - bienvenida.tscn
-- escena de diálogo correspondiente a dialogo.tscn
 
-Scripts:
+
+Scripts principales:
 
 - scripts/game.gd
 - scripts/dialogue_ui.gd
+- scripts/pnj.gd
 - script del Player
-- pnj.gd
 - DialogueManager
 
 
@@ -1320,32 +1348,7 @@ antes de modificar archivos.
 
 
 ==================================================
-28. METODOLOGIA DE TRABAJO
-==================================================
-
-Antes de modificar código:
-
-1. Estudiar el archivo real.
-2. Estudiar las escenas relacionadas.
-3. Identificar dependencias.
-4. Determinar qué sistema debe ser responsable de la
-   funcionalidad.
-5. Evitar duplicar responsabilidades.
-6. Hacer el cambio mínimo necesario.
-7. Probar la funcionalidad.
-8. Comprobar que no se ha roto ninguna funcionalidad existente.
-9. Registrar el avance en content_context.md.
-10. Solo después considerar cerrada la versión o avance.
-
-No reconstruir scripts completos basándose en suposiciones cuando
-el archivo real puede ser consultado.
-
-Cuando se solicite un script completo, debe generarse a partir
-de la versión real del archivo.
-
-
-==================================================
-29. PRINCIPIO DE CONSERVACION
+32. PRINCIPIO DE CONSERVACION
 ==================================================
 
 No modificar sistemas que no sean necesarios para resolver el
@@ -1355,76 +1358,74 @@ Especialmente:
 
 - no modificar Player sin necesidad;
 - no modificar DialogueManager sin necesidad;
-- no introducir lógica global en DialogueUI;
+- no introducir lógica global innecesaria en DialogueUI;
 - no duplicar sistemas de XP;
+- no duplicar Player;
+- no introducir DialogueUI dentro de mapas;
 - no eliminar funcionalidades existentes sin comprobar sus
-  referencias;
-- no crear Players adicionales dentro de los mapas;
-- no convertir SpawnPlayer en un segundo Player.
+  referencias.
+
 
 La arquitectura debe evolucionar de forma incremental.
 
 
 ==================================================
-30. REGISTRO DE VERSIONES
+33. PRINCIPIO DE RESPONSABILIDADES
 ==================================================
 
-v0.0.1
+PLAYER
 
-Objetivo:
-Separar la visualización global de nivel/XP del sistema de
-diálogos.
-
-Cambios:
-
-- HUD global de Game utilizado para nivel y XP;
-- actualización mediante xp_changed;
-- DialogueUI liberado de la responsabilidad de nivel/XP;
-- eliminado Panel2 de dialogo.tscn;
-- eliminado lbl_nivel de dialogo.tscn;
-- eliminado bar_progreso de dialogo.tscn.
-
-Resultado:
-
-Funcionalidad probada correctamente.
+Es el personaje real y mantiene su estado.
 
 
-v0.0.2
+GAME
 
-Objetivo:
+Coordina Player, mapas y UI global.
 
-Mejorar la arquitectura del Player y la presentación del
-inventario.
 
-Cambios:
+MAPA
 
-- inventario contenido en ScrollContainer;
-- Player convertido en entidad única y persistente;
-- Player trasladado a Game;
-- mapas liberados de su instancia propia del Player;
-- añadido SpawnPlayer como Marker2D;
-- Player colocado según SpawnPlayer;
-- Player oculto cuando no existe un mapa;
-- Player visible al cargar un mapa;
-- referencias dependientes del Player adaptadas al nuevo modelo.
+Contiene el entorno y los elementos propios de la zona.
 
-Resultado:
 
-Cambios implementados, probados y confirmados correctamente.
+SPAWNPLAYER
+
+Indica dónde aparece el Player.
+
+
+PNJ
+
+Interactúa con el Player y puede iniciar diálogos.
+
+
+DIALOGUEMANAGER
+
+Gestiona la lógica de conversaciones, efectos, inventario y
+persistencia.
+
+
+DIALOGUEUI
+
+Muestra visualmente los diálogos y sus opciones.
+
+
+HUD
+
+Muestra información rápida y global del jugador.
+
+
+ESTADO
+
+Muestra información detallada del jugador.
 
 
 ==================================================
-31. SIGUIENTE CONTINUACION
+34. SIGUIENTE CONTINUACION
 ==================================================
 
-El proyecto debe continuar desde el estado v0.0.2.
+El proyecto debe continuar desde el estado v0.0.3.
 
-No se debe volver a implementar:
-
-- la separación del HUD/XP;
-- el ScrollContainer del inventario;
-- el Player persistente;
-- SpawnPlayer básico.
+No se deben volver a implementar cambios ya consolidados.
 
 Antes de comenzar el siguiente objetivo:
 
@@ -1432,9 +1433,12 @@ Antes de comenzar el siguiente objetivo:
 - revisar el estado actual del repositorio;
 - identificar exactamente qué se quiere modificar;
 - estudiar los archivos afectados;
-- mantener las decisiones arquitectónicas establecidas.
+- mantener las decisiones arquitectónicas establecidas;
+- realizar primero una propuesta si el cambio afecta a la
+  arquitectura.
 
-Cualquier nueva modificación deberá seguir el flujo:
+
+Todo nuevo cambio debe seguir:
 
 PROPUESTA
     ↓

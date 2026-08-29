@@ -12,11 +12,12 @@ grow_vertical = 2
 script = ExtResource("1_hpq5i")
 
 [node name="PanelGeneral" type="Panel" parent="." unique_id=2123154516]
+visible = false
 layout_mode = 0
 offset_left = 40.0
 offset_top = 180.0
-offset_right = 246.0
-offset_bottom = 363.0
+offset_right = 308.0
+offset_bottom = 463.0
 
 [node name="PanelCargaEscenas" type="Panel" parent="." unique_id=105727122]
 layout_mode = 0

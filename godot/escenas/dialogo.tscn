@@ -46,3 +46,5 @@ offset_left = 20.0
 offset_top = 5.7649984
 offset_right = 94.494995
 offset_bottom = 30.5
+
+[connection signal="gui_input" from="PanelTexto" to="." method="_on_panel_texto_gui_input"]
