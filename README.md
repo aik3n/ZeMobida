@@ -37,7 +37,6 @@ ZeMobida is an open-source Godot game built around exploration, NPC interaction,
 │   ├── project.godot
 │   └── export_presets.cfg
 ├── guiones/
-├── content_context.md
 ├── README.md
 ├── README.esp.md
 └── LICENSE
