@@ -1,83 +1,79 @@
-ZeMobida
+# ZeMobida
 
-Un juego de aventuras y decisiones donde tus conversaciones tienen consecuencias.
+> Un juego de aventuras y decisiones donde tus conversaciones tienen consecuencias.
 
-🚧 Proyecto en desarrollo
+**Estado:** prototipo / desarrollo activo  
+**Motor:** Godot 4.7  
+**Renderizado:** GL Compatibility  
+**Licencia:** GNU GPLv3  
+**Revisión auditada:** `12ea5386c03d53dd51dae26fd172775e281544f8`
 
-ZeMobida es un videojuego de código abierto desarrollado con Godot
-.
+## Descripción
 
-El proyecto todavía se encuentra en una fase temprana de desarrollo. Muchas de sus mecánicas y contenidos pueden cambiar a medida que el juego evoluciona.
+ZeMobida es un videojuego de código abierto desarrollado con Godot y centrado en exploración, interacción con PNJ, diálogos ramificados, inventario, experiencia y decisiones del jugador.
 
-🎮 El juego
+## Funcionalidades actuales
 
-En ZeMobida podrás explorar un mundo poblado por personajes con los que interactuar, tomar decisiones y descubrir diferentes situaciones.
+- Mundo 2D explorable (`aldea`).
+- `Player` persistente propiedad de `Game`.
+- Spawn y límites de cámara por mapa.
+- Interacción y seguimiento de PNJ.
+- Diálogos ramificados en `.txt`.
+- Condiciones de inventario y efectos.
+- XP y niveles `a1`, `a2`, `b1`, `b2`, `c1`.
+- HUD y estado/inventario global.
+- Guardado local en `user://`.
+- Sincronización de guiones desde GitHub.
+- Parser y validador de diálogos.
 
-Las conversaciones no son simplemente texto: tus decisiones pueden modificar el estado del juego, afectar a tu inventario, experiencia y desbloquear nuevas posibilidades.
+## Requisitos
 
-El objetivo es construir una experiencia en la que las decisiones del jugador importen.
+- Godot **4.7**.
+- Conexión de red para la sincronización online.
+- Presets de Windows Desktop y Android.
 
-✨ Características
-💬 Sistema de diálogos ramificados.
-👥 Personajes no jugables (NPC).
-🎒 Sistema de inventario.
-⭐ Experiencia y niveles.
-🔀 Decisiones y condiciones.
-🌍 Mundo explorable.
-📝 Sistema de diálogos basado en archivos de texto.
-🛠️ Herramientas para validar y gestionar el contenido.
-🌐 Contenido actualizable desde GitHub.
-🧪 Estado del proyecto
+## Ejecutar
 
-ZeMobida se encuentra actualmente en fase de prototipo.
-
-Las funcionalidades principales están siendo desarrolladas y conectadas entre sí, pero todavía queda mucho trabajo antes de alcanzar una versión completa.
-
-Puedes consultar el estado del desarrollo en:
-
-Issues
-Discussions
-Commits
-Releases
-🚀 Ejecutar el proyecto
-Requisitos
-Godot 4.7
-Instalación
-
-Clona el repositorio:
-
+```bash
 git clone https://github.com/aik3n/ZeMobida.git
+cd ZeMobida
+```
 
+Abre `godot/project.godot` con Godot 4.7 y ejecuta `res://escenas/Game.tscn`.
 
-Abre el proyecto desde Godot y ejecútalo.
+## Arquitectura
 
-🤝 Contribuir
+| Componente | Responsabilidad |
+|---|---|
+| `Game` | Coordinación global, mapas, Player persistente y UI |
+| `Player` | Movimiento, XP y nivel |
+| `DialogueManager` | Diálogos, efectos, inventario y persistencia |
+| `DialogueParser` | Parser de guiones |
+| `DialogueValidator` | Validación |
+| `DialogueUI` | Presentación |
+| `DialogueUpdater` | Sincronización GitHub |
+| `PNJ` | Movimiento y diálogos |
 
-ZeMobida es un proyecto abierto y las contribuciones son bienvenidas.
+Consulta [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-Puedes contribuir de diferentes formas:
+## Documentación
 
-🐛 Informando de errores.
-💡 Proponiendo ideas.
-📝 Mejorando la documentación.
-🌍 Traduciendo contenido.
-💻 Contribuyendo con código.
-🎨 Creando o mejorando contenido.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- [`docs/DECISIONS.md`](docs/DECISIONS.md)
+- [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md)
+- [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)
+- [`docs/AUDIT.md`](docs/AUDIT.md)
 
-Si quieres contribuir, abre un issue o un pull request.
+## Hallazgos principales
 
-🌍 Idiomas
-🇬🇧 English
-🇪🇸 Español
-🟥⬜🟩 Euskara
-📜 Licencia
+1. Android tiene Internet desactivado aunque el juego usa HTTP para GitHub.
+2. La sincronización depende de la rama mutable `main`.
+3. El contenido descargado no se valida completamente antes de activarse.
+4. No se detectan ciclos automáticos de diálogo.
+5. Persisten valores de prototipo y una ruta local absoluta.
+6. El package Android es un placeholder.
+7. No se observa una suite automatizada de CI/tests.
 
-ZeMobida es software libre y se distribuye bajo los términos de la GNU General Public License v3.0 (GPLv3).
+## Licencia
 
-Consulta el archivo LICENSE para conocer los términos completos de la licencia.
-
-❤️ Proyecto
-
-ZeMobida es un proyecto independiente creado con la intención de experimentar, aprender y construir una experiencia de juego abierta a la comunidad.
-
-Si te interesa el proyecto, ⭐ dale una estrella al repositorio y síguelo para conocer su evolución.
+GNU GPL v3.0.
