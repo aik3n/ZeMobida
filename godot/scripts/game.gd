@@ -163,7 +163,92 @@ func _configurar_player() -> void:
 	player_actual.set_physics_process(true)
 	player_actual.set_process_unhandled_input(true)
 
+	_configurar_camera()
+
 	_actualizar_hud()
+
+
+
+func _configurar_camera() -> void:
+
+	var camera: Camera2D = player_actual.get_node_or_null(
+		"Camera2D"
+	)
+
+	if camera == null:
+
+		push_warning(
+			"No se encontró Camera2D en el Player."
+		)
+
+		return
+
+	var camera_bounds: Area2D = mapa_actual.get_node_or_null(
+		"CameraBounds"
+	)
+
+	if camera_bounds == null:
+
+		push_warning(
+			"No se encontró CameraBounds en el mapa."
+		)
+
+		return
+
+	var collision_shape: CollisionShape2D = (
+		camera_bounds.get_node_or_null(
+			"CollisionShape2D"
+		)
+	)
+
+	if collision_shape == null:
+
+		push_warning(
+			"No se encontró CollisionShape2D dentro de CameraBounds."
+		)
+
+		return
+
+	if collision_shape.shape == null:
+
+		push_warning(
+			"CameraBounds no tiene un Shape definido."
+		)
+
+		return
+
+	if not collision_shape.shape is RectangleShape2D:
+
+		push_warning(
+			"CameraBounds debe utilizar RectangleShape2D."
+		)
+
+		return
+
+	var rectangle: RectangleShape2D = (
+		collision_shape.shape as RectangleShape2D
+	)
+
+	var size: Vector2 = rectangle.size
+	var center: Vector2 = collision_shape.global_position
+
+	camera.limit_left = int(
+		center.x - size.x / 2.0
+	)
+
+	camera.limit_right = int(
+		center.x + size.x / 2.0
+	)
+
+	camera.limit_top = int(
+		center.y - size.y / 2.0
+	)
+
+	camera.limit_bottom = int(
+		center.y + size.y / 2.0
+	)
+
+	camera.enabled = true
 
 
 

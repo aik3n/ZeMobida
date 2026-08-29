@@ -3,6 +3,9 @@
 [ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="2_jns4i"]
 [ext_resource type="Texture2D" uid="uid://ddxmxgyyfy8mn" path="res://icon.svg" id="4_87o4k"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xw7ts"]
+size = Vector2(1699, 905)
+
 [node name="aldea" type="Node2D" unique_id=493802413]
 
 [node name="juan" parent="." unique_id=1491293733 instance=ExtResource("2_jns4i")]
@@ -29,3 +32,9 @@ sprite = ExtResource("4_87o4k")
 
 [node name="SpawnPlayer" type="Marker2D" parent="." unique_id=957641453]
 position = Vector2(567, 301)
+
+[node name="CameraBounds" type="Area2D" parent="." unique_id=319864449]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CameraBounds" unique_id=1758029404]
+position = Vector2(480.5, 118.5)
+shape = SubResource("RectangleShape2D_xw7ts")
