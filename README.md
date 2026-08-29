@@ -1,9 +1,6 @@
-
-🌍 Languages
-
-🇬🇧 English (README.eng.md) - 🇪🇸 Español (README.esp.md) - 🟥⬜🟩 Euskara (README.eus.md)
-
 ZeMobida
+
+🇬🇧 English · 🇪🇸 Español · 🟥⬜🟩 Euskara
 
 An adventure and decision-driven game where your conversations have consequences.
 
