@@ -1,11 +1,11 @@
 --archivo: aldea_charo_a1.txt
 # INICIO			--linea de comentario
-Hola, aventurero, soy charo.
+Hola, aventurero, soy Paco.
 quieres comprar algo
 
 ?avion ?tren > TODO -- condiciones inventario, salta automaticamente a #TODO
 
-1 Comprar avion > AVION [+AvioN, xp+1]
+1 Comprar pacp > AVION [+paco, xp+1]
 2 Comprar tren > TREN[+TrEn, xp+5]   --otro de comentario de guion
 
 # AVION 
