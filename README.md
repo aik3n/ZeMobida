@@ -1,3 +1,6 @@
+## Languages 
+- 🇬🇧 English - 🇪🇸 [Español](README.es.md)
+
 # My Game
 
 An open-source game made with ❤️.
@@ -6,10 +9,9 @@ An open-source game made with ❤️.
 
 This is a small experimental game project.
 
-## Languages
 
-- 🇬🇧 English
-- 🇪🇸 [Español](README.es.md)
+
+
 
 ## License
 
