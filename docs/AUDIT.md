@@ -1,101 +1,57 @@
-# ZeMobida — Deep Audit
+# ZeMobida — Technical Audit
 
-**Repository:** `https://github.com/aik3n/ZeMobida`  
-**Commit:** `12ea5386c03d53dd51dae26fd172775e281544f8`
+**Fecha:** 2026-08-29  
+**Estado:** sincronización incremental implementada y validada en ejecución.
 
-## Executive summary
+## Resultado
 
-The project has a coherent prototype architecture, especially the separation between `Game`, persistent `Player`, `DialogueManager` and `DialogueUI`.
+La sincronización de guiones ahora incluye:
 
-It is not yet production-ready.
+- `Actualizar guiones al iniciar: Sí / No`;
+- manifest local con SHA por archivo;
+- descargas incrementales;
+- almacenamiento temporal;
+- validación antes de activar;
+- conservación de caché anterior ante fallo;
+- timeout global configurable de 30 segundos por defecto;
+- comprobación antes de permitir entrar al mapa.
 
-## Findings
+La implementación fue probada en ejecución y confirmada como funcional.
 
-### P0 — Android networking mismatch
+## Riesgos pendientes
 
-`dialogue_updater.gd` performs HTTP requests to GitHub, while the Android export preset has:
+### Alto — Referencia remota mutable
+Actualmente se utiliza `main`.
 
-```text
-permissions/internet=false
-```
+**Recomendación:** estudiar una referencia inmutable, como commit SHA o release de contenido.
 
-**Recommendation:** enable Internet and test on device, or make synchronization optional with bundled offline content.
+### Alto — Tests automatizados
+No existe una suite automatizada completa visible para parser, validator, updater y persistencia.
 
-### P1 — Mutable remote content
+**Recomendación:** añadir tests headless y CI.
 
-The updater follows `main`, so an installed binary can change behavior without a rebuild.
+### Alto — Metadatos de distribución
+Persisten elementos de prototipo en configuración/exportación.
 
-**Recommendation:** pin a commit SHA, tag or versioned content release.
+**Recomendación:** completar identidad, package ID, versión y firma antes de release.
 
-### P1 — Content activated without complete validation
+### Medio — Ciclos automáticos
+El runtime sigue saltos automáticos recursivamente y el validator no detecta todos los ciclos.
 
-Downloaded scripts should be parsed and validated before replacing the known-good local set.
+**Recomendación:** detectar ciclos y añadir límite de transiciones.
 
-**Recommendation:**
+### Medio — Tablas de XP duplicadas
+Los umbrales aparecen en más de un lugar.
 
-```text
-download → parse all → validate all → activate
-```
+**Recomendación:** centralizar configuración.
 
-On failure, retain the previous version.
+### Bajo — Acoplamiento al SceneTree
+Algunas partes dependen de nombres concretos y búsquedas dinámicas.
 
-### P2 — Automatic dialogue cycles
+**Recomendación:** mejorar contratos si el proyecto crece.
 
-The validator checks destination existence but not graph cycles.
+## Estado documental
 
-Example:
+La documentación actual refleja el comportamiento implementado, incluyendo sincronización por SHA, opción de usuario, timeout, validación previa y fallback a caché.
 
-```text
-# A
-> B
-
-# B
-> A
-```
-
-**Recommendation:** detect cycles in automatic transitions.
-
-### P2 — No visible automated test/CI suite
-
-Add unit tests for parser, validator, effects, XP, save/load and dialogue resolution, then a headless smoke test.
-
-### P2 — Prototype metadata
-
-`project.godot` contains prototype values such as `config/name="test"` and a machine-specific absolute video path. The Android package identifier is still a placeholder.
-
-### P3 — Duplicated XP thresholds
-
-XP/level configuration is duplicated and could diverge.
-
-## Security/integrity
-
-No obvious secrets were identified in the reviewed project files. The principal concern is trust in mutable remote content rather than executable code.
-
-## Recommended roadmap
-
-### Phase 1
-- fix Android networking/offline fallback;
-- clean release metadata;
-- remove absolute paths.
-
-### Phase 2
-- pin content;
-- validate content before activation;
-- detect automatic cycles;
-- version save/content schemas.
-
-### Phase 3
-- automated tests;
-- CI;
-- release smoke tests.
-
-### Phase 4
-- responsive UI;
-- platform controls;
-- release/signing/versioning.
-
-## Overall assessment
-
-**Maturity:** functional prototype with a solid foundation, not production-ready.
-
-The best next step is to improve deterministic content delivery and automated validation rather than perform a large refactor.
+El contenido de `guiones/` del repositorio es contenido versionado; `user://dialogues/` es la caché runtime.

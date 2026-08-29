@@ -24,7 +24,7 @@ layout_mode = 0
 offset_left = 193.0
 offset_top = 65.0
 offset_right = 652.0
-offset_bottom = 329.0
+offset_bottom = 390.0
 
 [node name="btn_Aldea" type="Button" parent="PanelCargaEscenas" unique_id=1387758120]
 layout_mode = 0
@@ -33,3 +33,19 @@ offset_top = 39.0
 offset_right = 422.0
 offset_bottom = 99.0
 text = "Carga Aldea"
+
+[node name="chk_ActualizarGuiones" type="CheckButton" parent="PanelCargaEscenas"]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 120.0
+offset_right = 422.0
+offset_bottom = 158.0
+text = "Actualizar guiones al iniciar"
+
+[node name="lbl_EstadoGuiones" type="Label" parent="PanelCargaEscenas"]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 175.0
+offset_right = 422.0
+offset_bottom = 210.0
+text = "Comprobando guiones..."

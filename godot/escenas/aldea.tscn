@@ -38,3 +38,9 @@ position = Vector2(567, 301)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CameraBounds" unique_id=1758029404]
 position = Vector2(480.5, 118.5)
 shape = SubResource("RectangleShape2D_xw7ts")
+
+[node name="paco" parent="." unique_id=1383033262 instance=ExtResource("2_jns4i")]
+position = Vector2(458, 430)
+nombre = "paco"
+sprite = ExtResource("4_87o4k")
+tipo_seguimiento = 0

@@ -1,92 +1,83 @@
 # ZeMobida — Architecture
 
-**Audited revision:** `12ea5386c03d53dd51dae26fd172775e281544f8`
+**Estado:** implementación actual validada en ejecución el 2026-08-29.  
+**Godot:** 4.7.
 
-## High-level model
+## Modelo
 
 ```text
 Game
-├── Player
-├── HUD / Status UI
+├── Player persistente
+├── HUD / estado
 ├── DialogueUI
-└── SceneContainer
-    └── Current map
-        ├── PNJ
-        ├── SpawnPlayer
-        └── CameraBounds
+└── mapa actual
+    ├── PNJ
+    ├── SpawnPlayer
+    └── CameraBounds
+
+DialogueManager (autoload)
+├── parser
+├── validator
+├── runtime de diálogo
+├── inventario
+└── persistencia
+
+DialogueUpdater (autoload)
+└── GitHub → user://dialogues/
 ```
 
-`Game` owns the persistent Player and coordinates map lifecycle and global UI.
+`Game` coordina mapas, Player y UI global. `DialogueManager` ejecuta diálogos y actualmente también gestiona inventario y persistencia.
 
-## Responsibilities
+## Contenido
 
-### Game
-Map loading, Player lifecycle/spawn, camera limits and global UI.
+- `guiones/`: contenido de diálogo versionado en el repositorio.
+- `user://dialogues/`: caché local utilizada por el runtime.
 
-### Player
-Movement, XP, level and `xp_changed`.
+GitHub es la fuente de actualización. La caché local permite continuar jugando cuando GitHub no está disponible.
 
-### DialogueManager
-Active dialogue, nodes, conditions, jumps, options, effects, inventory and persistence. It is an autoload.
+## Sincronización
 
-### DialogueParser
-Converts `.txt` dialogue into internal dictionaries.
-
-### DialogueValidator
-Checks parser errors, empty dialogue and destination validity.
-
-### DialogueUI
-Presentation of speaker/text/options and user interaction.
-
-### DialogueUpdater
-Downloads dialogue content from the GitHub Contents API into `user://dialogues/`.
-
-### PNJ
-Movement/follow modes, interaction and dialogue file resolution.
-
-## Runtime flow
+La opción de usuario es:
 
 ```text
-Game startup
-  → persistent Player
-  → bienvenida
-  → dialogue synchronization
-  → aldea
-  → PNJ interaction
-  → DialogueManager
-  → DialogueUI
+Actualizar guiones al iniciar: Sí / No
 ```
 
-NPC dialogue resolution:
+Con `Sí`, antes de permitir entrar al mapa se consulta GitHub, se obtiene el `sha` de cada archivo y se compara con el manifest local. Sólo se descargan archivos nuevos o modificados.
+
+Los cambios se descargan temporalmente y se validan antes de activar la nueva colección. Si hay error o timeout, se conserva la caché anterior.
+
+El timeout global es configurable y vale `30.0` segundos por defecto.
+
+Con `No`, no se consulta GitHub y se utiliza la caché local.
+
+## Manifest
+
+El manifest representa los SHA de la colección realmente activa. Esto permite conservar archivos sin cambios, descargar sólo cambios y detectar archivos nuevos o eliminados.
+
+## Resolución
 
 ```text
-<map>_<npc>_<level>.txt
+<mapa>_<npc>_<nivel>.txt
         ↓
-<map>_<npc>.txt
+<mapa>_<npc>.txt
         ↓
 generico.txt
 ```
 
-## Persistence
+## Persistencia
 
 ```text
 user://save/status.txt
 ```
 
-Current fields include:
+XP determina el nivel y el inventario forma parte del estado persistente.
 
-```text
-xp=<integer>
-inventory=item1,item2,...
-```
+## Pendientes conocidos
 
-Level is derived from XP.
-
-## Architectural risks
-
-- Scene-tree lookups create coupling.
-- `DialogueManager` combines dialogue, inventory and persistence.
-- Automatic dialogue cycles are not currently detected.
-- Remote content introduces versioning/integrity concerns.
-
-See `DECISIONS.md` for rationale and `AUDIT.md` for risks.
+- fijar una referencia remota inmutable en lugar de `main`;
+- ampliar validación semántica;
+- detectar ciclos automáticos;
+- añadir tests automatizados;
+- reducir acoplamiento al `SceneTree`;
+- centralizar tablas de niveles.

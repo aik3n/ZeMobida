@@ -4,41 +4,73 @@ signal jugar
 
 @onready var panel_carga_escenas: Panel = $PanelCargaEscenas
 @onready var btn_aldea: Button = $PanelCargaEscenas/btn_Aldea
+@onready var chk_actualizar: CheckButton = $PanelCargaEscenas/chk_ActualizarGuiones
+@onready var lbl_estado_guiones: Label = $PanelCargaEscenas/lbl_EstadoGuiones
 
 
 func _ready() -> void:
 
-	panel_carga_escenas.process_mode = (
-		Node.PROCESS_MODE_DISABLED
+	panel_carga_escenas.process_mode = Node.PROCESS_MODE_DISABLED
+
+	chk_actualizar.button_pressed = DialogueUpdater.actualizar_guiones_al_iniciar
+	chk_actualizar.toggled.connect(
+		_on_actualizar_guiones_toggled
 	)
 
 	DialogueUpdater.guiones_disponibles_changed.connect(
 		_on_guiones_disponibles_changed
 	)
 
-	if DialogueUpdater.guiones_disponibles:
-		_habilitar_carga_escenas()
+	DialogueUpdater.sincronizacion_completada.connect(
+		_on_sincronizacion_completada
+	)
 
 	btn_aldea.pressed.connect(
 		_on_btn_aldea_pressed
 	)
 
+	_actualizar_estado_inicial()
+
+
+func _actualizar_estado_inicial() -> void:
+
+	if DialogueUpdater.sincronizando:
+		lbl_estado_guiones.text = "Comprobando guiones..."
+		return
+
+	if DialogueUpdater.guiones_disponibles:
+		_habilitar_carga_escenas()
+		lbl_estado_guiones.text = "Guiones disponibles."
+	else:
+		lbl_estado_guiones.text = "No hay guiones disponibles."
+
+
+func _on_actualizar_guiones_toggled(enabled: bool) -> void:
+	DialogueUpdater.set_actualizar_guiones_al_iniciar(enabled)
 
 
 func _on_guiones_disponibles_changed() -> void:
 
-	_habilitar_carga_escenas()
+	if DialogueUpdater.guiones_disponibles:
+		_habilitar_carga_escenas()
+		lbl_estado_guiones.text = "Guiones disponibles."
+	else:
+		panel_carga_escenas.process_mode = Node.PROCESS_MODE_DISABLED
+		lbl_estado_guiones.text = "No hay guiones disponibles."
 
+
+func _on_sincronizacion_completada() -> void:
+
+	if DialogueUpdater.guiones_disponibles:
+		lbl_estado_guiones.text = "Guiones disponibles."
+	else:
+		lbl_estado_guiones.text = "No hay guiones disponibles."
 
 
 func _habilitar_carga_escenas() -> void:
 
-	panel_carga_escenas.process_mode = (
-		Node.PROCESS_MODE_INHERIT
-	)
-
+	panel_carga_escenas.process_mode = Node.PROCESS_MODE_INHERIT
 
 
 func _on_btn_aldea_pressed() -> void:
-
 	jugar.emit()

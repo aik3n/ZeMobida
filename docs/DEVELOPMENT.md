@@ -1,80 +1,80 @@
 # ZeMobida — Development Guide
 
-**Baseline:** `12ea5386c03d53dd51dae26fd172775e281544f8`  
-**Godot:** 4.7
+**Estado:** sincronización de guiones validada en ejecución el 2026-08-29.  
+**Godot:** 4.7.
 
-## Principles
+## Reglas
 
-Prefer small, isolated changes that preserve existing responsibilities.
+- El código implementado es la fuente de verdad del comportamiento.
+- `guiones/` es contenido versionado.
+- `user://dialogues/` es la caché utilizada por runtime.
+- Una actualización fallida nunca debe destruir una caché válida.
 
-Before significant architectural changes:
+## Sincronización
 
-1. identify the existing responsibility;
-2. identify the limitation;
-3. propose the change;
-4. implement the smallest viable change;
-5. test existing behavior;
-6. update documentation/ADR;
-7. commit.
-
-## Main code areas
+Preferencia:
 
 ```text
-godot/scripts/game.gd
-godot/scripts/player.gd
-godot/scripts/pnj.gd
-godot/scripts/dialogue_manager.gd
-godot/scripts/dialogue_parser.gd
-godot/scripts/dialogue_validator.gd
-godot/scripts/dialogue_ui.gd
-godot/scripts/dialogue_updater.gd
+Actualizar guiones al iniciar: Sí / No
 ```
 
-Content lives in:
+Con `Sí`:
 
 ```text
-guiones/
+caché local
+   ↓
+GitHub
+   ↓
+SHA por archivo
+   ↓
+comparar manifest
+   ↓
+descargar sólo cambios
+   ↓
+validar
+   ↓
+activar
+   ↓
+entrar al mapa
 ```
 
-## Manual regression matrix
+Timeout global:
 
-### Startup
-- project opens;
-- bienvenida loads;
-- synchronization completes or fails safely;
-- map can be entered.
+```gdscript
+const SYNC_TIMEOUT_SECONDS: float = 30.0
+```
 
-### Player
-- spawn works;
-- movement works;
-- Player persists across map changes.
+Ante timeout, error de red, descarga o validación, se conserva la caché anterior.
 
-### Dialogue
-- interaction starts dialogue;
-- options work;
-- conditions work;
-- effects modify state;
-- leaving the interaction ends dialogue;
-- fallback works.
+Con `No`, no se contacta con GitHub.
 
-### Persistence
-- XP saves/loads;
-- inventory saves/loads;
-- level is recalculated.
+## Regla de actualización segura
 
-### Network failure
-- GitHub unavailable;
-- previous local content remains intact;
-- application remains usable.
+```text
+descargar → temporal → validar → activar
+```
 
-## Release checklist
+Nunca borrar la caché activa antes de saber que la nueva colección es válida.
 
-- replace prototype application name;
-- configure real Android package identifier;
-- configure signing;
-- enable/test Android Internet if online sync remains;
-- pin/version content source;
-- validate downloaded content before activation;
-- add parser/validator tests;
-- remove absolute local paths;
-- verify release builds.
+## Regresión recomendada
+
+Comprobar:
+- primera ejecución;
+- ejecución sin cambios;
+- archivo modificado;
+- archivo nuevo;
+- archivo eliminado;
+- GitHub inaccesible;
+- timeout;
+- contenido inválido;
+- caché conservada tras error;
+- `Actualizar = No` sin petición remota.
+
+## Desarrollo de guiones
+
+Antes de modificar `guiones/`:
+1. comprobar `DIALOGUE_FORMAT.md`;
+2. verificar destinos;
+3. verificar condiciones y efectos;
+4. evitar ciclos automáticos;
+5. comprobar continuidad narrativa.
