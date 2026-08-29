@@ -81,3 +81,47 @@ XP determina el nivel y el inventario forma parte del estado persistente.
 - añadir tests automatizados;
 - reducir acoplamiento al `SceneTree`;
 - centralizar tablas de niveles.
+
+
+## Selección dinámica de mapas
+
+La selección de mapas está integrada en `bienvenida.tscn` mediante una instancia de:
+
+```text
+escenas/carrusel_mapas.tscn
+```
+
+El carrusel descubre automáticamente las escenas `.tscn` directamente dentro de:
+
+```text
+res://mapas/
+```
+
+No existe una lista manual de mapas ni un sistema de bloqueo/desbloqueo. Todos los mapas descubiertos están disponibles para jugar.
+
+Para cada escena:
+
+```text
+aldea_ibon.tscn → aldea ibon
+```
+
+El nombre mostrado se obtiene eliminando `.tscn` y sustituyendo `_` por espacios. La ruta de la escena es la referencia interna del mapa.
+
+### Preview opcional
+
+Una escena de mapa puede incluir un nodo llamado `Preview`. Si es `Sprite2D` o `TextureRect` y tiene una textura, el carrusel utiliza esa textura como imagen de presentación.
+
+La ausencia de `Preview` no impide seleccionar ni jugar el mapa.
+
+### Último mapa jugado
+
+El carrusel guarda la ruta del mapa cuando el jugador pulsa `JUGAR` y la conserva en `user://settings.cfg`.
+
+Al iniciar la bienvenida:
+
+- si el último mapa todavía existe, queda seleccionado;
+- si ya no existe, se selecciona el primer mapa disponible.
+
+No se guarda el índice del carrusel, porque el orden puede cambiar cuando se añaden mapas.
+
+`Game` sigue siendo responsable de cargar la escena. El carrusel sólo comunica la ruta del mapa seleccionado.

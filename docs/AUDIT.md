@@ -55,3 +55,43 @@ Algunas partes dependen de nombres concretos y búsquedas dinámicas.
 La documentación actual refleja el comportamiento implementado, incluyendo sincronización por SHA, opción de usuario, timeout, validación previa y fallback a caché.
 
 El contenido de `guiones/` del repositorio es contenido versionado; `user://dialogues/` es la caché runtime.
+
+
+## Selección de mapas — implementación
+
+Se ha sustituido el botón específico de `aldea` por un carrusel instanciado en `bienvenida.tscn`.
+
+### Hechos verificados en código
+
+- `Game` ya no utiliza `ALDEA_SCENE`.
+- `bienvenida.gd` emite `jugar(mapa_path)`.
+- `Game.gd` recibe la ruta y carga la escena seleccionada.
+- `CarruselMapas` descubre `.tscn` directamente en `res://mapas/`.
+- Todos los mapas descubiertos son seleccionables.
+- El nombre visible deriva del nombre del archivo, quitando `.tscn` y reemplazando `_` por espacios.
+- `Preview` es opcional y puede ser `Sprite2D` o `TextureRect`.
+- El último mapa se guarda al pulsar `JUGAR`.
+- Si el último mapa ya no existe, se selecciona el primero disponible.
+- El desplazamiento puede realizarse con botones, teclado y gesto horizontal de ratón.
+
+### Inferencias
+
+La estructura `res://mapas/` permite incorporar nuevas escenas de mapa sin modificar el código del selector, siempre que sean `.tscn` directamente dentro de esa carpeta.
+
+### Pendiente de validación runtime
+
+La implementación debe probarse en Godot con los casos descritos en `DEVELOPMENT.md`. No se considera verificado por una mera revisión estática del código.
+
+### Riesgos conocidos
+
+**Medio — Descubrimiento limitado a una carpeta**
+
+Actualmente sólo se descubren `.tscn` directamente dentro de `res://mapas/`, no escenas en subcarpetas.
+
+**Recomendación:** mantenerlo así mientras el número de mapas sea manejable; ampliar recursivamente sólo si la organización futura lo requiere.
+
+**Bajo — Preview mediante instanciación temporal**
+
+Para obtener `Preview`, el selector carga e instancia temporalmente la escena del mapa. Esto funciona para el contrato actual, pero puede ser innecesario si los mapas futuros tienen inicialización pesada.
+
+**Recomendación:** si aparece ese problema, sustituirlo por lectura de metadatos o un recurso de preview dedicado.

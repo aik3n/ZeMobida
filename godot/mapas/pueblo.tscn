@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://beyvk1jtcv182"]
+
+[ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="1_5v2x2"]
+[ext_resource type="Texture2D" uid="uid://ddxmxgyyfy8mn" path="res://icon.svg" id="2_biny4"]
+[ext_resource type="Texture2D" uid="uid://bvcjaae4y8myn" path="res://art/preview/urrea.PNG" id="3_biny4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xw7ts"]
+size = Vector2(1699, 905)
+
+[node name="aldea" type="Node2D" unique_id=493802413]
+
+[node name="javi" parent="." unique_id=1491293733 instance=ExtResource("1_5v2x2")]
+position = Vector2(171, 116)
+nombre = "javi"
+sprite = ExtResource("2_biny4")
+tipo_seguimiento = 1
+
+[node name="charo" parent="." unique_id=1247965314 instance=ExtResource("1_5v2x2")]
+position = Vector2(102, 331)
+nombre = "samu"
+sprite = ExtResource("2_biny4")
+
+[node name="SpawnPlayer" type="Marker2D" parent="." unique_id=957641453]
+position = Vector2(567, 301)
+
+[node name="CameraBounds" type="Area2D" parent="." unique_id=319864449]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CameraBounds" unique_id=1758029404]
+position = Vector2(480.5, 118.5)
+shape = SubResource("RectangleShape2D_xw7ts")
+
+[node name="Preview" type="Sprite2D" parent="." unique_id=300975964]
+visible = false
+position = Vector2(-392, -130)
+texture = ExtResource("3_biny4")

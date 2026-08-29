@@ -1,0 +1,69 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/carrusel_mapas.gd" id="1"]
+
+[node name="CarruselMapas" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("1")
+
+[node name="Contenedor" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="BtnAnterior" type="Button" parent="Contenedor"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+text = "◀"
+focus_mode = 0
+
+[node name="Centro" type="VBoxContainer" parent="Contenedor"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="Preview" type="TextureRect" parent="Contenedor/Centro"]
+custom_minimum_size = Vector2(300, 170)
+layout_mode = 2
+size_flags_horizontal = 3
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+
+[node name="Nombre" type="Label" parent="Contenedor/Centro"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "mapa"
+horizontal_alignment = 1
+
+[node name="Indicadores" type="Label" parent="Contenedor/Centro"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "1 / 1"
+horizontal_alignment = 1
+
+[node name="Jugar" type="Button" parent="Contenedor/Centro"]
+custom_minimum_size = Vector2(180, 48)
+layout_mode = 2
+text = "JUGAR"
+
+[node name="BtnSiguiente" type="Button" parent="Contenedor"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+text = "▶"
+focus_mode = 0
+
+[connection signal="pressed" from="Contenedor/BtnAnterior" to="." method="_on_btn_anterior_pressed"]
+[connection signal="pressed" from="Contenedor/BtnSiguiente" to="." method="_on_btn_siguiente_pressed"]
+[connection signal="pressed" from="Contenedor/Centro/Jugar" to="." method="_on_jugar_pressed"]

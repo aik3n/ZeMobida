@@ -1,4 +1,6 @@
-[gd_scene format=3 uid="uid://diplle3q6f52e"]
+[gd_scene load_steps=3 format=3 uid="uid://diplle3q6f52e"]
+
+[ext_resource type="PackedScene" path="res://escenas/carrusel_mapas.tscn" id="2_carrusel"]
 
 [ext_resource type="Script" uid="uid://buic8l4pj5del" path="res://scripts/bienvenida.gd" id="1_hpq5i"]
 
@@ -24,28 +26,28 @@ layout_mode = 0
 offset_left = 193.0
 offset_top = 65.0
 offset_right = 652.0
-offset_bottom = 390.0
+offset_bottom = 500.0
 
-[node name="btn_Aldea" type="Button" parent="PanelCargaEscenas" unique_id=1387758120]
+
+[node name="CarruselMapas" parent="PanelCargaEscenas" instance=ExtResource("2_carrusel")]
 layout_mode = 0
-offset_left = 36.0
-offset_top = 39.0
-offset_right = 422.0
-offset_bottom = 99.0
-text = "Carga Aldea"
+offset_left = 20.0
+offset_top = 15.0
+offset_right = 439.0
+offset_bottom = 315.0
 
 [node name="chk_ActualizarGuiones" type="CheckButton" parent="PanelCargaEscenas"]
 layout_mode = 0
 offset_left = 36.0
-offset_top = 120.0
+offset_top = 330.0
 offset_right = 422.0
-offset_bottom = 158.0
+offset_bottom = 368.0
 text = "Actualizar guiones al iniciar"
 
 [node name="lbl_EstadoGuiones" type="Label" parent="PanelCargaEscenas"]
 layout_mode = 0
 offset_left = 36.0
-offset_top = 175.0
+offset_top = 385.0
 offset_right = 422.0
-offset_bottom = 210.0
+offset_bottom = 420.0
 text = "Comprobando guiones..."

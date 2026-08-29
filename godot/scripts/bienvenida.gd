@@ -1,9 +1,8 @@
 extends Control
 
-signal jugar
+signal jugar(mapa_path: String)
 
 @onready var panel_carga_escenas: Panel = $PanelCargaEscenas
-@onready var btn_aldea: Button = $PanelCargaEscenas/btn_Aldea
 @onready var chk_actualizar: CheckButton = $PanelCargaEscenas/chk_ActualizarGuiones
 @onready var lbl_estado_guiones: Label = $PanelCargaEscenas/lbl_EstadoGuiones
 
@@ -25,8 +24,8 @@ func _ready() -> void:
 		_on_sincronizacion_completada
 	)
 
-	btn_aldea.pressed.connect(
-		_on_btn_aldea_pressed
+	$PanelCargaEscenas/CarruselMapas.jugar.connect(
+		_on_carrusel_jugar
 	)
 
 	_actualizar_estado_inicial()
@@ -72,5 +71,5 @@ func _habilitar_carga_escenas() -> void:
 	panel_carga_escenas.process_mode = Node.PROCESS_MODE_INHERIT
 
 
-func _on_btn_aldea_pressed() -> void:
-	jugar.emit()
+func _on_carrusel_jugar(mapa_path: String) -> void:
+	jugar.emit(mapa_path)

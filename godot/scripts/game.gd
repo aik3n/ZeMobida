@@ -2,7 +2,6 @@ extends Node
 
 
 const BIENVENIDA_SCENE := "res://escenas/bienvenida.tscn"
-const ALDEA_SCENE := "res://escenas/aldea.tscn"
 
 
 @onready var scene_container: Node = $SceneContainer
@@ -124,7 +123,7 @@ func cargar_escena(
 	if instance.has_signal("jugar"):
 
 		instance.jugar.connect(
-			ir_a_aldea
+			ir_a_mapa
 		)
 
 
@@ -252,11 +251,9 @@ func _configurar_camera() -> void:
 
 
 
-func ir_a_aldea() -> void:
+func ir_a_mapa(mapa_path: String) -> void:
 
-	cargar_escena(
-		ALDEA_SCENE
-	)
+	cargar_escena(mapa_path)
 
 
 

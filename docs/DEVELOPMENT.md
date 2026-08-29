@@ -78,3 +78,65 @@ Antes de modificar `guiones/`:
 3. verificar condiciones y efectos;
 4. evitar ciclos automáticos;
 5. comprobar continuidad narrativa.
+
+
+## Selección de mapas
+
+La selección está implementada como la escena reutilizable:
+
+```text
+res://escenas/carrusel_mapas.tscn
+```
+
+y está instanciada dentro de `bienvenida.tscn`.
+
+El carrusel busca automáticamente archivos `.tscn` directamente en:
+
+```text
+res://mapas/
+```
+
+Para añadir un mapa al juego no es necesario modificar el selector:
+
+```text
+res://mapas/nuevo_mapa.tscn
+```
+
+aparecerá automáticamente.
+
+Todos los mapas descubiertos están disponibles; no existe lógica de desbloqueo.
+
+### Nombre visible
+
+Se toma el nombre del archivo:
+
+```text
+nuevo_mapa.tscn → nuevo mapa
+```
+
+### Preview
+
+La escena puede contener un nodo opcional `Preview`. Si el nodo es `Sprite2D` o `TextureRect` y tiene textura, ésta se muestra en el carrusel. Si no existe o no tiene textura, se muestra sólo el nombre.
+
+### Persistencia
+
+El último mapa se guarda al pulsar `JUGAR`, no al desplazarse por el carrusel. Se almacena como ruta de escena en `user://settings.cfg`.
+
+Al iniciar se intenta recuperar esa ruta. Si el archivo ya no existe, se selecciona el primer mapa disponible.
+
+### Regresión recomendada
+
+Además de las pruebas generales, comprobar:
+
+- un mapa;
+- varios mapas;
+- ordenación estable por nombre;
+- navegación con botones;
+- navegación con teclado;
+- desplazamiento horizontal con ratón;
+- mapa con `Preview`;
+- mapa sin `Preview`;
+- recordar último mapa tras reiniciar;
+- último mapa eliminado → primer mapa;
+- añadir un nuevo `.tscn` → aparece sin modificar el selector;
+- `JUGAR` → `Game` carga la escena seleccionada.

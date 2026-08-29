@@ -120,3 +120,37 @@ No se introduce una copia automática de `res://guiones/` como sustituto de la c
 ### Consequence
 
 La documentación debe distinguir entre contenido versionado y caché runtime.
+
+
+## ADR-015 — Dynamic map selection in the welcome screen
+**Status:** Accepted
+
+### Context
+
+La selección original de mapas estaba acoplada a un único botón para `aldea`. El juego debe poder incorporar nuevos mapas sin modificar la lógica del selector.
+
+No se contempla un sistema de bloqueo/desbloqueo: todos los mapas disponibles son jugables.
+
+### Decision
+
+- La selección se implementa como `res://escenas/carrusel_mapas.tscn`.
+- `bienvenida.tscn` instancia el carrusel.
+- El carrusel descubre automáticamente los `.tscn` directamente contenidos en `res://mapas/`.
+- Todos los mapas descubiertos están disponibles.
+- El nombre mostrado se obtiene del nombre del archivo, eliminando `.tscn` y sustituyendo `_` por espacios.
+- La imagen de presentación es opcional y se obtiene de un nodo `Preview` dentro de la escena del mapa, si es `Sprite2D` o `TextureRect` con textura.
+- El último mapa se guarda al pulsar `JUGAR` como ruta de escena en `user://settings.cfg`.
+- Al iniciar, se recupera ese mapa si sigue existiendo; si no, se selecciona el primero disponible.
+- `Game` sigue siendo responsable de cargar la escena; el carrusel sólo comunica la ruta seleccionada.
+
+### Consequences
+
+Añadir un mapa consiste en incorporar su `.tscn` a `res://mapas/`, sin modificar la lógica del selector.
+
+El orden del carrusel puede cambiar cuando se incorporan mapas. Por ello se persiste la ruta, no el índice.
+
+No existe metadata adicional obligatoria para que un mapa sea seleccionable.
+
+### Verification
+
+La implementación requiere prueba runtime en Godot. La revisión estática confirma el flujo y las responsabilidades descritas.
