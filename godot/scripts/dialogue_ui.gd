@@ -5,11 +5,11 @@ extends CanvasLayer
 @onready var panel_opciones: Panel = $PanelOpciones
 
 @onready var name_label: Label = $PanelTexto/NameLabel
-@onready var dialogue_text: Label = $PanelTexto/DialogueText
+@onready var dialogue_text: Label = $PanelTexto/ScrollTexto/DialogueText
 @onready var options_indicator: Label = $PanelTexto/OptionsIndicator
 
 @onready var options_container: VBoxContainer = (
-	$PanelOpciones/OptionsContainer
+	$PanelOpciones/ScrollOpciones/OptionsContainer
 )
 
 
@@ -53,6 +53,10 @@ func show_text(
 	name_label.text = speaker_name
 	dialogue_text.text = text
 
+	# Cada nodo nuevo comienza mostrando el inicio del texto.
+	var scroll_texto: ScrollContainer = $PanelTexto/ScrollTexto
+	scroll_texto.scroll_vertical = 0
+
 
 func show_options(options: Array) -> void:
 
@@ -77,7 +81,9 @@ func show_options(options: Array) -> void:
 		var button := Button.new()
 
 		button.text = option["text"]
+		button.custom_minimum_size = Vector2(0, 88)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.add_theme_font_size_override("font_size", 32)
 
 		options_container.add_child(button)
 

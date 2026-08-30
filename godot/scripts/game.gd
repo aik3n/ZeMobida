@@ -15,15 +15,15 @@ const BIENVENIDA_SCENE := "res://escenas/bienvenida.tscn"
 @onready var hud_barra_xp: ProgressBar = $UI/HUD/bar_Progreso
 
 # Panel de estado
-@onready var estado_panel: Panel = $UI/Estado/Panel
+@onready var estado_panel: Panel = $EstadoUI/Estado/Panel
 @onready var boton_estado: Button = $UI/BotonEstado
-@onready var boton_cerrar: Button = $UI/Estado/Panel/Cerrar
+@onready var boton_cerrar: Button = $EstadoUI/Estado/Panel/Cerrar
 
-@onready var estado_titulo: Label = $UI/Estado/Panel/Titulo
-@onready var estado_nivel: Label = $UI/Estado/Panel/Nivel
-@onready var estado_progreso: Label = $UI/Estado/Panel/Progreso
-@onready var estado_barra_xp: ProgressBar = $UI/Estado/Panel/BarraXP
-@onready var estado_inventario: Label = $UI/Estado/Panel/Scroll/Inventario
+@onready var estado_titulo: Label = $EstadoUI/Estado/Panel/Titulo
+@onready var estado_nivel: Label = $EstadoUI/Estado/Panel/Nivel
+@onready var estado_progreso: Label = $EstadoUI/Estado/Panel/Progreso
+@onready var estado_barra_xp: ProgressBar = $EstadoUI/Estado/Panel/BarraXP
+@onready var estado_inventario: Label = $EstadoUI/Estado/Panel/Scroll/Inventario
 
 
 var mapa_actual: Node = null
@@ -79,10 +79,17 @@ func cargar_escena(
 	scene_path: String
 ) -> void:
 
-	# Desactivar Player mientras no hay mapa cargado.
+	# Desactivar Player y su cámara mientras no hay mapa cargado.
 	player_actual.visible = false
 	player_actual.set_physics_process(false)
 	player_actual.set_process_unhandled_input(false)
+
+	var camera: Camera2D = player_actual.get_node_or_null(
+		"Camera2D"
+	)
+
+	if camera != null:
+		camera.enabled = false
 
 	for child in scene_container.get_children():
 		child.queue_free()

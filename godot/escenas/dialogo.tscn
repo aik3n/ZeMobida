@@ -2,58 +2,124 @@
 
 [ext_resource type="Script" uid="uid://bow6kmegnlxqm" path="res://scripts/dialogue_ui.gd" id="1_l0sow"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6v2ab"]
+[sub_resource type="StyleBoxFlat" id="StyleText"]
+bg_color = Color(0.025, 0.037, 0.058, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.22, 0.58, 0.72, 0.85)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+
+[sub_resource type="StyleBoxFlat" id="StyleOptions"]
+bg_color = Color(0.035, 0.05, 0.072, 0.97)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.48, 0.62, 0.8)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
 
 [node name="DialogueUI" type="CanvasLayer" unique_id=2027231516]
+layer = 10
 script = ExtResource("1_l0sow")
 
 [node name="PanelTexto" type="Panel" parent="." unique_id=1311012228]
-offset_left = 53.0
-offset_top = 75.0
-offset_right = 435.0
-offset_bottom = 177.0
-theme_override_styles/panel = SubResource("StyleBoxEmpty_6v2ab")
-
-[node name="NameLabel" type="Label" parent="PanelTexto" unique_id=1183654783]
-layout_mode = 0
-offset_left = 10.0
-offset_top = 4.0
-offset_right = 203.0
-offset_bottom = 27.0
-text = "kaixo"
-
-[node name="DialogueText" type="Label" parent="PanelTexto" unique_id=2064739650]
-layout_mode = 0
-offset_left = 10.0
-offset_top = 33.0
-offset_right = 50.0
-offset_bottom = 56.0
-text = "quedisecabesa"
-
-[node name="OptionsIndicator" type="Label" parent="PanelTexto" unique_id=782487588]
-layout_mode = 0
-offset_left = 345.0
-offset_top = 8.0
-offset_right = 368.0
-offset_bottom = 31.0
-text = "▼"
-horizontal_alignment = 1
-
-[node name="PanelOpciones" type="Panel" parent="." unique_id=534952449]
-offset_left = 52.0
-offset_top = 417.0
-offset_right = 339.0
-offset_bottom = 636.0
-
-[node name="OptionsContainer" type="VBoxContainer" parent="PanelOpciones" unique_id=499011989]
 layout_mode = 1
 anchors_preset = -1
-anchor_top = 0.065000005
-anchor_right = 0.615
-anchor_bottom = 0.5
-offset_left = 20.0
-offset_top = 5.7649984
-offset_right = 94.494995
-offset_bottom = 30.5
+anchor_left = 0.045
+anchor_top = 0.02
+anchor_right = 0.955
+anchor_bottom = 0.245
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleText")
+
+[node name="NameLabel" type="Label" parent="PanelTexto" unique_id=1183654783]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.04
+anchor_top = 0.035
+anchor_right = 0.76
+anchor_bottom = 0.235
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.55, 0.88, 0.94, 1)
+theme_override_font_sizes/font_size = 42
+text = "PNJ"
+vertical_alignment = 1
+
+[node name="OptionsIndicator" type="Label" parent="PanelTexto" unique_id=782487588]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.84
+anchor_top = 0.035
+anchor_right = 0.95
+anchor_bottom = 0.235
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.52, 0.87, 0.88, 1)
+theme_override_font_sizes/font_size = 44
+text = "▼"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScrollTexto" type="ScrollContainer" parent="PanelTexto"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.04
+anchor_top = 0.27
+anchor_right = 0.96
+anchor_bottom = 0.91
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="DialogueText" type="Label" parent="PanelTexto/ScrollTexto" unique_id=2064739650]
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.94, 0.96, 0.98, 1)
+theme_override_font_sizes/font_size = 34
+theme_override_constants/line_spacing = 7
+text = "Texto del diálogo"
+autowrap_mode = 2
+
+[node name="PanelOpciones" type="Panel" parent="." unique_id=534952449]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.045
+anchor_top = 0.72
+anchor_right = 0.955
+anchor_bottom = 0.965
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleOptions")
+
+[node name="ScrollOpciones" type="ScrollContainer" parent="PanelOpciones"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 28.0
+offset_right = -28.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="OptionsContainer" type="VBoxContainer" parent="PanelOpciones/ScrollOpciones" unique_id=499011989]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
 
 [connection signal="gui_input" from="PanelTexto" to="." method="_on_panel_texto_gui_input"]

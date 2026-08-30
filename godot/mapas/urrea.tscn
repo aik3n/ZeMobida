@@ -1,13 +1,17 @@
 [gd_scene format=3 uid="uid://cyevx4cmndhpk"]
 
 [ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="1_623nq"]
+[ext_resource type="Texture2D" uid="uid://bvcjaae4y8myn" path="res://art/preview/urrea.PNG" id="1_hbwb5"]
 [ext_resource type="Texture2D" uid="uid://ddxmxgyyfy8mn" path="res://icon.svg" id="2_hbwb5"]
-[ext_resource type="Texture2D" uid="uid://bvcjaae4y8myn" path="res://art/preview/urrea.PNG" id="3_623nq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xw7ts"]
 size = Vector2(1699, 905)
 
-[node name="aldea" type="Node2D" unique_id=493802413]
+[node name="urrea" type="Node2D" unique_id=493802413]
+
+[node name="Preview" type="Sprite2D" parent="." unique_id=1403445782]
+visible = false
+texture = ExtResource("1_hbwb5")
 
 [node name="juan" parent="." unique_id=1491293733 instance=ExtResource("1_623nq")]
 position = Vector2(171, 116)
@@ -45,8 +49,3 @@ position = Vector2(567, 301)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CameraBounds" unique_id=1758029404]
 position = Vector2(480.5, 118.5)
 shape = SubResource("RectangleShape2D_xw7ts")
-
-[node name="Preview" type="Sprite2D" parent="." unique_id=1403445782]
-visible = false
-position = Vector2(-392, -130)
-texture = ExtResource("3_623nq")

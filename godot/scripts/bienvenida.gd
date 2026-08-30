@@ -3,7 +3,7 @@ extends Control
 signal jugar(mapa_path: String)
 
 @onready var panel_carga_escenas: Panel = $PanelCargaEscenas
-@onready var chk_actualizar: CheckButton = $PanelCargaEscenas/chk_ActualizarGuiones
+@onready var chk_actualizar: Button = $PanelCargaEscenas/chk_ActualizarGuiones
 @onready var lbl_estado_guiones: Label = $PanelCargaEscenas/lbl_EstadoGuiones
 
 
@@ -12,6 +12,8 @@ func _ready() -> void:
 	panel_carga_escenas.process_mode = Node.PROCESS_MODE_DISABLED
 
 	chk_actualizar.button_pressed = DialogueUpdater.actualizar_guiones_al_iniciar
+	_actualizar_texto_check()
+
 	chk_actualizar.toggled.connect(
 		_on_actualizar_guiones_toggled
 	)
@@ -46,6 +48,15 @@ func _actualizar_estado_inicial() -> void:
 
 func _on_actualizar_guiones_toggled(enabled: bool) -> void:
 	DialogueUpdater.set_actualizar_guiones_al_iniciar(enabled)
+	_actualizar_texto_check()
+
+
+func _actualizar_texto_check() -> void:
+
+	if chk_actualizar.button_pressed:
+		chk_actualizar.text = "☑  Actualizar guiones al iniciar"
+	else:
+		chk_actualizar.text = "☐  Actualizar guiones al iniciar"
 
 
 func _on_guiones_disponibles_changed() -> void:
