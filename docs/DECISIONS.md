@@ -247,3 +247,84 @@ runtime
 ```
 
 `user://dialogues_manifest.json` sigue siendo metadato local de sincronización y `user://settings.cfg` mantiene la preferencia de actualización.
+
+
+## ADR-019 — Mapas ilustrados top-down como modelo visual principal
+**Status:** Accepted
+
+### Context
+
+Los mapas necesitan libertad artística y deben ser sencillos de producir por un equipo de arte. Construir todas las localizaciones mediante tiles limitaría la composición visual y obligaría a mantener un tileset como parte central del flujo de producción.
+
+### Decision
+
+Los mapas principales se diseñan como ilustraciones completas en perspectiva **top-down**.
+
+El contrato visual objetivo es:
+
+```text
+Fondo
+Colisiones
+actores dinámicos
+Frontal opcional
+SpawnPlayer
+Preview opcional
+```
+
+`Fondo` es un `Sprite2D` a escala `1:1`; un píxel de la ilustración corresponde a una unidad de mundo. Para facilitar coordenadas y colocación, el fondo se usa con `centered = false`.
+
+Cuando existe un nodo raíz llamado `Fondo` con textura, `Game` obtiene de él los límites de `Camera2D`. Los mapas antiguos pueden seguir usando `CameraBounds` como fallback.
+
+`Preview` es independiente de `Fondo`: el carrusel puede utilizar una miniatura específica sin cargar la imagen completa del mundo.
+
+Las colisiones y una posible capa `Frontal` se añaden en Godot encima de la ilustración según las necesidades jugables. No se impone `TileMap`.
+
+### Consequences
+
+El equipo de arte puede crear escenarios de cualquier tamaño o proporción sin adaptar el dibujo al viewport del teléfono.
+
+La escala visual del personaje, caminos, puertas y edificios debe fijarse a partir de un mapa piloto antes de producir muchas localizaciones.
+
+La primera prueba de este modelo utiliza `res://art/mapas/aldea.PNG`.
+
+### Verification
+
+El fondo real de `aldea` a escala `1:1` y los límites automáticos de cámara fueron validados manualmente en runtime el 2026-08-30.
+
+
+## ADR-020 — Tap para mover y arrastre para explorar
+**Status:** Accepted
+
+### Context
+
+En móvil, un toque sobre el mapa puede expresar dos intenciones distintas: ordenar al personaje que camine a un punto o desplazar la vista para inspeccionar una zona.
+
+Mover al Player inmediatamente al presionar impide distinguir ambas acciones.
+
+### Decision
+
+El gesto se interpreta al soltar:
+
+- toque sin superar el umbral → mover Player al punto de mundo tocado;
+- arrastre de al menos `28 px` → desplazar la cámara y no mover Player;
+- al terminar un arrastre → mantener la cámara en la posición explorada;
+- nuevo tap → calcular el destino con la cámara desplazada y recentrar después;
+- recentrado → `Tween` cúbico `EASE_OUT` de `0.38 s`;
+- teclado/mando → volver inmediatamente al seguimiento normal.
+
+Mientras se determina si el gesto es tap o arrastre, el Player permanece quieto.
+
+El desplazamiento manual de cámara se limita a los límites activos del mapa.
+
+### Consequences
+
+Explorar el escenario no provoca movimientos accidentales y el jugador puede observar zonas alejadas antes de decidir adónde caminar.
+
+El recentrado suave evita el salto visual que producía volver instantáneamente a `Camera2D.position = Vector2.ZERO`.
+
+Los eventos equivalentes de ratón se mantienen para pruebas de escritorio.
+
+### Verification
+
+El flujo tap/arrastre, permanencia de cámara, cálculo de destino con cámara desplazada y recentrado suave fueron validados manualmente en runtime el 2026-08-30.
+

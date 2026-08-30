@@ -2,12 +2,18 @@
 
 [ext_resource type="Texture2D" uid="uid://di4y2fkshmt31" path="res://art/preview/aldea.PNG" id="1_sru6s"]
 [ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="2_jns4i"]
+[ext_resource type="Texture2D" path="res://art/mapas/aldea.PNG" id="3_fondo"]
 [ext_resource type="Texture2D" uid="uid://ddxmxgyyfy8mn" path="res://icon.svg" id="4_87o4k"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xw7ts"]
 size = Vector2(1699, 905)
 
 [node name="aldea2" type="Node2D" unique_id=493802413]
+
+[node name="Fondo" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("3_fondo")
+centered = false
 
 [node name="Preview" type="Sprite2D" parent="." unique_id=1760231233]
 visible = false

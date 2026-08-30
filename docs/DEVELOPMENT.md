@@ -1,6 +1,6 @@
 # ZeMobida — Development Guide
 
-**Estado:** sincronización de guiones validada en ejecución el 2026-08-29. El subsistema de diálogo y su interacción de opciones también fueron validados en runtime tras la revisión final.  
+**Estado:** subsistemas de guiones y diálogo validados; maquetación, mapa piloto ilustrado y control táctil de cámara revisados en runtime hasta el 2026-08-30.  
 **Godot:** 4.7.
 
 ## Reglas
@@ -143,6 +143,155 @@ Además de las pruebas generales, comprobar:
 - último mapa eliminado → primer mapa;
 - añadir un nuevo `.tscn` → aparece sin modificar el selector;
 - `JUGAR` → `Game` carga la escena seleccionada.
+
+
+## Creación de mapas top-down
+
+La dirección artística vigente es:
+
+```text
+imagen de fondo + colisiones + elementos dinámicos encima
+```
+
+No se exige `TileMap`. El objetivo es que el equipo de arte pueda diseñar cada localización como una ilustración completa con libertad de composición.
+
+### Fondo
+
+Un mapa ilustrado puede incluir en su raíz:
+
+```text
+Fondo (Sprite2D)
+```
+
+Reglas:
+
+- textura de la ilustración completa;
+- escala `1:1`;
+- `centered = false`;
+- no redimensionar el fondo desde Godot para adaptar el mapa al teléfono.
+
+El viewport y el tamaño del mapa son conceptos distintos. El viewport lógico actual es `1080 × 1920`; una ilustración puede ser mayor, menor o tener otra proporción.
+
+El mapa piloto es `aldea` y utiliza:
+
+```text
+res://art/mapas/aldea.PNG
+```
+
+`Game` obtiene automáticamente los límites de cámara desde el rectángulo transformado de `Fondo`. Si un mapa no incluye este nodo, se mantiene el sistema anterior basado en `CameraBounds`.
+
+### Preview del carrusel
+
+La imagen de carrusel es independiente del fondo jugable.
+
+Por ejemplo, `aldea` puede utilizar:
+
+```text
+Fondo   → res://art/mapas/aldea.PNG
+Preview → res://art/preview/aldea.PNG
+```
+
+Esto evita usar una imagen grande del mundo como miniatura.
+
+### Colisiones
+
+Las colisiones se dibujarán en Godot encima de la ilustración.
+
+Reglas prácticas:
+
+- bloquear sólo el espacio que realmente debe impedir el paso;
+- pensar en la posición de los pies del personaje;
+- no perseguir el contorno exacto de cada píxel;
+- agrupar la geometría por zonas comprensibles cuando ayude al mantenimiento.
+
+La incorporación de colisiones al mapa piloto es el siguiente paso del modelo visual.
+
+### Frontal
+
+Los elementos que deban ocultar parcialmente a Player o PNJ pueden suministrarse en una capa gráfica adicional `Frontal`.
+
+Ejemplos:
+
+- copas de árboles;
+- tejados;
+- arcos;
+- elementos altos de primer plano.
+
+`Frontal` es opcional y se añadirá cuando el arte del mapa lo necesite.
+
+
+## Control táctil del mapa
+
+El control vigente de Player y cámara está orientado a móvil.
+
+### Tap
+
+Un toque no ordena movimiento al presionar.
+
+```text
+presionar → esperar intención
+soltar sin arrastrar → mover Player
+```
+
+El destino se calcula en coordenadas de mundo en el momento de soltar.
+
+### Arrastre
+
+Si el puntero recorre al menos:
+
+```gdscript
+const DRAG_THRESHOLD := 28.0
+```
+
+el gesto pasa a exploración.
+
+Durante el arrastre:
+
+- no se ordena movimiento al Player;
+- el mapa sigue visualmente el dedo;
+- la cámara queda limitada al área válida del mapa.
+
+Al soltar, la cámara permanece en la posición explorada.
+
+### Volver al jugador
+
+Al hacer un nuevo tap después de explorar:
+
+1. se calcula el destino usando la cámara todavía desplazada;
+2. el Player comienza a caminar hacia ese destino;
+3. la cámara vuelve a `Vector2.ZERO` suavemente.
+
+El recentrado actual usa:
+
+```gdscript
+const CAMERA_RECENTER_TIME := 0.38
+```
+
+con `Tween.TRANS_CUBIC` y `Tween.EASE_OUT`.
+
+Un nuevo gesto cancela el Tween en curso para mantener respuesta directa.
+
+Teclado o mando restablecen inmediatamente la posición normal de la cámara.
+
+### Ratón
+
+El mismo flujo se admite con botón izquierdo y movimiento de ratón para poder probar en escritorio. Los eventos de ratón generados por un dispositivo táctil se ignoran cuando ya se está procesando un toque.
+
+### Regresión recomendada
+
+Comprobar:
+
+- tap sin desplazamiento → Player se mueve al soltar;
+- mantener pulsado → Player no se mueve;
+- desplazamiento menor que el umbral → sigue siendo tap;
+- desplazamiento mayor que el umbral → sólo mueve cámara;
+- soltar arrastre → cámara permanece desplazada;
+- tap con cámara desplazada → destino correcto;
+- recentrado suave sin salto;
+- iniciar otro gesto durante el recentrado → se cancela correctamente;
+- no poder desplazar la cámara fuera de los límites;
+- teclado/mando → cámara vuelve al seguimiento normal;
+- interacción con UI → no debe generar un movimiento no manejado del Player.
 
 ### Responsabilidad de validación
 

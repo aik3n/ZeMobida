@@ -17,5 +17,5 @@ texture = ExtResource("1_esbpa")
 shape = SubResource("CircleShape2D_4kxuq")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=460678938]
-drag_horizontal_enabled = true
-drag_vertical_enabled = true
+drag_horizontal_enabled = false
+drag_vertical_enabled = false

@@ -89,6 +89,7 @@ func cargar_escena(
 	)
 
 	if camera != null:
+		camera.position = Vector2.ZERO
 		camera.enabled = false
 
 	for child in scene_container.get_children():
@@ -189,6 +190,12 @@ func _configurar_camera() -> void:
 
 		return
 
+	# Los mapas ilustrados pueden definir sus límites directamente con
+	# un Sprite2D llamado Fondo. Su textura se usa a escala 1:1.
+	if _configurar_limites_desde_fondo(camera):
+		camera.enabled = true
+		return
+
 	var camera_bounds: Area2D = mapa_actual.get_node_or_null(
 		"CameraBounds"
 	)
@@ -255,6 +262,50 @@ func _configurar_camera() -> void:
 	)
 
 	camera.enabled = true
+
+
+
+func _configurar_limites_desde_fondo(camera: Camera2D) -> bool:
+	var fondo_node := mapa_actual.get_node_or_null("Fondo")
+
+	if not fondo_node is Sprite2D:
+		return false
+
+	var fondo := fondo_node as Sprite2D
+
+	if fondo.texture == null:
+		return false
+
+	var local_rect := fondo.get_rect()
+	var corners: Array[Vector2] = [
+		fondo.to_global(local_rect.position),
+		fondo.to_global(
+			Vector2(local_rect.end.x, local_rect.position.y)
+		),
+		fondo.to_global(local_rect.end),
+		fondo.to_global(
+			Vector2(local_rect.position.x, local_rect.end.y)
+		)
+	]
+
+	var min_x := corners[0].x
+	var max_x := corners[0].x
+	var min_y := corners[0].y
+	var max_y := corners[0].y
+
+	for point in corners:
+		min_x = minf(min_x, point.x)
+		max_x = maxf(max_x, point.x)
+		min_y = minf(min_y, point.y)
+		max_y = maxf(max_y, point.y)
+
+	camera.limit_left = int(floor(min_x))
+	camera.limit_right = int(ceil(max_x))
+	camera.limit_top = int(floor(min_y))
+	camera.limit_bottom = int(ceil(max_y))
+	camera.position = Vector2.ZERO
+
+	return true
 
 
 

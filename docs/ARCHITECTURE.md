@@ -1,6 +1,6 @@
 # ZeMobida — Architecture
 
-**Estado:** implementación actual validada en ejecución el 2026-08-29.  
+**Estado:** implementación funcional revisada hasta el 2026-08-30. La maquetación, el mapa piloto ilustrado y el control de cámara fueron validados manualmente en runtime.  
 **Godot:** 4.7.
 
 ## Modelo
@@ -8,12 +8,17 @@
 ```text
 Game
 ├── Player persistente
-├── HUD / estado
-├── DialogueUI
+│   └── Camera2D
+├── UI global
+│   ├── HUD               CanvasLayer 5
+│   └── Estado            CanvasLayer 20
+├── DialogueUI            CanvasLayer 10
 └── mapa actual
+    ├── Fondo             Sprite2D, opcional pero preferido
+    ├── Preview           opcional, independiente del Fondo
     ├── PNJ
     ├── SpawnPlayer
-    └── CameraBounds
+    └── CameraBounds      fallback para mapas sin Fondo
 
 DialogueManager (autoload)
 ├── parser
@@ -82,6 +87,98 @@ Las secciones tienen responsabilidades separadas:
 ```
 
 `DialogueManager` mantiene la persistencia de XP e inventario, pero comparte el archivo con las preferencias del updater y el último mapa. El manifest de guiones sigue siendo un archivo independiente porque representa metadatos de sincronización, no configuración ni estado de partida.
+
+
+## Modelo visual de mapas top-down
+
+La dirección visual aprobada para los mapas es **top-down con ilustración completa de fondo**, no un `TileMap` obligatorio.
+
+El contrato artístico objetivo es:
+
+```text
+mapa
+├── Fondo
+├── Colisiones
+├── actores dinámicos
+├── Frontal            opcional
+├── SpawnPlayer
+└── Preview            opcional
+```
+
+`Fondo` es un `Sprite2D` que contiene la ilustración principal. Para el mapa piloto `aldea` se utiliza:
+
+```text
+res://art/mapas/aldea.PNG
+```
+
+La imagen se utiliza a escala `1:1`: un píxel de la ilustración corresponde a una unidad de mundo. El `Sprite2D` se configura con `centered = false`, por lo que la esquina superior izquierda del dibujo coincide con el origen visual del mapa.
+
+El tamaño del mapa es independiente del viewport `1080 × 1920`. La cámara muestra sólo una región del mundo.
+
+### Límites de cámara
+
+`Game` intenta primero obtener los límites de cámara a partir de un nodo `Sprite2D` llamado `Fondo`.
+
+Si existe y tiene textura, se utiliza su rectángulo transformado como límites de `Camera2D`. Esto permite que el tamaño de la ilustración defina automáticamente el área explorable visualmente.
+
+Los mapas que todavía no tengan `Fondo` conservan el contrato anterior:
+
+```text
+CameraBounds
+└── CollisionShape2D
+    └── RectangleShape2D
+```
+
+`CameraBounds` es por tanto un mecanismo de compatibilidad para los mapas existentes, no un requisito de los nuevos mapas ilustrados.
+
+### Preview
+
+`Preview` y `Fondo` tienen responsabilidades distintas:
+
+- `Fondo`: imagen recorrida por el jugador;
+- `Preview`: imagen mostrada en el carrusel.
+
+El carrusel no necesita cargar la ilustración completa como preview.
+
+### Colisiones y capa frontal
+
+La arquitectura acordada contempla dos capas que todavía se incorporarán progresivamente al mapa piloto:
+
+- `Colisiones`: geometría jugable trazada en Godot sobre la ilustración;
+- `Frontal`: elementos visuales opcionales que deben tapar al jugador o a los PNJ cuando pasan por detrás.
+
+Las colisiones deben representar el espacio realmente transitable, especialmente la zona de los pies del personaje, y no reproducir necesariamente el contorno exacto de cada elemento dibujado.
+
+
+## Control táctil y exploración de cámara
+
+El control móvil distingue entre intención de movimiento e intención de exploración.
+
+```text
+tocar y soltar       → mover Player al punto tocado
+arrastrar            → desplazar la cámara
+soltar tras arrastre → mantener la cámara desplazada
+nuevo tap            → mover Player y recentrar cámara suavemente
+teclado/mando        → seguimiento normal del Player
+```
+
+El movimiento por tap comienza **al soltar**, no al presionar. Mientras se decide si el gesto es un tap o un arrastre, el Player permanece quieto.
+
+El umbral actual para considerar el gesto un arrastre es:
+
+```text
+28 px
+```
+
+Durante un arrastre la cámara se desplaza en sentido inverso al movimiento de la propia cámara para que el contenido visual siga al dedo. El desplazamiento se limita a los límites activos del mapa.
+
+Después de explorar, un nuevo tap calcula primero la posición de mundo correspondiente al punto tocado y después recentra la cámara. El recentrado utiliza un `Tween` cúbico `EASE_OUT` de:
+
+```text
+0.38 s
+```
+
+Así se evita un salto brusco al volver al seguimiento del jugador.
 
 
 ## Pendientes conocidos
