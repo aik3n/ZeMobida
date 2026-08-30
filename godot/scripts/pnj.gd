@@ -172,7 +172,7 @@ func get_map_name() -> String:
 	return scene_path.get_file().get_basename()
 
 
-func get_dialogue_file() -> String:
+func get_dialogue_path() -> String:
 
 	var map_name := get_map_name()
 
@@ -202,45 +202,20 @@ func get_dialogue_file() -> String:
 
 		return ""
 
-	var base_name := "%s_%s" % [
+	var dialogue_path := DialogueManager.resolve_dialogue_path(
 		map_name,
-		nombre
-	]
-
-	# Primero busca el diálogo específico del nivel.
-	var level_file := "%s_%s.txt" % [
-		base_name,
-		player_node.nivel
-	]
-
-	if FileAccess.file_exists(
-		"user://dialogues/" + level_file
-	):
-
-		return level_file
-
-	# Después busca el diálogo específico del NPC.
-	var generic_file := "%s.txt" % base_name
-
-	if FileAccess.file_exists(
-		"user://dialogues/" + generic_file
-	):
-
-		return generic_file
-
-	# Finalmente busca el diálogo genérico.
-	if FileAccess.file_exists(
-		"user://dialogues/generico.txt"
-	):
-
-		return "generico.txt"
-
-	push_error(
-		"No existe diálogo para: "
-		+ base_name
+		nombre,
+		str(player_node.nivel)
 	)
 
-	return ""
+	if dialogue_path.is_empty():
+
+		push_error(
+			"No existe diálogo para: %s_%s"
+			% [map_name, nombre]
+		)
+
+	return dialogue_path
 
 
 func _on_interaction_area_body_entered(body: Node) -> void:
@@ -251,16 +226,19 @@ func _on_interaction_area_body_entered(body: Node) -> void:
 
 	player_nearby = true
 
-	if not DialogueManager.dialogue_active:
+	if (
+		not DialogueManager.dialogue_active
+		and not DialogueManager.editor_active
+	):
 
-		var dialogue_file := get_dialogue_file()
+		var dialogue_path := get_dialogue_path()
 
-		if dialogue_file.is_empty():
+		if dialogue_path.is_empty():
 
 			return
 
 		DialogueManager.start_dialogue(
-			"user://dialogues/" + dialogue_file,
+			dialogue_path,
 			nombre
 		)
 

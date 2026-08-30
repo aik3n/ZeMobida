@@ -1,14 +1,16 @@
 # ZeMobida — Development Guide
 
-**Estado:** subsistemas de guiones y diálogo validados; maquetación, mapa piloto ilustrado y control táctil de cámara revisados en runtime hasta el 2026-08-30.  
+**Estado:** subsistemas de guiones y diálogo validados; maquetación, mapa piloto ilustrado, control táctil, feedback del Player y creador local de guiones revisados en runtime hasta el 2026-08-30.  
 **Godot:** 4.7.
 
 ## Reglas
 
 - El código implementado es la fuente de verdad del comportamiento.
 - Los guiones se versionan en el repositorio independiente `aik3n/ZeMobida_guiones`.
-- `user://dialogues/` es la caché utilizada por runtime.
-- Una actualización fallida nunca debe destruir una caché válida.
+- `user://dialogues/` es la caché oficial sincronizada utilizada por runtime.
+- `user://custom_dialogues/` contiene únicamente guiones locales del jugador.
+- `DialogueUpdater` nunca debe modificar `user://custom_dialogues/`.
+- Una actualización fallida nunca debe destruir una caché oficial válida.
 
 ## Sincronización
 
@@ -31,7 +33,7 @@ comparar manifest
    ↓
 descargar sólo cambios
    ↓
-validar
+comprobar conjunto descargado
    ↓
 activar
    ↓
@@ -78,6 +80,132 @@ Antes de modificar los `.txt` de `aik3n/ZeMobida_guiones`:
 3. verificar condiciones y efectos;
 4. evitar ciclos automáticos;
 5. comprobar continuidad narrativa.
+
+
+## Creador local de guiones
+
+El creador reutiliza el mismo formato `.txt` que los guiones oficiales. No existe un segundo formato ni una fase especial de exportación.
+
+### Archivo editable
+
+El jugador sólo puede editar:
+
+```text
+<mapa>_<pnj>_<nivel>.txt
+```
+
+Los fallbacks:
+
+```text
+<mapa>_<pnj>.txt
+generico.txt
+```
+
+son oficiales y no se editan desde el juego.
+
+### Prioridad runtime
+
+La resolución es:
+
+```text
+local exacto
+→ oficial exacto
+→ oficial PNJ
+→ oficial genérico
+```
+
+Por ejemplo:
+
+```text
+user://custom_dialogues/aldea_ibon_a1.txt
+```
+
+sustituye localmente sólo a:
+
+```text
+user://dialogues/aldea_ibon_a1.txt
+```
+
+No sustituye a otros niveles ni modifica el archivo oficial.
+
+### Flujo de edición
+
+El botón `EDITAR` aparece junto al nombre del PNJ durante el diálogo.
+
+```text
+EDITAR
+  ↓
+¿existe local exacto?
+  sí → cargar local
+  no
+  ↓
+¿existe oficial exacto?
+  sí → cargar su contenido como copia de trabajo
+  no → cargar boceto
+```
+
+La copia local sólo existe después de un guardado correcto.
+
+El editor utiliza `CodeEdit` y sólo expone:
+
+```text
+GUARDAR
+CERRAR
+```
+
+`GUARDAR` escribe el `.txt` en `user://custom_dialogues/` y cierra inmediatamente después de una escritura correcta. Si no puede crear la carpeta o abrir el archivo para escritura, no cierra el editor.
+
+`CERRAR` no guarda cambios pendientes.
+
+### Highlight
+
+`res://scripts/dialogue_syntax_highlighter.gd` colorea el lenguaje de forma visual:
+
+```text
+' comentario → verde
+# nodo       → violeta
+= opción     → azul
+? condición  → amarillo
+> salto      → cyan
+[efectos]    → naranja
+```
+
+El resaltado no altera el contenido ni sustituye al parser.
+
+### Validación
+
+**Guardar no valida el guion.**
+
+El flujo es deliberadamente:
+
+```text
+editar
+→ guardar
+→ volver al juego
+→ interactuar con el PNJ
+→ DialogueParser
+→ DialogueValidator
+```
+
+Por tanto, el propio flujo normal del juego sirve para probar y validar el guion. Si el archivo local es inválido, se aplica el mismo comportamiento de error que para un oficial inválido.
+
+### Regresión recomendada
+
+Comprobar:
+
+- oficial exacto sin local → se usa el oficial;
+- local exacto + oficial exacto → se usa el local;
+- borrar el local → vuelve a usarse el oficial;
+- no existe exacto local/oficial → se mantienen los fallbacks oficiales;
+- `EDITAR` sobre oficial exacto → carga exactamente su contenido;
+- `EDITAR` sin exacto oficial → muestra el boceto;
+- abrir oficial exacto y cerrar sin guardar → no crea archivo local;
+- modificar y pulsar `CERRAR` → cambios descartados;
+- `GUARDAR` → escribe local y cierra;
+- siguiente interacción → usa la versión local guardada;
+- reabrir `EDITAR` → muestra la versión local;
+- guion local inválido → runtime lo detecta al cargarlo;
+- comentarios, nodos, opciones, condiciones, saltos y efectos → colores diferenciados.
 
 
 ## Selección de mapas

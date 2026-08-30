@@ -46,7 +46,7 @@ layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.04
 anchor_top = 0.035
-anchor_right = 0.76
+anchor_right = 0.62
 anchor_bottom = 0.235
 grow_horizontal = 2
 grow_vertical = 2
@@ -54,6 +54,19 @@ theme_override_colors/font_color = Color(0.55, 0.88, 0.94, 1)
 theme_override_font_sizes/font_size = 42
 text = "PNJ"
 vertical_alignment = 1
+
+[node name="EditButton" type="Button" parent="PanelTexto"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.64
+anchor_top = 0.035
+anchor_right = 0.82
+anchor_bottom = 0.235
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 24
+text = "EDITAR"
 
 [node name="OptionsIndicator" type="Label" parent="PanelTexto" unique_id=782487588]
 layout_mode = 1
@@ -123,3 +136,6 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 16
 
 [connection signal="gui_input" from="PanelTexto" to="." method="_on_panel_texto_gui_input"]
+
+[connection signal="pressed" from="PanelTexto/EditButton" to="." method="_on_edit_button_pressed"]
+

@@ -1,6 +1,6 @@
-# Prototipo de UI, mapas y control táctil
+# Prototipo de UI, mapas, control táctil y creador de guiones
 
-**Estado:** maquetación funcional y flujo del mapa piloto validados manualmente en runtime el 2026-08-30.
+**Estado:** maquetación funcional, flujo del mapa piloto y creador local de guiones revisados manualmente en runtime el 2026-08-30.
 
 La sincronización de guiones y el descubrimiento de mapas exportados ya fueron validados previamente en dispositivo Android. El nuevo fondo ilustrado y el control tap/arrastre deben mantenerse dentro de la regresión Android antes de una release.
 
@@ -23,6 +23,7 @@ HUD / UI normal → CanvasLayer 5
 Diálogo         → CanvasLayer 10
 Feedback Player → CanvasLayer 15
 Estado          → CanvasLayer 20
+Editor guiones  → CanvasLayer 30
 ```
 
 Por ello, abrir Estado durante un diálogo deja la ventana de Estado por encima sin modificar capas dinámicamente.
@@ -35,6 +36,58 @@ Por ello, abrir Estado durante un diálogo deja la ventana de Estado por encima 
 - panel de opciones en la parte inferior;
 - opciones con scroll propio;
 - zona central libre para mantener visible el mapa.
+
+
+## Edición de guiones durante el diálogo
+
+El panel superior del diálogo incorpora `EDITAR` junto al nombre del PNJ.
+
+```text
+IBON                         [EDITAR]
+Hola, aventurero...
+```
+
+El botón siempre representa el archivo específico del contexto actual:
+
+```text
+<mapa>_<pnj>_<nivel>.txt
+```
+
+Al pulsarlo, el diálogo se cierra y se abre `DialogueEditor` por encima del resto de UI.
+
+### Editor
+
+El editor ocupa prácticamente toda la pantalla y utiliza `CodeEdit`.
+
+```text
+aldea_ibon_a1.txt
+
+┌────────────────────────────┐
+│ # INICIO                   │
+│ Hola.                      │
+│                            │
+│ = Salir > FINAL            │
+└────────────────────────────┘
+
+[ GUARDAR ]      [ CERRAR ]
+```
+
+No existen botones de validar, probar o insertar sintaxis.
+
+El highlight actual diferencia:
+
+```text
+' comentario → verde
+# nodo       → violeta
+= opción     → azul
+? condición  → amarillo
+> salto      → cyan
+[efectos]    → naranja
+```
+
+`GUARDAR` escribe el guion local y cierra. `CERRAR` sale sin guardar cambios pendientes. Si la escritura falla, `GUARDAR` no cierra.
+
+La prueba del contenido ocurre al volver al mapa e interactuar de nuevo con el PNJ.
 
 ## Pantalla inicial
 

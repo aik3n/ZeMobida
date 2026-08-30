@@ -453,3 +453,67 @@ La carga inicial de estado persistido no se trata como una ganancia o pérdida y
 
 XP positiva/negativa, objetos añadidos/eliminados, ausencia de feedback sin cambio real, solapamiento de mensajes y colas positiva/negativa independientes fueron validados manualmente en runtime el 2026-08-30.
 
+
+## ADR-024 — Guiones locales editables con prioridad por archivo exacto
+**Status:** Accepted
+
+### Context
+
+Los guiones oficiales se sincronizan desde GitHub hacia `user://dialogues/`. Se quiere permitir que el jugador modifique o cree una variante de diálogo sin alterar la caché oficial, sin introducir todavía un sistema de publicación, cuentas o backend.
+
+El objetivo es mantener el creador lo más pequeño posible y reutilizar el formato, parser y validator existentes.
+
+### Decision
+
+Se introduce una segunda fuente local:
+
+```text
+oficial → user://dialogues/
+local   → user://custom_dialogues/
+```
+
+El jugador sólo puede editar el archivo específico:
+
+```text
+<mapa>_<pnj>_<nivel>.txt
+```
+
+La prioridad se aplica archivo por archivo:
+
+```text
+1. local <mapa>_<pnj>_<nivel>.txt
+2. oficial <mapa>_<pnj>_<nivel>.txt
+3. oficial <mapa>_<pnj>.txt
+4. oficial generico.txt
+```
+
+Los fallbacks oficiales no son editables.
+
+`EDITAR`, situado junto al nombre del PNJ, abre:
+
+- la versión local exacta si existe;
+- en caso contrario, el contenido de la versión oficial exacta como copia de trabajo;
+- en ausencia de ambas, un boceto básico.
+
+Abrir una copia de trabajo no crea todavía un archivo local.
+
+El editor usa `CodeEdit` con resaltado visual del formato. Sólo contiene `GUARDAR` y `CERRAR`.
+
+`GUARDAR` escribe en `user://custom_dialogues/` y cierra únicamente después de una escritura correcta. `CERRAR` descarta los cambios no guardados.
+
+Guardar no ejecuta `DialogueParser` ni `DialogueValidator`. La validación se mantiene en el runtime normal cuando el jugador vuelve a interactuar con el PNJ.
+
+### Consequences
+
+Los guiones oficiales y locales pueden coexistir sin mezclarse ni ser destruidos por una sincronización.
+
+Un guion local sustituye sólo a su equivalente exacto, por lo que no altera otros niveles ni los fallbacks genéricos.
+
+El jugador puede probar inmediatamente sus cambios usando la interacción normal del juego, sin un modo de prueba adicional.
+
+La sintaxis continúa teniendo una única fuente de verdad: el parser y validator existentes.
+
+### Verification
+
+Prioridad local, edición de una copia oficial, creación desde boceto, guardado/cierre y resaltado de sintaxis fueron revisados manualmente en runtime el 2026-08-30.
+

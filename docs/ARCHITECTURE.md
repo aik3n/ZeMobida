@@ -1,6 +1,6 @@
 # ZeMobida — Architecture
 
-**Estado:** implementación funcional revisada hasta el 2026-08-30. La maquetación, el mapa piloto ilustrado y el control de cámara fueron validados manualmente en runtime.  
+**Estado:** implementación funcional revisada hasta el 2026-08-30. La maquetación, el mapa piloto ilustrado, el control de cámara, el feedback del Player y el creador local de guiones fueron revisados manualmente en runtime.  
 **Godot:** 4.7.
 
 ## Modelo
@@ -14,6 +14,7 @@ Game
 │   ├── HUD               CanvasLayer 5
 │   └── Estado            CanvasLayer 20
 ├── DialogueUI            CanvasLayer 10
+├── DialogueEditor        CanvasLayer 30
 └── mapa actual
     ├── Fondo             Sprite2D, opcional pero preferido
     ├── Colisiones        StaticBody2D + shapes/polígonos
@@ -27,6 +28,8 @@ DialogueManager (autoload)
 ├── parser
 ├── validator
 ├── runtime de diálogo
+├── resolución oficial/local
+├── editor de diálogo local
 ├── inventario
 └── persistencia
 
@@ -41,10 +44,11 @@ Al cargar un mapa, `Game` coloca el Player en `SpawnPlayer` y sincroniza tambié
 
 ## Contenido
 
-- `aik3n/ZeMobida_guiones`: repositorio independiente que contiene los `.txt` de diálogo en su raíz.
-- `user://dialogues/`: caché local utilizada por el runtime.
+- `aik3n/ZeMobida_guiones`: repositorio independiente que contiene los `.txt` oficiales en su raíz.
+- `user://dialogues/`: caché local de guiones oficiales sincronizados.
+- `user://custom_dialogues/`: guiones creados o modificados por el jugador.
 
-El repositorio de guiones en GitHub es la fuente de verdad del contenido. El repositorio principal no contiene una copia de los `.txt`. La caché local permite continuar jugando cuando GitHub no está disponible.
+El repositorio de guiones en GitHub es la fuente de verdad del contenido oficial. Los guiones personalizados no forman parte de esa caché y `DialogueUpdater` no los modifica.
 
 ## Sincronización
 
@@ -68,13 +72,62 @@ El manifest representa los SHA de la colección realmente activa. Esto permite c
 
 ## Resolución
 
+La prioridad local se aplica **archivo por archivo** y sólo al diálogo específico de mapa + PNJ + nivel:
+
+```text
+1. user://custom_dialogues/<mapa>_<npc>_<nivel>.txt
+2. user://dialogues/<mapa>_<npc>_<nivel>.txt
+3. user://dialogues/<mapa>_<npc>.txt
+4. user://dialogues/generico.txt
+```
+
+Los archivos `<mapa>_<npc>.txt` y `generico.txt` siguen siendo exclusivamente oficiales.
+
+## Creador local de guiones
+
+Durante un diálogo, `DialogueUI` muestra un botón `EDITAR` junto al nombre del PNJ. El archivo objetivo siempre es:
+
 ```text
 <mapa>_<npc>_<nivel>.txt
-        ↓
-<mapa>_<npc>.txt
-        ↓
-generico.txt
 ```
+
+No se permite editar directamente los fallbacks oficiales `<mapa>_<npc>.txt` ni `generico.txt`.
+
+Al abrir el editor:
+
+```text
+si existe local exacto
+→ abrir local
+
+si no existe local y existe oficial exacto
+→ cargar el texto oficial como copia de trabajo
+
+si no existe ninguno exacto
+→ cargar un boceto básico
+```
+
+La copia local no se crea al abrir el editor. Sólo se escribe en `user://custom_dialogues/` al pulsar `GUARDAR`.
+
+`DialogueEditor` es una escena separada en `CanvasLayer 30` y utiliza `CodeEdit` con un `SyntaxHighlighter` específico del formato de ZeMobida. El resaltado es únicamente visual y no modifica ni interpreta el guion.
+
+```text
+' comentario → verde
+# nodo       → violeta
+= opción     → azul
+? condición  → amarillo
+> salto      → cyan
+[efectos]    → naranja
+```
+
+El editor sólo ofrece:
+
+```text
+GUARDAR → escribir archivo local y cerrar
+CERRAR  → cerrar sin guardar cambios pendientes
+```
+
+Si la escritura falla, el editor permanece abierto. Guardar **no ejecuta Parser ni Validator**. La validación sigue ocurriendo cuando el jugador vuelve a interactuar con el PNJ y `DialogueManager` carga el archivo de forma normal; un guion inválido sigue recurriendo a `fallo.txt`.
+
 
 ## Persistencia
 

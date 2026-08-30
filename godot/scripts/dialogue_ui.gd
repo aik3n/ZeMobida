@@ -5,6 +5,7 @@ extends CanvasLayer
 @onready var panel_opciones: Panel = $PanelOpciones
 
 @onready var name_label: Label = $PanelTexto/NameLabel
+@onready var edit_button: Button = $PanelTexto/EditButton
 @onready var dialogue_text: Label = $PanelTexto/ScrollTexto/DialogueText
 @onready var options_indicator: Label = $PanelTexto/OptionsIndicator
 
@@ -104,6 +105,11 @@ func toggle_options() -> void:
 func _on_option_pressed(option: Dictionary) -> void:
 
 	DialogueManager.select_option(option)
+
+
+func _on_edit_button_pressed() -> void:
+
+	DialogueManager.open_current_dialogue_editor()
 
 
 func _on_panel_texto_gui_input(event: InputEvent) -> void:

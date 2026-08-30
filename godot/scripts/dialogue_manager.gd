@@ -4,6 +4,8 @@ extends Node
 var current_node := ""
 var dialogue_active := false
 var dialogue_ui = null
+var dialogue_editor = null
+var editor_active := false
 var current_dialogue_file := ""
 var current_speaker := ""
 
@@ -15,7 +17,20 @@ var _validator := DialogueValidator.new()
 
 
 const DIALOGUE_FOLDER := "user://dialogues/"
+const CUSTOM_DIALOGUE_FOLDER := "user://custom_dialogues/"
 const DIALOGUE_ERROR_FILE := "user://dialogues/fallo.txt"
+
+const DIALOGUE_EDITOR_SCENE: PackedScene = preload(
+	"res://escenas/dialogue_editor.tscn"
+)
+
+const DIALOGUE_TEMPLATE := (
+	"# INICIO\n"
+	+ "Escribe aquí tu diálogo.\n\n"
+	+ "= Salir > FINAL\n\n"
+	+ "# FINAL\n"
+	+ "Adiós.\n"
+)
 
 const SETTINGS_FILE := "user://settings.cfg"
 const PLAYER_SECTION := "player"
@@ -35,11 +50,183 @@ func get_dialogue_path(file_name: String) -> String:
 	return DIALOGUE_FOLDER + file_name
 
 
+func get_level_dialogue_file_name(
+	map_name: String,
+	speaker_name: String,
+	level: String
+) -> String:
+	return "%s_%s_%s.txt" % [
+		map_name,
+		speaker_name,
+		level
+	]
+
+
+func resolve_dialogue_path(
+	map_name: String,
+	speaker_name: String,
+	level: String
+) -> String:
+	var level_file := get_level_dialogue_file_name(
+		map_name,
+		speaker_name,
+		level
+	)
+
+	var local_level_path := (
+		CUSTOM_DIALOGUE_FOLDER
+		+ level_file
+	)
+
+	if FileAccess.file_exists(local_level_path):
+		return local_level_path
+
+	var official_level_path := (
+		DIALOGUE_FOLDER
+		+ level_file
+	)
+
+	if FileAccess.file_exists(official_level_path):
+		return official_level_path
+
+	var generic_file := "%s_%s.txt" % [
+		map_name,
+		speaker_name
+	]
+
+	var official_generic_path := (
+		DIALOGUE_FOLDER
+		+ generic_file
+	)
+
+	if FileAccess.file_exists(official_generic_path):
+		return official_generic_path
+
+	if FileAccess.file_exists(
+		DIALOGUE_FOLDER + "generico.txt"
+	):
+		return DIALOGUE_FOLDER + "generico.txt"
+
+	return ""
+
+
+func open_current_dialogue_editor() -> void:
+	if editor_active or not dialogue_active:
+		return
+
+	var game = get_tree().current_scene
+
+	if game == null:
+		push_warning(
+			"No se encontró Game para abrir el editor."
+		)
+		return
+
+	var mapa_actual = game.get("mapa_actual")
+
+	if mapa_actual == null:
+		push_warning(
+			"No se encontró el mapa actual para editar."
+		)
+		return
+
+	var player = game.get("player_actual")
+
+	if player == null:
+		player = game.get_node_or_null("Player")
+
+	if player == null:
+		push_warning(
+			"No se encontró el Player para editar."
+		)
+		return
+
+	var scene_path: String = mapa_actual.scene_file_path
+	var map_name := scene_path.get_file().get_basename()
+
+	var speaker_name := current_speaker
+
+	if map_name.is_empty() or speaker_name.is_empty():
+		return
+
+	var file_name := get_level_dialogue_file_name(
+		map_name,
+		speaker_name,
+		str(player.nivel)
+	)
+
+	var initial_text := _get_editable_dialogue_source(
+		file_name
+	)
+
+	editor_active = true
+
+	# El editor sustituye temporalmente al diálogo.
+	# Al cerrar, el jugador vuelve al mapa y puede interactuar
+	# otra vez con el PNJ para probar el archivo guardado.
+	end_dialogue()
+
+	dialogue_editor = DIALOGUE_EDITOR_SCENE.instantiate()
+	game.add_child(dialogue_editor)
+
+	dialogue_editor.tree_exited.connect(
+		_on_dialogue_editor_closed,
+		CONNECT_ONE_SHOT
+	)
+
+	dialogue_editor.setup(
+		file_name,
+		initial_text
+	)
+
+
+func _get_editable_dialogue_source(
+	file_name: String
+) -> String:
+	var local_path := (
+		CUSTOM_DIALOGUE_FOLDER
+		+ file_name
+	)
+
+	if FileAccess.file_exists(local_path):
+		return _read_dialogue_text(local_path)
+
+	var official_path := (
+		DIALOGUE_FOLDER
+		+ file_name
+	)
+
+	if FileAccess.file_exists(official_path):
+		return _read_dialogue_text(official_path)
+
+	return DIALOGUE_TEMPLATE
+
+
+func _read_dialogue_text(file_path: String) -> String:
+	var file := FileAccess.open(
+		file_path,
+		FileAccess.READ
+	)
+
+	if file == null:
+		return DIALOGUE_TEMPLATE
+
+	var content := file.get_as_text()
+	file.close()
+
+	return content
+
+
+func _on_dialogue_editor_closed() -> void:
+	editor_active = false
+	dialogue_editor = null
+
+
 func start_dialogue(
 	file_path: String,
 	speaker_name: String
 ):
-	if dialogue_active:
+	if dialogue_active or editor_active:
 		return
 
 	dialogue_active = true
