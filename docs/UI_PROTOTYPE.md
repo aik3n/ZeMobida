@@ -63,29 +63,39 @@ Se utiliza mediante un `Sprite2D` llamado `Fondo`, a escala `1:1` y con `centere
 
 La imagen de presentación del carrusel sigue siendo independiente del fondo jugable.
 
-Los límites de cámara se calculan automáticamente desde `Fondo`. Los mapas sin fondo ilustrado pueden seguir usando `CameraBounds`.
+Los límites de cámara se calculan automáticamente desde `Fondo`. Los mapas sin fondo ilustrado pueden seguir usando `CameraBounds`; `aldea` ya no necesita ese nodo.
 
-Las colisiones y la capa gráfica `Frontal` son el siguiente paso del mapa piloto; todavía no se consideran terminadas.
+Las colisiones se construyen en Godot mediante cuerpos estáticos y shapes/polígonos.
+
+La capa `Frontal` se resuelve con un PNG transparente opcional alineado con `Fondo`, dibujado por encima de Player/PNJ. Se descartó el recorte dinámico mediante `Polygon2D` por complejidad innecesaria.
 
 ## Control táctil
 
 ```text
 tocar y soltar       → mover Player
 arrastrar            → explorar mapa
-soltar arrastre      → mantener cámara desplazada
-nuevo tap            → mover + recentrado suave
+pinch                → zoom en móvil
+rueda                 → zoom en escritorio
+soltar exploración   → conservar posición y zoom
+nuevo tap            → mover + restaurar cámara
 ```
 
 Parámetros actuales:
 
 ```text
 umbral de arrastre: 28 px
-recentrado:          0.38 s
-Tween:               cubic / ease out
+zoom:                0.7 … 1.4
+zoom normal:         1.0
+recentrado:          0.8 s
+Tween:               cubic / ease out, paralelo
 ```
 
-El destino del nuevo tap se calcula antes del recentrado, por lo que sigue siendo correcto aunque la cámara esté desplazada.
+El destino del nuevo tap se calcula antes del recentrado, por lo que sigue siendo correcto aunque la cámara esté desplazada y con zoom distinto de `1.0`.
+
+Al volver al Player se restauran conjuntamente `camera.position = Vector2.ZERO` y `camera.zoom = Vector2.ONE`.
 
 Un nuevo gesto puede cancelar el recentrado en curso.
 
-El ratón reproduce el mismo comportamiento para pruebas de escritorio.
+El Player persistente sincroniza su destino con `SpawnPlayer` al cargar el mapa, evitando que camine hacia una posición anterior.
+
+El ratón reproduce tap/arrastre con botón izquierdo y zoom con rueda para pruebas de escritorio.

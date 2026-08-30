@@ -166,6 +166,10 @@ func _configurar_player() -> void:
 		spawn.global_position
 	)
 
+	# Player es persistente: al cambiarlo de posición también hay que
+	# sincronizar su destino para que no intente volver al punto anterior.
+	player_actual.destino = spawn.global_position
+
 	player_actual.visible = true
 	player_actual.set_physics_process(true)
 	player_actual.set_process_unhandled_input(true)

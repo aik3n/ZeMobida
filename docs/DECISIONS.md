@@ -309,7 +309,7 @@ El gesto se interpreta al soltar:
 - arrastre de al menos `28 px` → desplazar la cámara y no mover Player;
 - al terminar un arrastre → mantener la cámara en la posición explorada;
 - nuevo tap → calcular el destino con la cámara desplazada y recentrar después;
-- recentrado → `Tween` cúbico `EASE_OUT` de `0.38 s`;
+- recentrado → `Tween` cúbico `EASE_OUT` de `0.8 s`;
 - teclado/mando → volver inmediatamente al seguimiento normal.
 
 Mientras se determina si el gesto es tap o arrastre, el Player permanece quieto.
@@ -328,3 +328,85 @@ Los eventos equivalentes de ratón se mantienen para pruebas de escritorio.
 
 El flujo tap/arrastre, permanencia de cámara, cálculo de destino con cámara desplazada y recentrado suave fueron validados manualmente en runtime el 2026-08-30.
 
+
+
+## ADR-021 — Capa Frontal como imagen transparente opcional
+**Status:** Accepted
+
+### Context
+
+En un mapa top-down algunos elementos deben dibujarse por encima del Player y los PNJ para transmitir profundidad: tejados, copas de árboles, arcos, toldos, etc.
+
+Se probó reutilizar partes del propio `Fondo` mediante `Polygon2D` y coordenadas UV. Aunque técnicamente funciona, convertirlo en una herramienta cómoda requiere lógica adicional de editor y sincronización de UV.
+
+### Decision
+
+Se adopta una solución explícita y simple: cada mapa puede proporcionar una imagen PNG `Frontal` con transparencia.
+
+```text
+Fondo      z bajo
+Player/PNJ z medio
+Frontal    z alto
+```
+
+`Fondo` y `Frontal` comparten origen `(0,0)`, escala `1:1` y `centered = false`.
+
+`Frontal` está siempre visible; las zonas transparentes no afectan al dibujo y las zonas opacas ocultan naturalmente a los actores cuando pasan por detrás.
+
+No se requiere detección de entrada/salida ni recorte dinámico en runtime.
+
+### Consequences
+
+El equipo de arte mantiene una segunda capa sólo en los mapas que la necesiten. A cambio, la implementación en Godot permanece trivial, predecible y sin herramientas personalizadas.
+
+### Verification
+
+El concepto fue probado manualmente en runtime el 2026-08-30 y se confirmó el solapamiento correcto sobre el Player.
+
+
+## ADR-022 — Zoom temporal como parte de la exploración de cámara
+**Status:** Accepted
+
+### Context
+
+Los mapas ilustrados pueden ser mayores que el viewport. Además del paneo, resulta útil poder modificar temporalmente cuánto terreno se ve sin convertir el zoom en un estado permanente de gameplay.
+
+### Decision
+
+La cámara permite zoom de exploración:
+
+```text
+mínimo: 0.7
+normal: 1.0
+máximo: 1.4
+```
+
+Controles:
+
+- pinch de dos dedos en móvil;
+- rueda del ratón en escritorio.
+
+Durante pinch no se ordena movimiento al Player. Al terminar el gesto se evita que el dedo restante genere un tap accidental.
+
+Mientras se explora, posición y zoom se conservan.
+
+Un nuevo tap para mover restaura simultáneamente:
+
+```text
+camera.position → Vector2.ZERO
+camera.zoom     → Vector2.ONE
+```
+
+mediante un Tween paralelo `TRANS_CUBIC / EASE_OUT` de `0.8 s`.
+
+Teclado o mando restauran posición y zoom inmediatamente.
+
+### Consequences
+
+El zoom funciona como herramienta temporal de observación y no altera permanentemente la presentación normal del juego.
+
+El clamp de cámara debe considerar el zoom actual para impedir mostrar terreno fuera de los límites del mapa.
+
+### Verification
+
+Rueda/pinch, conservación del estado de exploración y restauración conjunta de posición y zoom fueron validados manualmente en runtime el 2026-08-30.

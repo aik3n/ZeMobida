@@ -15,10 +15,12 @@ Game
 ├── DialogueUI            CanvasLayer 10
 └── mapa actual
     ├── Fondo             Sprite2D, opcional pero preferido
-    ├── Preview           opcional, independiente del Fondo
+    ├── Colisiones        StaticBody2D + shapes/polígonos
     ├── PNJ
     ├── SpawnPlayer
-    └── CameraBounds      fallback para mapas sin Fondo
+    ├── Frontal           Sprite2D transparente, opcional
+    ├── Preview           opcional, independiente del Fondo
+    └── CameraBounds      fallback sólo para mapas sin Fondo
 
 DialogueManager (autoload)
 ├── parser
@@ -32,6 +34,9 @@ DialogueUpdater (autoload)
 ```
 
 `Game` coordina mapas, Player y UI global. `DialogueManager` ejecuta diálogos y actualmente también gestiona inventario y persistencia.
+
+
+Al cargar un mapa, `Game` coloca el Player en `SpawnPlayer` y sincroniza también su destino de movimiento con esa misma posición. Esto evita que el Player persistente intente regresar al destino conservado del mapa o posición anterior.
 
 ## Contenido
 
@@ -131,6 +136,8 @@ CameraBounds
 
 `CameraBounds` es por tanto un mecanismo de compatibilidad para los mapas existentes, no un requisito de los nuevos mapas ilustrados.
 
+`aldea` ya usa `Fondo` como fuente de límites y no necesita `CameraBounds`.
+
 ### Preview
 
 `Preview` y `Fondo` tienen responsabilidades distintas:
@@ -142,12 +149,19 @@ El carrusel no necesita cargar la ilustración completa como preview.
 
 ### Colisiones y capa frontal
 
-La arquitectura acordada contempla dos capas que todavía se incorporarán progresivamente al mapa piloto:
+Las colisiones se construyen en Godot sobre la ilustración mediante `StaticBody2D` y `CollisionShape2D` / `CollisionPolygon2D`. Deben representar el espacio realmente transitable, especialmente la zona de los pies del personaje, sin reproducir necesariamente el contorno exacto de cada elemento dibujado.
 
-- `Colisiones`: geometría jugable trazada en Godot sobre la ilustración;
-- `Frontal`: elementos visuales opcionales que deben tapar al jugador o a los PNJ cuando pasan por detrás.
+`Frontal` es una imagen PNG transparente opcional alineada con `Fondo`. Ambas comparten origen, escala y tamaño de referencia:
 
-Las colisiones deben representar el espacio realmente transitable, especialmente la zona de los pies del personaje, y no reproducir necesariamente el contorno exacto de cada elemento dibujado.
+```text
+Fondo      z bajo
+Player/PNJ z medio
+Frontal    z alto
+```
+
+`Frontal` sólo contiene los elementos que deben ocultar a los actores al pasar por detrás: copas de árboles, tejados, arcos, toldos, etc.
+
+No requiere detección de entrada/salida, recortes dinámicos ni UV generados en runtime. El experimento con `Polygon2D` fue descartado a favor de esta solución más simple.
 
 
 ## Control táctil y exploración de cámara
@@ -157,9 +171,11 @@ El control móvil distingue entre intención de movimiento e intención de explo
 ```text
 tocar y soltar       → mover Player al punto tocado
 arrastrar            → desplazar la cámara
-soltar tras arrastre → mantener la cámara desplazada
-nuevo tap            → mover Player y recentrar cámara suavemente
-teclado/mando        → seguimiento normal del Player
+pinch de dos dedos   → zoom en móvil
+rueda del ratón      → zoom en escritorio
+soltar exploración   → mantener posición y zoom
+nuevo tap            → mover Player y restaurar cámara suavemente
+teclado/mando        → restaurar cámara estándar inmediatamente
 ```
 
 El movimiento por tap comienza **al soltar**, no al presionar. Mientras se decide si el gesto es un tap o un arrastre, el Player permanece quieto.
@@ -172,13 +188,22 @@ El umbral actual para considerar el gesto un arrastre es:
 
 Durante un arrastre la cámara se desplaza en sentido inverso al movimiento de la propia cámara para que el contenido visual siga al dedo. El desplazamiento se limita a los límites activos del mapa.
 
-Después de explorar, un nuevo tap calcula primero la posición de mundo correspondiente al punto tocado y después recentra la cámara. El recentrado utiliza un `Tween` cúbico `EASE_OUT` de:
+El zoom de exploración está limitado actualmente al intervalo `0.7 … 1.4`. Durante un pinch no se ordena movimiento al Player; al terminar, el dedo que pueda quedar apoyado se ignora hasta que todos los dedos se hayan soltado para evitar taps accidentales.
+
+Después de explorar, un nuevo tap calcula primero la posición de mundo correspondiente al punto tocado y después restaura simultáneamente:
 
 ```text
-0.38 s
+camera.position → Vector2.ZERO
+camera.zoom     → Vector2.ONE
 ```
 
-Así se evita un salto brusco al volver al seguimiento del jugador.
+El recentrado usa un `Tween` paralelo, cúbico `EASE_OUT`, de:
+
+```text
+0.8 s
+```
+
+Así posición y zoom vuelven juntos sin un salto brusco.
 
 
 ## Pendientes conocidos

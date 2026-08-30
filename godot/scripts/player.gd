@@ -15,7 +15,11 @@ var destino: Vector2
 @onready var camera: Camera2D = $Camera2D
 
 const DRAG_THRESHOLD := 28.0
-const CAMERA_RECENTER_TIME := 0.38
+const CAMERA_RECENTER_TIME := 0.8
+
+const ZOOM_MIN := 0.7
+const ZOOM_MAX := 1.4
+const ZOOM_WHEEL_STEP := 0.1
 
 enum PointerSource {
 	NONE,
@@ -28,6 +32,16 @@ var _pointer_start := Vector2.ZERO
 var _pointer_last := Vector2.ZERO
 var _pointer_dragging := false
 var _camera_recenter_tween: Tween
+
+# Toques activos por índice de dedo.
+var _touch_points: Dictionary = {}
+var _pinch_active := false
+var _pinch_last_distance := 0.0
+
+# Tras terminar un pinch se ignora el dedo que pueda quedar apoyado
+# hasta que todos los dedos se hayan soltado. Así no se genera un tap
+# accidental al finalizar el gesto de zoom.
+var _touch_block_until_release := false
 
 
 const NIVELES := {
@@ -55,26 +69,25 @@ func _ready():
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
-		var touch := event as InputEventScreenTouch
-
-		if touch.pressed:
-			_pointer_source = PointerSource.TOUCH
-			_begin_pointer(touch.position)
-		elif _pointer_source == PointerSource.TOUCH:
-			_end_pointer(touch.position)
-			_pointer_source = PointerSource.NONE
-
+		_handle_screen_touch(event as InputEventScreenTouch)
 		return
 
 	if event is InputEventScreenDrag:
-		if _pointer_source == PointerSource.TOUCH:
-			var drag := event as InputEventScreenDrag
-			_update_pointer(drag.position)
-
+		_handle_screen_drag(event as InputEventScreenDrag)
 		return
 
 	if event is InputEventMouseButton:
 		var mouse_button := event as InputEventMouseButton
+
+		# Zoom de escritorio con rueda.
+		if mouse_button.pressed:
+			if mouse_button.button_index == MOUSE_BUTTON_WHEEL_UP:
+				_set_zoom(camera.zoom.x + ZOOM_WHEEL_STEP * mouse_button.factor)
+				return
+
+			if mouse_button.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				_set_zoom(camera.zoom.x - ZOOM_WHEEL_STEP * mouse_button.factor)
+				return
 
 		if mouse_button.button_index != MOUSE_BUTTON_LEFT:
 			return
@@ -82,7 +95,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		# En dispositivos táctiles Godot puede generar también eventos
 		# de ratón. Si ya estamos procesando el toque, se ignoran.
 		if mouse_button.pressed:
-			if _pointer_source != PointerSource.TOUCH:
+			if _pointer_source != PointerSource.TOUCH and not _pinch_active:
 				_pointer_source = PointerSource.MOUSE
 				_begin_pointer(mouse_button.position)
 		elif _pointer_source == PointerSource.MOUSE:
@@ -96,6 +109,132 @@ func _unhandled_input(event: InputEvent) -> void:
 			if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				var motion := event as InputEventMouseMotion
 				_update_pointer(motion.position)
+
+
+func _handle_screen_touch(touch: InputEventScreenTouch) -> void:
+	if touch.pressed:
+		_touch_points[touch.index] = touch.position
+
+		if _touch_block_until_release:
+			return
+
+		if _touch_points.size() == 1:
+			_pointer_source = PointerSource.TOUCH
+			_begin_pointer(touch.position)
+			return
+
+		if _touch_points.size() >= 2:
+			_start_pinch()
+			return
+
+	# Release.
+	if not _touch_points.has(touch.index):
+		return
+
+	if _pinch_active:
+		_touch_points.erase(touch.index)
+
+		if _touch_points.size() < 2:
+			_end_pinch()
+		return
+
+	if _touch_block_until_release:
+		_touch_points.erase(touch.index)
+
+		if _touch_points.is_empty():
+			_touch_block_until_release = false
+
+		return
+
+	if _pointer_source == PointerSource.TOUCH:
+		_end_pointer(touch.position)
+		_pointer_source = PointerSource.NONE
+
+	_touch_points.erase(touch.index)
+
+
+func _handle_screen_drag(drag: InputEventScreenDrag) -> void:
+	if not _touch_points.has(drag.index):
+		return
+
+	_touch_points[drag.index] = drag.position
+
+	if _pinch_active:
+		_update_pinch()
+		return
+
+	if _touch_block_until_release:
+		return
+
+	if _pointer_source == PointerSource.TOUCH:
+		_update_pointer(drag.position)
+
+
+func _start_pinch() -> void:
+	_stop_camera_recenter()
+
+	# Dos dedos significan exclusivamente exploración/zoom.
+	destino = global_position
+	velocity = Vector2.ZERO
+
+	_pointer_source = PointerSource.NONE
+	_pointer_dragging = false
+
+	_pinch_active = true
+	_pinch_last_distance = _current_pinch_distance()
+
+
+func _update_pinch() -> void:
+	if _touch_points.size() < 2:
+		return
+
+	var new_distance := _current_pinch_distance()
+
+	if _pinch_last_distance <= 0.0:
+		_pinch_last_distance = new_distance
+		return
+
+	if new_distance <= 0.0:
+		return
+
+	var ratio := new_distance / _pinch_last_distance
+	_set_zoom(camera.zoom.x * ratio)
+
+	_pinch_last_distance = new_distance
+
+
+func _end_pinch() -> void:
+	_pinch_active = false
+	_pinch_last_distance = 0.0
+	_pointer_source = PointerSource.NONE
+	_pointer_dragging = false
+
+	# Si todavía queda un dedo apoyado se ignora hasta soltarlo.
+	_touch_block_until_release = not _touch_points.is_empty()
+
+
+func _current_pinch_distance() -> float:
+	var indices: Array = _touch_points.keys()
+	indices.sort()
+
+	if indices.size() < 2:
+		return 0.0
+
+	var a: Vector2 = _touch_points[indices[0]]
+	var b: Vector2 = _touch_points[indices[1]]
+
+	return a.distance_to(b)
+
+
+func _set_zoom(value: float) -> void:
+	var clamped_zoom := clampf(value, ZOOM_MIN, ZOOM_MAX)
+
+	camera.zoom = Vector2(
+		clamped_zoom,
+		clamped_zoom
+	)
+
+	_clamp_camera_to_limits()
 
 
 func _begin_pointer(screen_position: Vector2) -> void:
@@ -147,19 +286,33 @@ func _end_pointer(screen_position: Vector2) -> void:
 func _start_camera_recenter() -> void:
 	_stop_camera_recenter()
 
-	if camera.position.is_zero_approx():
+	var position_is_normal := camera.position.is_zero_approx()
+	var zoom_is_normal := camera.zoom.is_equal_approx(Vector2.ONE)
+
+	if position_is_normal and zoom_is_normal:
 		camera.position = Vector2.ZERO
+		camera.zoom = Vector2.ONE
 		return
 
-	# Tween nativo de Godot: el arrastre sigue respondiendo 1:1 al dedo,
-	# pero al ordenar movimiento la cámara recupera al jugador sin salto.
+	# Volver al Player significa restaurar la cámara estándar completa:
+	# posición centrada y zoom 1.0. Ambos cambios ocurren en paralelo para
+	# que la transición se perciba como un único movimiento suave.
 	_camera_recenter_tween = create_tween()
 	_camera_recenter_tween.set_trans(Tween.TRANS_CUBIC)
 	_camera_recenter_tween.set_ease(Tween.EASE_OUT)
+	_camera_recenter_tween.set_parallel(true)
+
 	_camera_recenter_tween.tween_property(
 		camera,
 		"position",
 		Vector2.ZERO,
+		CAMERA_RECENTER_TIME
+	)
+
+	_camera_recenter_tween.tween_property(
+		camera,
+		"zoom",
+		Vector2.ONE,
 		CAMERA_RECENTER_TIME
 	)
 
@@ -241,8 +394,10 @@ func _physics_process(_delta):
 	)
 
 	if input_direction != Vector2.ZERO:
-		# Teclado/mandos vuelven inmediatamente al seguimiento normal.
+		# Teclado/mandos vuelven inmediatamente a la cámara estándar.
+		_stop_camera_recenter()
 		camera.position = Vector2.ZERO
+		camera.zoom = Vector2.ONE
 		velocity = input_direction * vel
 		move_and_slide()
 		return

@@ -180,6 +180,8 @@ res://art/mapas/aldea.PNG
 
 `Game` obtiene automáticamente los límites de cámara desde el rectángulo transformado de `Fondo`. Si un mapa no incluye este nodo, se mantiene el sistema anterior basado en `CameraBounds`.
 
+En un mapa ilustrado ya convertido, como `aldea`, `CameraBounds` es redundante y puede eliminarse.
+
 ### Preview del carrusel
 
 La imagen de carrusel es independiente del fondo jugable.
@@ -208,16 +210,48 @@ La incorporación de colisiones al mapa piloto es el siguiente paso del modelo v
 
 ### Frontal
 
-Los elementos que deban ocultar parcialmente a Player o PNJ pueden suministrarse en una capa gráfica adicional `Frontal`.
+Los elementos que deban ocultar parcialmente a Player o PNJ se suministran mediante una imagen PNG transparente opcional.
 
-Ejemplos:
+Flujo recomendado:
 
-- copas de árboles;
-- tejados;
-- arcos;
-- elementos altos de primer plano.
+```text
+aldea.PNG
+aldea_frontal.PNG
+```
 
-`Frontal` es opcional y se añadirá cuando el arte del mapa lo necesite.
+En la escena:
+
+```text
+Fondo      → Sprite2D, z bajo
+Player/PNJ → z medio
+Frontal    → Sprite2D, z alto
+```
+
+`Fondo` y `Frontal` deben compartir:
+
+```text
+position = (0, 0)
+scale = (1, 1)
+centered = false
+```
+
+La imagen frontal sólo contiene los píxeles que deben quedar por encima de los actores, por ejemplo copas de árboles, tejados, arcos o toldos.
+
+No se utiliza recorte dinámico ni `Polygon2D` para generar esta capa en runtime. Esa posibilidad se probó y se descartó por complejidad innecesaria.
+
+
+### SpawnPlayer
+
+Al cargar un mapa, `Game` coloca el Player persistente en `SpawnPlayer` y sincroniza su variable `destino` con esa misma posición.
+
+La regla es:
+
+```text
+global_position = SpawnPlayer
+destino         = SpawnPlayer
+```
+
+Así el personaje aparece quieto en el nuevo spawn aunque conserve estado entre escenas.
 
 
 ## Control táctil del mapa
@@ -253,29 +287,52 @@ Durante el arrastre:
 
 Al soltar, la cámara permanece en la posición explorada.
 
+### Zoom de exploración
+
+El zoom es temporal y forma parte del modo de exploración:
+
+```gdscript
+const ZOOM_MIN := 0.7
+const ZOOM_MAX := 1.4
+```
+
+Controles:
+
+- móvil: pinch con dos dedos;
+- escritorio: rueda del ratón.
+
+Durante el pinch, el Player permanece quieto. Al finalizar un pinch se ignora cualquier dedo que siga apoyado hasta que todos se hayan soltado, evitando un tap accidental.
+
 ### Volver al jugador
 
 Al hacer un nuevo tap después de explorar:
 
-1. se calcula el destino usando la cámara todavía desplazada;
+1. se calcula el destino usando la cámara todavía desplazada y con su zoom actual;
 2. el Player comienza a caminar hacia ese destino;
-3. la cámara vuelve a `Vector2.ZERO` suavemente.
+3. la cámara restaura posición y zoom en paralelo.
+
+Estado estándar:
+
+```text
+camera.position = Vector2.ZERO
+camera.zoom     = Vector2.ONE
+```
 
 El recentrado actual usa:
 
 ```gdscript
-const CAMERA_RECENTER_TIME := 0.38
+const CAMERA_RECENTER_TIME := 0.8
 ```
 
-con `Tween.TRANS_CUBIC` y `Tween.EASE_OUT`.
+con `Tween.TRANS_CUBIC`, `Tween.EASE_OUT` y propiedades animadas en paralelo.
 
 Un nuevo gesto cancela el Tween en curso para mantener respuesta directa.
 
-Teclado o mando restablecen inmediatamente la posición normal de la cámara.
+Teclado o mando restauran inmediatamente posición y zoom estándar.
 
 ### Ratón
 
-El mismo flujo se admite con botón izquierdo y movimiento de ratón para poder probar en escritorio. Los eventos de ratón generados por un dispositivo táctil se ignoran cuando ya se está procesando un toque.
+El botón izquierdo reproduce tap/arrastre para pruebas de escritorio. La rueda controla el zoom. Los eventos de ratón generados por un dispositivo táctil se ignoran cuando ya se está procesando un toque.
 
 ### Regresión recomendada
 
@@ -287,10 +344,15 @@ Comprobar:
 - desplazamiento mayor que el umbral → sólo mueve cámara;
 - soltar arrastre → cámara permanece desplazada;
 - tap con cámara desplazada → destino correcto;
-- recentrado suave sin salto;
+- rueda del ratón → zoom `0.7 … 1.4`;
+- pinch de dos dedos → zoom sin mover Player;
+- terminar pinch → no producir tap accidental;
+- conservar posición y zoom al explorar;
+- nuevo tap → posición y zoom vuelven juntos a estado estándar;
+- recentrado de `0.8 s` suave y sin salto;
 - iniciar otro gesto durante el recentrado → se cancela correctamente;
-- no poder desplazar la cámara fuera de los límites;
-- teclado/mando → cámara vuelve al seguimiento normal;
+- no poder desplazar la cámara fuera de los límites con distintos niveles de zoom;
+- teclado/mando → posición y zoom vuelven inmediatamente a estado estándar;
 - interacción con UI → no debe generar un movimiento no manejado del Player.
 
 ### Responsabilidad de validación

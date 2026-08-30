@@ -6,6 +6,9 @@
 [ext_resource type="Texture2D" uid="uid://ddxmxgyyfy8mn" path="res://icon.svg" id="4_87o4k"]
 [ext_resource type="Texture2D" uid="uid://dpyw518c5ss7y" path="res://art/mapas/frontal_prueba.png" id="5_frontal"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xw7ts"]
+size = Vector2(318, 905)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fmk2k"]
 size = Vector2(179, 55)
 
@@ -50,7 +53,13 @@ nombre = "peter"
 sprite = ExtResource("4_87o4k")
 
 [node name="SpawnPlayer" type="Marker2D" parent="." unique_id=957641453]
-position = Vector2(1667, 1134)
+position = Vector2(2113, 1401)
+
+[node name="CameraBounds" type="Area2D" parent="." unique_id=319864449]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CameraBounds" unique_id=1758029404]
+position = Vector2(-210, 118.5)
+shape = SubResource("RectangleShape2D_xw7ts")
 
 [node name="paco" parent="." unique_id=1383033262 instance=ExtResource("2_jns4i")]
 position = Vector2(1848, 1058)
@@ -58,11 +67,8 @@ nombre = "paco"
 sprite = ExtResource("4_87o4k")
 tipo_seguimiento = 0
 
-[node name="colisiones" type="StaticBody2D" parent="." unique_id=894876693]
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=894876693]
 
-[node name="tejado" type="CollisionShape2D" parent="colisiones" unique_id=1384321302]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1384321302]
 position = Vector2(1874, 1257)
 shape = SubResource("RectangleShape2D_fmk2k")
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="colisiones" unique_id=847719243]
-polygon = PackedVector2Array(909, 880, 796, 1040, 505, 1050, 256, 1640, 1091, 1617, 978, 1091, 1060, 870)
