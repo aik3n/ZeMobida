@@ -62,15 +62,19 @@ El editor ocupa prácticamente toda la pantalla y utiliza `CodeEdit`.
 ```text
 aldea_ibon_a1.txt
 
-┌────────────────────────────┐
-│ # INICIO                   │
-│ Hola.                      │
-│                            │
-│ = Salir > FINAL            │
-└────────────────────────────┘
+┌──────────────────────────────┐
+│   # INICIO                   │
+│ ● Hola [xp+20, xp+10]        │
+│                              │
+│   = Salir > FINAL            │
+└──────────────────────────────┘
 
 [ GUARDAR ]      [ CERRAR ]
 ```
+
+El `CodeEdit` no hace wrap. Una línea larga permanece como una sola línea visual y se consulta mediante scroll horizontal.
+
+El gutter izquierdo muestra `●` rojo sólo como aviso local. No existen mensajes emergentes ni un panel de errores.
 
 No existen botones de validar, probar o insertar sintaxis.
 
@@ -87,7 +91,9 @@ El highlight actual diferencia:
 
 `GUARDAR` escribe el guion local y cierra. `CERRAR` sale sin guardar cambios pendientes. Si la escritura falla, `GUARDAR` no cierra.
 
-La prueba del contenido ocurre al volver al mapa e interactuar de nuevo con el PNJ.
+Las marcas `●` nunca deshabilitan ni modifican `GUARDAR`; un guion puede dejarse a medias y conservarse para continuar después.
+
+El diagnóstico sólo evalúa la forma de cada línea. No juzga coherencia, destinos, ciclos ni si el diálogo tiene final.
 
 ## Pantalla inicial
 

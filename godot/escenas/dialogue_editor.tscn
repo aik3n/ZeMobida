@@ -1,6 +1,6 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://dnvvingbo01b2"]
 
-[ext_resource type="Script" path="res://scripts/dialogue_editor.gd" id="1_editor"]
+[ext_resource type="Script" uid="uid://0446qb4544yx" path="res://scripts/dialogue_editor.gd" id="1_editor"]
 
 [sub_resource type="StyleBoxFlat" id="StyleEditor"]
 bg_color = Color(0.025, 0.037, 0.058, 0.99)
@@ -14,22 +14,19 @@ corner_radius_top_right = 28
 corner_radius_bottom_right = 28
 corner_radius_bottom_left = 28
 
-[node name="DialogueEditor" type="CanvasLayer"]
+[node name="DialogueEditor" type="CanvasLayer" unique_id=1720702188]
 layer = 30
 script = ExtResource("1_editor")
 
-[node name="Background" type="ColorRect" parent="."]
-layout_mode = 1
+[node name="Background" type="ColorRect" parent="." unique_id=1831575590]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 color = Color(0, 0, 0, 0.72)
 
-[node name="Panel" type="Panel" parent="."]
-layout_mode = 1
+[node name="Panel" type="Panel" parent="." unique_id=707113502]
 anchors_preset = -1
 anchor_left = 0.035
 anchor_top = 0.025
@@ -39,7 +36,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleEditor")
 
-[node name="Title" type="Label" parent="Panel"]
+[node name="Title" type="Label" parent="Panel" unique_id=320747932]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.04
@@ -53,7 +50,7 @@ theme_override_font_sizes/font_size = 34
 text = "aldea_ibon_a1.txt"
 vertical_alignment = 1
 
-[node name="CodeEdit" type="CodeEdit" parent="Panel"]
+[node name="CodeEdit" type="CodeEdit" parent="Panel" unique_id=104090263]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.04
@@ -63,13 +60,13 @@ anchor_bottom = 0.83
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
-theme_override_font_sizes/font_size = 30
 theme_override_constants/line_spacing = 8
-placeholder_text = "# INICIO\nEscribe aquí tu diálogo."
-wrap_mode = 1
+theme_override_font_sizes/font_size = 30
+placeholder_text = "# INICIO
+Escribe aquí tu diálogo."
 scroll_past_end_of_file = true
 
-[node name="SaveButton" type="Button" parent="Panel"]
+[node name="SaveButton" type="Button" parent="Panel" unique_id=1177657783]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.04
@@ -82,7 +79,7 @@ focus_mode = 0
 theme_override_font_sizes/font_size = 32
 text = "GUARDAR"
 
-[node name="CloseButton" type="Button" parent="Panel"]
+[node name="CloseButton" type="Button" parent="Panel" unique_id=1710235549]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.52

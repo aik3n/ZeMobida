@@ -119,6 +119,22 @@ La copia local no se crea al abrir el editor. Sólo se escribe en `user://custom
 [efectos]    → naranja
 ```
 
+El `CodeEdit` trabaja sin `wrap`: una línea lógica del guion corresponde siempre a una única línea visual. Las líneas largas se recorren con scroll horizontal.
+
+Además del highlight, el editor mantiene un gutter de diagnóstico local. Si una línea no cumple la forma limpia esperada del lenguaje, muestra un `●` rojo delante de ella. La comprobación es exclusivamente local a esa línea y no usa `DialogueParser` ni `DialogueValidator`.
+
+El marcador puede señalar errores sintácticos locales o formas ambiguas/poco legibles, por ejemplo:
+
+```text
+## INICIO
+= Sí > A > B
+Texto # INICIO
+Hola [xp+20, xp+10]
+= Comprar [xp+5] > COMPRA
+```
+
+No se comprueban destinos existentes, coherencia, ciclos, narrativa ni estructura global. Un diálogo sin final puede ser intencionado y no se considera un error del editor.
+
 El editor sólo ofrece:
 
 ```text
@@ -126,7 +142,9 @@ GUARDAR → escribir archivo local y cerrar
 CERRAR  → cerrar sin guardar cambios pendientes
 ```
 
-Si la escritura falla, el editor permanece abierto. Guardar **no ejecuta Parser ni Validator**. La validación sigue ocurriendo cuando el jugador vuelve a interactuar con el PNJ y `DialogueManager` carga el archivo de forma normal; un guion inválido sigue recurriendo a `fallo.txt`.
+El `●` rojo es únicamente informativo y **nunca bloquea `GUARDAR`**. Es válido guardar un guion incompleto o con líneas marcadas para continuar editándolo más adelante.
+
+Si la escritura falla, el editor permanece abierto. Guardar **no ejecuta Parser ni Validator**. El comportamiento posterior del guion se determina únicamente cuando el jugador vuelve a interactuar con el PNJ mediante el runtime normal.
 
 
 ## Persistencia

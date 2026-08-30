@@ -157,7 +157,7 @@ CERRAR
 
 `CERRAR` no guarda cambios pendientes.
 
-### Highlight
+### Highlight y lectura por línea
 
 `res://scripts/dialogue_syntax_highlighter.gd` colorea el lenguaje de forma visual:
 
@@ -170,11 +170,81 @@ CERRAR
 [efectos]    → naranja
 ```
 
+El `CodeEdit` no usa `wrap`. Cada línea del archivo ocupa una única línea visual y las líneas largas utilizan scroll horizontal. Esto mantiene alineados el highlight y el gutter de diagnóstico.
+
 El resaltado no altera el contenido ni sustituye al parser.
 
-### Validación
+### Diagnóstico local por línea
 
-**Guardar no valida el guion.**
+`DialogueEditor` marca con un `●` rojo las líneas que no cumplen la forma local recomendada del lenguaje.
+
+El diagnóstico:
+
+```text
+es local a una única línea
+no usa DialogueParser
+no usa DialogueValidator
+no comprueba otras líneas
+no bloquea GUARDAR
+```
+
+Reglas actuales:
+
+```text
+# NODO
+→ `#` sólo puede aparecer como declaración de nodo.
+→ la etiqueta debe ser un único token.
+→ sólo puede coexistir con un comentario `' ...`.
+
+= opción
+→ puede contener un único `>`.
+→ el salto debe aparecer antes del bloque de efectos.
+→ no se admiten marcadores estructurales fuera de orden.
+
+?condición
+→ cada condición usa un único `?`.
+→ puede contener un único `>`.
+→ requiere un destino limpio.
+
+> salto
+→ contiene un único `>` y un destino limpio.
+
+[efectos]
+→ sólo puede existir un bloque por línea.
+→ `[` y `]` deben estar emparejados.
+→ máximo un efecto XP por línea.
+→ XP usa `xp+N` o `xp-N`.
+→ objetos usan `+objeto` o `-objeto`.
+```
+
+Ejemplos marcados:
+
+```text
+## INICIO
+Texto # INICIO
+= Sí > A > B
+> HOLA = Buenos días
+= Comprar [xp+5] > COMPRA
+Hola [[xp+20]]
+Hola [xp+20, xp+10]
+```
+
+No se analiza:
+
+```text
+existencia de nodos destino
+coherencia narrativa
+ciclos
+finales
+recompensas repetidas
+estructura global
+```
+
+Un diálogo que no termina puede ser deliberado y no se considera error.
+
+### Guardado y validación
+
+**Guardar no valida el guion y las marcas rojas no bloquean el guardado.**
 
 El flujo es deliberadamente:
 
@@ -187,7 +257,7 @@ editar
 → DialogueValidator
 ```
 
-Por tanto, el propio flujo normal del juego sirve para probar y validar el guion. Si el archivo local es inválido, se aplica el mismo comportamiento de error que para un oficial inválido.
+Por tanto, el propio flujo normal del juego sirve para observar el comportamiento real del guion. El editor permite guardar deliberadamente contenido incompleto o marcado para continuar más adelante.
 
 ### Regresión recomendada
 
@@ -205,7 +275,18 @@ Comprobar:
 - siguiente interacción → usa la versión local guardada;
 - reabrir `EDITAR` → muestra la versión local;
 - guion local inválido → runtime lo detecta al cargarlo;
-- comentarios, nodos, opciones, condiciones, saltos y efectos → colores diferenciados.
+- comentarios, nodos, opciones, condiciones, saltos y efectos → colores diferenciados;
+- línea larga → permanece en una sola línea visual y usa scroll horizontal;
+- línea localmente incorrecta → `●` rojo;
+- corregir la línea → desaparece el `●`;
+- `#` fuera de una declaración de nodo → `●`;
+- nodo con contenido adicional distinto de comentario → `●`;
+- más de un `>` estructural → `●`;
+- más de un bloque `[` / `]` o corchetes desparejados → `●`;
+- dos efectos XP en una misma línea → `●`;
+- orden estructural incorrecto → `●`;
+- diálogo sin final o con ciclos narrativos → no se marca por ese motivo;
+- una o muchas líneas con `●` → `GUARDAR` continúa disponible y cierra tras escritura correcta.
 
 
 ## Selección de mapas

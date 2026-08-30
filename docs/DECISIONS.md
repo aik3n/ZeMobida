@@ -513,7 +513,17 @@ El jugador puede probar inmediatamente sus cambios usando la interacción normal
 
 La sintaxis continúa teniendo una única fuente de verdad: el parser y validator existentes.
 
+### Editor como herramienta de autoría
+
+El editor mantiene un enfoque deliberadamente ligero. Además del highlight, muestra un `●` rojo por línea cuando la forma local no respeta las convenciones del lenguaje.
+
+Las marcas son informativas y no bloqueantes. Se permite guardar un guion incompleto para continuarlo después.
+
+La comprobación se limita a la propia línea. No evalúa coherencia, destinos, ciclos, finales ni narrativa y no reutiliza `DialogueParser` ni `DialogueValidator`.
+
+El `CodeEdit` trabaja sin `wrap` para conservar correspondencia directa entre línea lógica, línea visual y marcador del gutter.
+
 ### Verification
 
-Prioridad local, edición de una copia oficial, creación desde boceto, guardado/cierre y resaltado de sintaxis fueron revisados manualmente en runtime el 2026-08-30.
+Prioridad local, edición de una copia oficial, creación desde boceto, guardado/cierre, resaltado de sintaxis, scroll horizontal y diagnóstico local no bloqueante fueron revisados manualmente en runtime el 2026-08-30.
 
