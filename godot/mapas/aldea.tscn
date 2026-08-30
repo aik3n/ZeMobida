@@ -33,6 +33,12 @@ nombre = "juan"
 sprite = ExtResource("4_87o4k")
 tipo_seguimiento = 1
 
+[node name="ibon" parent="." unique_id=186543396 instance=ExtResource("2_jns4i")]
+position = Vector2(1432, 1180)
+nombre = "ibon"
+sprite = ExtResource("4_87o4k")
+tipo_seguimiento = 1
+
 [node name="charo" parent="." unique_id=1247965314 instance=ExtResource("2_jns4i")]
 position = Vector2(1523, 1026)
 nombre = "charo"

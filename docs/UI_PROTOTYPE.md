@@ -21,6 +21,7 @@ El orden visual global es estático:
 ```text
 HUD / UI normal → CanvasLayer 5
 Diálogo         → CanvasLayer 10
+Feedback Player → CanvasLayer 15
 Estado          → CanvasLayer 20
 ```
 
@@ -99,3 +100,29 @@ Un nuevo gesto puede cancelar el recentrado en curso.
 El Player persistente sincroniza su destino con `SpawnPlayer` al cargar el mapa, evitando que camine hacia una posición anterior.
 
 El ratón reproduce tap/arrastre con botón izquierdo y zoom con rueda para pruebas de escritorio.
+
+## Feedback del Player
+
+XP e inventario tienen feedback visual inmediato junto al personaje.
+
+```text
+positivo → verde → sube
+negativo → rojo  → baja
+```
+
+Los negativos comienzan algo más abajo que los positivos. Ambos tipos pueden animarse simultáneamente porque utilizan colas independientes.
+
+Parámetros actuales:
+
+```text
+duración de cada mensaje: 1.2 s
+intervalo por cola:       0.25 s
+separación inicial:       60 px entre positivo y negativo
+```
+
+Cada mensaje mantiene su propia animación, por lo que varios textos pueden coexistir en pantalla.
+
+La regla funcional es estricta: si XP o inventario no cambian realmente, no aparece ningún mensaje. La restauración de una partida tampoco genera feedback.
+
+El `CanvasLayer 15` permite que el mensaje sea visible durante un diálogo y conserve un tamaño estable aunque la cámara use zoom.
+

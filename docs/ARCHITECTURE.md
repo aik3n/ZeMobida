@@ -8,7 +8,8 @@
 ```text
 Game
 ├── Player persistente
-│   └── Camera2D
+│   ├── Camera2D
+│   └── FeedbackLayer     CanvasLayer 15
 ├── UI global
 │   ├── HUD               CanvasLayer 5
 │   └── Estado            CanvasLayer 20
@@ -204,6 +205,29 @@ El recentrado usa un `Tween` paralelo, cúbico `EASE_OUT`, de:
 ```
 
 Así posición y zoom vuelven juntos sin un salto brusco.
+
+
+## Feedback inmediato de cambios del Player
+
+Los cambios de XP e inventario producen feedback flotante asociado visualmente al Player.
+
+```text
+ganancia → verde → sube
+pérdida  → rojo  → baja
+```
+
+El feedback se muestra sólo cuando el estado cambia realmente. Por ejemplo:
+
+- añadir un objeto ya existente no muestra mensaje;
+- quitar un objeto inexistente no muestra mensaje;
+- una variación de XP limitada por mínimo/máximo muestra únicamente la variación real;
+- cargar XP e inventario desde persistencia no genera mensajes.
+
+El texto usa un `CanvasLayer 15`: queda por encima de `DialogueUI` (`10`) y por debajo de `EstadoUI` (`20`). El origen del layer sigue cada frame la posición visual del Player, por lo que el mensaje permanece asociado al personaje aunque la cámara tenga paneo o zoom.
+
+Ganancias y pérdidas utilizan canales independientes. Cada canal conserva su propio orden, con una separación actual de `0.25 s` entre mensajes, pero un mensaje positivo y uno negativo pueden comenzar simultáneamente.
+
+Cada mensaje dura aproximadamente `1.2 s` y utiliza un `Label` temporal independiente que se elimina al terminar su `Tween`. No existe un gestor complejo de notificaciones ni pooling.
 
 
 ## Pendientes conocidos

@@ -19,3 +19,28 @@ shape = SubResource("CircleShape2D_4kxuq")
 [node name="Camera2D" type="Camera2D" parent="." unique_id=460678938]
 drag_horizontal_enabled = false
 drag_vertical_enabled = false
+
+[node name="FeedbackLayer" type="CanvasLayer" parent="."]
+layer = 15
+
+[node name="FeedbackLabel" type="Label" parent="FeedbackLayer"]
+visible = false
+offset_left = -300.0
+offset_top = -185.0
+offset_right = 300.0
+offset_bottom = -85.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.36, 1, 0.475, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.92)
+theme_override_constants/outline_size = 12
+theme_override_font_sizes/font_size = 64
+text = "+30 XP"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PositiveFeedbackTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="NegativeFeedbackTimer" type="Timer" parent="."]
+one_shot = true
+

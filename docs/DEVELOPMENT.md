@@ -364,6 +364,74 @@ Comprobar:
 Una línea de texto puede terminar en un bloque de efectos, por ejemplo `Has elegido bien [xp+30]`. El parser separa el texto de los efectos y `DialogueManager` los aplica únicamente cuando el nodo alcanza la fase de presentación.
 
 
+## Feedback flotante de XP e inventario
+
+Cuando un efecto modifica realmente XP o inventario, el jugador recibe un mensaje flotante junto al Player.
+
+Contrato visual actual:
+
+```text
+positivo
+  color verde
+  comienza encima del Player
+  sube
+  escala 0.72 → 1.18 → 1.0
+
+negativo
+  color rojo
+  comienza 60 px más abajo que el positivo
+  baja
+  escala 1.24 → 0.86
+```
+
+Los mensajes tienen borde oscuro para conservar legibilidad sobre el mapa. La duración visual actual es de aproximadamente `1.2 s`.
+
+### Dos colas independientes
+
+Los mensajes positivos y negativos no comparten cola:
+
+```text
+cola positiva → intervalo 0.25 s → mensajes que suben
+cola negativa → intervalo 0.25 s → mensajes que bajan
+```
+
+Dentro de cada tipo se conserva el orden. Entre tipos no existe bloqueo: una ganancia y una pérdida pueden comenzar a la vez.
+
+Cada mensaje duplica el `Label` de plantilla, ejecuta su propio `Tween` y se destruye con `queue_free()` al finalizar. La cola sólo regula la cadencia de lanzamiento.
+
+### Regla de cambio real
+
+No debe generarse feedback si el estado final no cambia.
+
+Comprobar:
+
+- XP positiva → texto `+N XP`;
+- XP negativa → texto `-N XP`;
+- XP en límite → mostrar sólo la variación real;
+- variación real `0` → no mostrar nada;
+- objeto nuevo → `+ Objeto`;
+- objeto eliminado → `- Objeto`;
+- objeto repetido al añadir → no mostrar;
+- objeto inexistente al quitar → no mostrar;
+- varios positivos → salida cada `0.25 s`;
+- varios negativos → salida cada `0.25 s`;
+- positivo y negativo simultáneos → ambos canales comienzan sin esperarse;
+- carga de partida → no genera feedback.
+
+### Orden visual
+
+El feedback utiliza `CanvasLayer 15`.
+
+```text
+HUD / UI normal → 5
+Diálogo         → 10
+Feedback Player → 15
+Estado          → 20
+```
+
+El layer sigue la posición del Player en pantalla. Esto evita que el diálogo tape los mensajes y mantiene su tamaño legible independientemente del zoom de cámara.
+
+
 ## Backlog técnico
 
 La lista priorizada de mejoras y riesgos pendientes se mantiene en `docs/AUDIT.md`, sección **Backlog de auditoría completa — 2026-08-29**.

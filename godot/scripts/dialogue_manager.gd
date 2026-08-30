@@ -265,6 +265,27 @@ func _apply_effects(effects: Array):
 				)
 
 
+func _mostrar_feedback_objeto(
+	texto: String,
+	positivo: bool
+) -> void:
+	var game = get_tree().current_scene
+
+	if game == null:
+		return
+
+	var player = game.get("player_actual")
+
+	if player == null:
+		return
+
+	if player.has_method("mostrar_feedback"):
+		player.mostrar_feedback(
+			texto,
+			positivo
+		)
+
+
 func _has_all_items(items: Array) -> bool:
 	for item in items:
 		if not inventory.has(item):
@@ -279,22 +300,41 @@ func has_item(item: String) -> bool:
 	)
 
 
-func add_item(item: String) -> void:
+func add_item(item: String) -> bool:
+	item = item.to_lower()
+
+	if inventory.has(item):
+		return false
+
+	inventory.append(item)
+
+	print(
+		"Inventario:",
+		inventory
+	)
+
+	_mostrar_feedback_objeto(
+		"+ " + item.capitalize(),
+		true
+	)
+
+	return true
+
+
+func remove_item(item: String) -> bool:
 	item = item.to_lower()
 
 	if not inventory.has(item):
-		inventory.append(item)
+		return false
 
-		print(
-			"Inventario:",
-			inventory
-		)
+	inventory.erase(item)
 
-
-func remove_item(item: String) -> void:
-	inventory.erase(
-		item.to_lower()
+	_mostrar_feedback_objeto(
+		"- " + item.capitalize(),
+		false
 	)
+
+	return true
 
 
 func end_dialogue():

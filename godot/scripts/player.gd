@@ -13,6 +13,10 @@ var vel := 400.0
 var destino: Vector2
 
 @onready var camera: Camera2D = $Camera2D
+@onready var feedback_layer: CanvasLayer = $FeedbackLayer
+@onready var feedback_label: Label = $FeedbackLayer/FeedbackLabel
+@onready var positive_feedback_timer: Timer = $PositiveFeedbackTimer
+@onready var negative_feedback_timer: Timer = $NegativeFeedbackTimer
 
 const DRAG_THRESHOLD := 28.0
 const CAMERA_RECENTER_TIME := 0.8
@@ -20,6 +24,20 @@ const CAMERA_RECENTER_TIME := 0.8
 const ZOOM_MIN := 0.7
 const ZOOM_MAX := 1.4
 const ZOOM_WHEEL_STEP := 0.1
+
+const FEEDBACK_POSITIVE_COLOR := Color("#5CFF79")
+const FEEDBACK_NEGATIVE_COLOR := Color("#FF5F6D")
+
+const FEEDBACK_POSITIVE_BASE_POSITION := Vector2(-300.0, -185.0)
+const FEEDBACK_NEGATIVE_BASE_POSITION := Vector2(-300.0, -125.0)
+
+const FEEDBACK_POSITIVE_DISTANCE := 125.0
+const FEEDBACK_NEGATIVE_DISTANCE := 105.0
+const FEEDBACK_DURATION := 1.20
+const FEEDBACK_INTERVAL := 0.25
+const FEEDBACK_FADE_DELAY := 0.68
+const FEEDBACK_FADE_TIME := 0.42
+const FEEDBACK_ROTATION_DEGREES := 4.0
 
 enum PointerSource {
 	NONE,
@@ -43,6 +61,12 @@ var _pinch_last_distance := 0.0
 # accidental al finalizar el gesto de zoom.
 var _touch_block_until_release := false
 
+var _positive_feedback_queue: Array[Dictionary] = []
+var _negative_feedback_queue: Array[Dictionary] = []
+
+var _positive_feedback_launcher_busy := false
+var _negative_feedback_launcher_busy := false
+
 
 const NIVELES := {
 	"a1": 70,
@@ -65,6 +89,32 @@ func _ready():
 	xp = clamp(xp, 0, _xp_maximo())
 	_actualizar_nivel()
 	destino = global_position
+
+	feedback_label.pivot_offset = feedback_label.size * 0.5
+	feedback_label.visible = false
+
+	positive_feedback_timer.timeout.connect(
+		_on_positive_feedback_timer_timeout
+	)
+
+	negative_feedback_timer.timeout.connect(
+		_on_negative_feedback_timer_timeout
+	)
+
+	_actualizar_posicion_feedback()
+
+
+func _process(_delta: float) -> void:
+	_actualizar_posicion_feedback()
+
+
+func _actualizar_posicion_feedback() -> void:
+	# FeedbackLayer está en CanvasLayer 15 para dibujarse por encima del
+	# diálogo (10), pero su origen sigue la posición visual del Player.
+	feedback_layer.offset = (
+		get_viewport().get_canvas_transform()
+		* global_position
+	)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -385,6 +435,189 @@ func _clamp_camera_axis(
 	return clampf(value, min_center, max_center)
 
 
+func mostrar_feedback(
+	texto: String,
+	positivo: bool
+) -> void:
+	if texto.is_empty():
+		return
+
+	var data := {
+		"texto": texto,
+		"positivo": positivo
+	}
+
+	if positivo:
+		_positive_feedback_queue.append(data)
+
+		if not _positive_feedback_launcher_busy:
+			_positive_feedback_launcher_busy = true
+			_lanzar_siguiente_feedback_positivo()
+	else:
+		_negative_feedback_queue.append(data)
+
+		if not _negative_feedback_launcher_busy:
+			_negative_feedback_launcher_busy = true
+			_lanzar_siguiente_feedback_negativo()
+
+
+func _on_positive_feedback_timer_timeout() -> void:
+	if _positive_feedback_queue.is_empty():
+		_positive_feedback_launcher_busy = false
+		return
+
+	_lanzar_siguiente_feedback_positivo()
+
+
+func _on_negative_feedback_timer_timeout() -> void:
+	if _negative_feedback_queue.is_empty():
+		_negative_feedback_launcher_busy = false
+		return
+
+	_lanzar_siguiente_feedback_negativo()
+
+
+func _lanzar_siguiente_feedback_positivo() -> void:
+	if _positive_feedback_queue.is_empty():
+		_positive_feedback_launcher_busy = false
+		return
+
+	var data: Dictionary = _positive_feedback_queue.pop_front()
+
+	_crear_feedback(
+		str(data["texto"]),
+		true
+	)
+
+	positive_feedback_timer.start(
+		FEEDBACK_INTERVAL
+	)
+
+
+func _lanzar_siguiente_feedback_negativo() -> void:
+	if _negative_feedback_queue.is_empty():
+		_negative_feedback_launcher_busy = false
+		return
+
+	var data: Dictionary = _negative_feedback_queue.pop_front()
+
+	_crear_feedback(
+		str(data["texto"]),
+		false
+	)
+
+	negative_feedback_timer.start(
+		FEEDBACK_INTERVAL
+	)
+
+
+func _crear_feedback(
+	texto: String,
+	positivo: bool
+) -> void:
+	var label := feedback_label.duplicate() as Label
+
+	if label == null:
+		return
+
+	feedback_layer.add_child(label)
+
+	var base_position := (
+		FEEDBACK_POSITIVE_BASE_POSITION
+		if positivo
+		else FEEDBACK_NEGATIVE_BASE_POSITION
+	)
+
+	label.text = texto
+	label.position = base_position
+	label.modulate = Color.WHITE
+	label.visible = true
+	label.pivot_offset = label.size * 0.5
+
+	label.rotation = deg_to_rad(
+		-FEEDBACK_ROTATION_DEGREES
+		if positivo
+		else FEEDBACK_ROTATION_DEGREES
+	)
+
+	label.add_theme_color_override(
+		"font_color",
+		FEEDBACK_POSITIVE_COLOR
+		if positivo
+		else FEEDBACK_NEGATIVE_COLOR
+	)
+
+	if positivo:
+		label.scale = Vector2.ONE * 0.72
+	else:
+		label.scale = Vector2.ONE * 1.24
+
+	var target_position := base_position
+
+	if positivo:
+		target_position.y -= FEEDBACK_POSITIVE_DISTANCE
+	else:
+		target_position.y += FEEDBACK_NEGATIVE_DISTANCE
+
+	var tween := create_tween()
+
+	tween.set_parallel(true)
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.set_ease(Tween.EASE_OUT)
+
+	tween.tween_property(
+		label,
+		"position",
+		target_position,
+		FEEDBACK_DURATION
+	)
+
+	tween.tween_property(
+		label,
+		"rotation",
+		0.0,
+		0.42
+	)
+
+	tween.tween_property(
+		label,
+		"modulate:a",
+		0.0,
+		FEEDBACK_FADE_TIME
+	).set_delay(
+		FEEDBACK_FADE_DELAY
+	)
+
+	if positivo:
+		tween.tween_property(
+			label,
+			"scale",
+			Vector2.ONE * 1.18,
+			0.17
+		)
+
+		tween.tween_property(
+			label,
+			"scale",
+			Vector2.ONE,
+			0.30
+		).set_delay(
+			0.17
+		)
+	else:
+		tween.tween_property(
+			label,
+			"scale",
+			Vector2.ONE * 0.86,
+			0.68
+		)
+
+	tween.finished.connect(
+		label.queue_free,
+		CONNECT_ONE_SHOT
+	)
+
+
 func _physics_process(_delta):
 	var input_direction := Input.get_vector(
 		"ui_left",
@@ -411,6 +644,8 @@ func _physics_process(_delta):
 
 
 func add_xp(amount: int) -> void:
+	var xp_anterior := xp
+
 	var nueva_xp: int = clamp(
 		xp + amount,
 		0,
@@ -423,6 +658,14 @@ func add_xp(amount: int) -> void:
 	xp = nueva_xp
 	_actualizar_nivel()
 	xp_changed.emit()
+
+	var cambio_real := xp - xp_anterior
+	var prefijo := "+" if cambio_real > 0 else ""
+
+	mostrar_feedback(
+		"%s%d XP" % [prefijo, cambio_real],
+		cambio_real > 0
+	)
 
 
 func _actualizar_nivel() -> void:

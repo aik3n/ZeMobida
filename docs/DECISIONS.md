@@ -410,3 +410,46 @@ El clamp de cámara debe considerar el zoom actual para impedir mostrar terreno 
 ### Verification
 
 Rueda/pinch, conservación del estado de exploración y restauración conjunta de posición y zoom fueron validados manualmente en runtime el 2026-08-30.
+
+
+## ADR-023 — Feedback flotante inmediato para cambios de XP e inventario
+**Status:** Accepted
+
+### Context
+
+Los efectos de diálogo ya podían modificar XP e inventario, pero el jugador sólo veía el resultado al consultar HUD o Estado. La acción narrativa y su consecuencia jugable quedaban visualmente desacopladas.
+
+### Decision
+
+Los cambios reales de XP y objetos generan mensajes flotantes asociados al Player.
+
+```text
+ganancia → verde → movimiento hacia arriba
+pérdida  → rojo  → movimiento hacia abajo
+```
+
+Sólo se genera feedback cuando el estado cambia realmente.
+
+Los mensajes viven en `CanvasLayer 15`, por encima del diálogo (`10`) y por debajo de Estado (`20`), y el origen visual del layer sigue la posición del Player.
+
+Se mantienen dos colas independientes:
+
+- positivos;
+- negativos.
+
+Cada cola lanza mensajes con un intervalo de `0.25 s`. Los dos canales pueden ejecutarse simultáneamente. Cada mensaje tiene su propio `Label` y `Tween`, dura aproximadamente `1.2 s` y se elimina al terminar.
+
+Los negativos comienzan ligeramente más abajo que los positivos para separar visualmente ambos sentidos.
+
+### Consequences
+
+El jugador percibe inmediatamente las consecuencias de una opción de diálogo sin abrir otra pantalla.
+
+La separación entre canales permite representar simultáneamente ganancias y pérdidas sin introducir un sistema complejo de notificaciones.
+
+La carga inicial de estado persistido no se trata como una ganancia o pérdida y no produce feedback.
+
+### Verification
+
+XP positiva/negativa, objetos añadidos/eliminados, ausencia de feedback sin cambio real, solapamiento de mensajes y colas positiva/negativa independientes fueron validados manualmente en runtime el 2026-08-30.
+
