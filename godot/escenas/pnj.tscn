@@ -1,22 +1,17 @@
 [gd_scene format=3 uid="uid://dr8npeucorwqx"]
 
-[ext_resource type="Texture2D" uid="uid://ddxmxgyyfy8mn" path="res://icon.svg" id="1_k73ab"]
 [ext_resource type="Script" uid="uid://caqkk62ge7skt" path="res://scripts/pnj.gd" id="1_q4jto"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_4kxuq"]
-radius = 23.086792
+radius = 50.08992
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_mti6b"]
-radius = 38.013157
+radius = 60.133186
 
 [node name="pnj1" type="CharacterBody2D" unique_id=1491293733]
 script = ExtResource("1_q4jto")
-nombre = null
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=690181880]
-rotation = 3.8571777
-scale = Vector2(0.4, 0.4)
-texture = ExtResource("1_k73ab")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1828085130]
 shape = SubResource("CircleShape2D_4kxuq")

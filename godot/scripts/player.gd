@@ -4,8 +4,11 @@ extends CharacterBody2D
 
 signal xp_changed
 
-@export_enum("a1", "a2", "b1", "b2", "c1")
-var nivel: String = "a1"
+const NIVELES_DATA := preload(
+	"res://scripts/niveles.gd"
+)
+
+var nivel: String = NIVELES_DATA.nivel_inicial()
 
 @export var xp: int = 0
 
@@ -66,23 +69,6 @@ var _negative_feedback_queue: Array[Dictionary] = []
 
 var _positive_feedback_launcher_busy := false
 var _negative_feedback_launcher_busy := false
-
-
-const NIVELES := {
-	"a1": 70,
-	"a2": 120,
-	"b1": 340,
-	"b2": 410,
-	"c1": 740
-}
-
-const ORDEN_NIVELES := [
-	"a1",
-	"a2",
-	"b1",
-	"b2",
-	"c1"
-]
 
 
 func _ready():
@@ -669,12 +655,9 @@ func add_xp(amount: int) -> void:
 
 
 func _actualizar_nivel() -> void:
-	var nuevo_nivel := ORDEN_NIVELES[0]
-
-	for nivel_nombre in ORDEN_NIVELES:
-		if xp <= NIVELES[nivel_nombre]:
-			nuevo_nivel = nivel_nombre
-			break
+	var nuevo_nivel := NIVELES_DATA.nivel_para_xp(
+		xp
+	)
 
 	if nuevo_nivel != nivel:
 		print(
@@ -686,4 +669,4 @@ func _actualizar_nivel() -> void:
 
 
 func _xp_maximo() -> int:
-	return NIVELES[ORDEN_NIVELES[-1]]
+	return NIVELES_DATA.xp_maximo()

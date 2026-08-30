@@ -1,10 +1,6 @@
 extends CharacterBody2D
 
 
-@export var nombre: String = "PNJ"
-@export var sprite: Texture2D
-
-
 enum TipoSeguimiento {
 	NUNCA_SEGUIR,
 	SEGUIR_Y_QUEDARSE,
@@ -30,12 +26,11 @@ const DISTANCIA_REANUDAR := 120.0
 const DISTANCIA_LLEGADA := 5.0
 
 
-@onready var sprite_2d: Sprite2D = $Sprite2D
+func get_nombre_tecnico() -> String:
+	return str(name).to_lower()
 
 
 func _ready() -> void:
-
-	sprite_2d.texture = sprite
 
 	var game := get_tree().current_scene
 
@@ -86,7 +81,7 @@ func _physics_process(_delta: float) -> void:
 func _actualizar_seguimiento() -> void:
 
 	var nuevo_estado := DialogueManager.has_item(
-		nombre.to_lower()
+		get_nombre_tecnico()
 	)
 
 	# El seguimiento acaba de comenzar.
@@ -202,9 +197,11 @@ func get_dialogue_path() -> String:
 
 		return ""
 
+	var nombre_tecnico := get_nombre_tecnico()
+
 	var dialogue_path := DialogueManager.resolve_dialogue_path(
 		map_name,
-		nombre,
+		nombre_tecnico,
 		str(player_node.nivel)
 	)
 
@@ -212,7 +209,7 @@ func get_dialogue_path() -> String:
 
 		push_error(
 			"No existe diálogo para: %s_%s"
-			% [map_name, nombre]
+			% [map_name, nombre_tecnico]
 		)
 
 	return dialogue_path
@@ -239,7 +236,7 @@ func _on_interaction_area_body_entered(body: Node) -> void:
 
 		DialogueManager.start_dialogue(
 			dialogue_path,
-			nombre
+			get_nombre_tecnico()
 		)
 
 

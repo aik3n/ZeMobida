@@ -51,7 +51,10 @@ func show_text(
 	text: String
 ) -> void:
 
-	name_label.text = speaker_name
+	name_label.text = speaker_name.replace(
+		"_",
+		" "
+	)
 	dialogue_text.text = text
 
 	# Cada nodo nuevo comienza mostrando el inicio del texto.

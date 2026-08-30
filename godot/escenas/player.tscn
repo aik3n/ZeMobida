@@ -4,32 +4,28 @@
 [ext_resource type="Script" uid="uid://drgmoxoncth27" path="res://scripts/player.gd" id="1_kkt6c"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_4kxuq"]
-radius = 26.076809
+radius = 35.057095
 
 [node name="player" type="CharacterBody2D" unique_id=750046266]
 script = ExtResource("1_kkt6c")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1661301542]
-scale = Vector2(0.5, 0.5)
 texture = ExtResource("1_esbpa")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=627423854]
 shape = SubResource("CircleShape2D_4kxuq")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=460678938]
-drag_horizontal_enabled = false
-drag_vertical_enabled = false
 
-[node name="FeedbackLayer" type="CanvasLayer" parent="."]
+[node name="FeedbackLayer" type="CanvasLayer" parent="." unique_id=606457261]
 layer = 15
 
-[node name="FeedbackLabel" type="Label" parent="FeedbackLayer"]
+[node name="FeedbackLabel" type="Label" parent="FeedbackLayer" unique_id=531767529]
 visible = false
 offset_left = -300.0
 offset_top = -185.0
 offset_right = 300.0
 offset_bottom = -85.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.36, 1, 0.475, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.92)
 theme_override_constants/outline_size = 12
@@ -38,9 +34,8 @@ text = "+30 XP"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="PositiveFeedbackTimer" type="Timer" parent="."]
+[node name="PositiveFeedbackTimer" type="Timer" parent="." unique_id=1040320656]
 one_shot = true
 
-[node name="NegativeFeedbackTimer" type="Timer" parent="."]
+[node name="NegativeFeedbackTimer" type="Timer" parent="." unique_id=1526722845]
 one_shot = true
-

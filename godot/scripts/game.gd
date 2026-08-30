@@ -3,6 +3,10 @@ extends Node
 
 const BIENVENIDA_SCENE := "res://escenas/bienvenida.tscn"
 
+const NIVELES_DATA := preload(
+	"res://scripts/niveles.gd"
+)
+
 
 @onready var scene_container: Node = $SceneContainer
 @onready var player_actual: Node = $Player
@@ -27,24 +31,6 @@ const BIENVENIDA_SCENE := "res://escenas/bienvenida.tscn"
 
 
 var mapa_actual: Node = null
-
-
-const NIVELES := {
-	"a1": 70,
-	"a2": 120,
-	"b1": 340,
-	"b2": 410,
-	"c1": 740
-}
-
-
-const ORDEN_NIVELES := [
-	"a1",
-	"a2",
-	"b1",
-	"b2",
-	"c1"
-]
 
 
 func _ready() -> void:
@@ -337,7 +323,7 @@ func _actualizar_hud() -> void:
 
 	hud_nivel.text = nivel.to_upper()
 
-	if not NIVELES.has(nivel):
+	if not NIVELES_DATA.tiene_nivel(nivel):
 
 		hud_progreso.text = "XP: %d" % xp
 
@@ -347,26 +333,17 @@ func _actualizar_hud() -> void:
 
 		return
 
-	var indice := ORDEN_NIVELES.find(
-		nivel
+	var limite_superior := (
+		NIVELES_DATA.xp_limite_superior(
+			nivel
+		)
 	)
 
-	if indice == -1:
-		return
-
-	var limite_superior: int = NIVELES[nivel]
-
-	var limite_inferior := 0
-
-	if indice > 0:
-
-		var nivel_anterior: String = (
-			ORDEN_NIVELES[indice - 1]
+	var limite_inferior := (
+		NIVELES_DATA.xp_limite_inferior(
+			nivel
 		)
-
-		limite_inferior = (
-			NIVELES[nivel_anterior] + 1
-		)
+	)
 
 	var rango := (
 		limite_superior
@@ -470,7 +447,7 @@ func _actualizar_experiencia(
 		player.xp
 	)
 
-	if not NIVELES.has(nivel):
+	if not NIVELES_DATA.tiene_nivel(nivel):
 
 		estado_progreso.text = "XP: %d" % xp
 
@@ -480,26 +457,17 @@ func _actualizar_experiencia(
 
 		return
 
-	var indice := ORDEN_NIVELES.find(
-		nivel
+	var limite_superior := (
+		NIVELES_DATA.xp_limite_superior(
+			nivel
+		)
 	)
 
-	if indice == -1:
-		return
-
-	var limite_superior: int = NIVELES[nivel]
-
-	var limite_inferior := 0
-
-	if indice > 0:
-
-		var nivel_anterior: String = (
-			ORDEN_NIVELES[indice - 1]
+	var limite_inferior := (
+		NIVELES_DATA.xp_limite_inferior(
+			nivel
 		)
-
-		limite_inferior = (
-			NIVELES[nivel_anterior] + 1
-		)
+	)
 
 	var rango := (
 		limite_superior

@@ -14,13 +14,11 @@ texture = ExtResource("2_biny4")
 
 [node name="javi" parent="." unique_id=1491293733 instance=ExtResource("1_5v2x2")]
 position = Vector2(171, 116)
-nombre = "javi"
 sprite = ExtResource("2_biny4")
 tipo_seguimiento = 1
 
-[node name="charo" parent="." unique_id=1247965314 instance=ExtResource("1_5v2x2")]
+[node name="samu" parent="." unique_id=1247965314 instance=ExtResource("1_5v2x2")]
 position = Vector2(102, 331)
-nombre = "samu"
 sprite = ExtResource("2_biny4")
 
 [node name="SpawnPlayer" type="Marker2D" parent="." unique_id=957641453]
