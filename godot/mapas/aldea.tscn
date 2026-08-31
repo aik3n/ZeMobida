@@ -34,47 +34,33 @@ texture = ExtResource("1_sru6s")
 
 [node name="juan" parent="." unique_id=1491293733 instance=ExtResource("2_jns4i")]
 position = Vector2(1582, 1301)
+sprite = ExtResource("4_juan")
 tipo_seguimiento = 1
 
 [node name="ibon" parent="." unique_id=186543396 instance=ExtResource("2_jns4i")]
 position = Vector2(1432, 1180)
+sprite = ExtResource("6_ibon")
 tipo_seguimiento = 1
 
 [node name="charo" parent="." unique_id=1247965314 instance=ExtResource("2_jns4i")]
 position = Vector2(1523, 1026)
+sprite = ExtResource("7_charo")
 
 [node name="luis" parent="." unique_id=552112840 instance=ExtResource("2_jns4i")]
 position = Vector2(2147, 1128)
+sprite = ExtResource("8_luis")
 tipo_seguimiento = 0
 
 [node name="peter" parent="." unique_id=187825920 instance=ExtResource("2_jns4i")]
 position = Vector2(1997, 962)
-
-
-
-[node name="Sprite2D" parent="juan" index="0"]
-texture = ExtResource("4_juan")
-
-[node name="Sprite2D" parent="ibon" index="0"]
-texture = ExtResource("6_ibon")
-
-[node name="Sprite2D" parent="charo" index="0"]
-texture = ExtResource("7_charo")
-
-[node name="Sprite2D" parent="luis" index="0"]
-texture = ExtResource("8_luis")
-
-[node name="Sprite2D" parent="peter" index="0"]
-texture = ExtResource("9_peter")
-
-[node name="Sprite2D" parent="paco" index="0"]
-texture = ExtResource("10_paco")
+sprite = ExtResource("9_peter")
 
 [node name="SpawnPlayer" type="Marker2D" parent="." unique_id=957641453]
 position = Vector2(1667, 1134)
 
 [node name="paco" parent="." unique_id=1383033262 instance=ExtResource("2_jns4i")]
 position = Vector2(1848, 1058)
+sprite = ExtResource("10_paco")
 tipo_seguimiento = 0
 
 [node name="colisiones" type="StaticBody2D" parent="." unique_id=894876693]

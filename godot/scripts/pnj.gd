@@ -1,3 +1,4 @@
+@tool
 extends CharacterBody2D
 
 
@@ -7,6 +8,11 @@ enum TipoSeguimiento {
 	SEGUIR_Y_VOLVER
 }
 
+
+@export var sprite: Texture2D:
+	set(value):
+		sprite = value
+		_actualizar_sprite_visual()
 
 @export var tipo_seguimiento: TipoSeguimiento = TipoSeguimiento.SEGUIR_Y_VOLVER
 
@@ -26,11 +32,24 @@ const DISTANCIA_REANUDAR := 120.0
 const DISTANCIA_LLEGADA := 5.0
 
 
+func _actualizar_sprite_visual() -> void:
+	var nodo_sprite := get_node_or_null("Sprite2D") as Sprite2D
+
+	if nodo_sprite != null:
+		nodo_sprite.texture = sprite
+
+
 func get_nombre_tecnico() -> String:
 	return str(name).to_lower()
 
 
 func _ready() -> void:
+	_actualizar_sprite_visual()
+
+	# @tool permite reflejar el sprite dentro del editor. Toda la lógica
+	# de gameplay sigue ejecutándose exclusivamente durante el juego.
+	if Engine.is_editor_hint():
+		return
 
 	var game := get_tree().current_scene
 
@@ -39,6 +58,8 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 
 	if player == null:
 		return
@@ -80,9 +101,9 @@ func _physics_process(_delta: float) -> void:
 
 func _actualizar_seguimiento() -> void:
 
-	var nuevo_estado := DialogueManager.has_item(
+	var nuevo_estado: bool = bool(DialogueManager.has_item(
 		get_nombre_tecnico()
-	)
+	))
 
 	# El seguimiento acaba de comenzar.
 	if nuevo_estado and not siguiendo:
@@ -199,11 +220,11 @@ func get_dialogue_path() -> String:
 
 	var nombre_tecnico := get_nombre_tecnico()
 
-	var dialogue_path := DialogueManager.resolve_dialogue_path(
+	var dialogue_path: String = str(DialogueManager.resolve_dialogue_path(
 		map_name,
 		nombre_tecnico,
 		str(player_node.nivel)
-	)
+	))
 
 	if dialogue_path.is_empty():
 
@@ -216,6 +237,8 @@ func get_dialogue_path() -> String:
 
 
 func _on_interaction_area_body_entered(body: Node) -> void:
+	if Engine.is_editor_hint():
+		return
 
 	if body.name != "Player":
 
@@ -241,6 +264,8 @@ func _on_interaction_area_body_entered(body: Node) -> void:
 
 
 func _on_interaction_area_body_exited(body: Node) -> void:
+	if Engine.is_editor_hint():
+		return
 
 	if body.name != "Player":
 
