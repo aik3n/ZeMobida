@@ -4,7 +4,12 @@
 [ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="2_jns4i"]
 [ext_resource type="Texture2D" uid="uid://bms6oms14c8ui" path="res://art/mapas/aldea.PNG" id="3_fondo"]
 [ext_resource type="Texture2D" uid="uid://dpyw518c5ss7y" path="res://art/mapas/frontal_prueba.png" id="5_frontal"]
-[ext_resource type="Texture2D" uid="uid://c36wafwmad47r" path="res://art/personajes/aldea/ibon.png" id="6_ibon"]
+[ext_resource type="Texture2D" uid="uid://d288q5sfejdxr" path="res://art/personajes/salce/secretaria.png" id="5_sstdv"]
+[ext_resource type="Texture2D" uid="uid://dce4bpgo04sn0" path="res://art/personajes/aldea/chef.png" id="6_ir3er"]
+[ext_resource type="Texture2D" uid="uid://di7iyu2fbpj4d" path="res://art/personajes/aldea/ejecutivo.png" id="7_nnw51"]
+[ext_resource type="Texture2D" uid="uid://dhavs312oheyk" path="res://art/personajes/aldea/limpiador.png" id="8_e16na"]
+[ext_resource type="Texture2D" uid="uid://bf1slfiushdtc" path="res://art/personajes/aldea/medico.png" id="9_bm4e6"]
+[ext_resource type="Texture2D" uid="uid://l6rlkvcbeieg" path="res://art/personajes/aldea/obrero_madera.png" id="10_lqgry"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fmk2k"]
 size = Vector2(179, 55)
@@ -30,32 +35,32 @@ texture = ExtResource("1_sru6s")
 [node name="SpawnPlayer" type="Marker2D" parent="." unique_id=957641453]
 position = Vector2(1667, 1134)
 
-[node name="juan" parent="." unique_id=1491293733 instance=ExtResource("2_jns4i")]
-position = Vector2(1582, 1301)
-sprite = ExtResource("6_ibon")
+[node name="secretaria" parent="." unique_id=1491293733 instance=ExtResource("2_jns4i")]
+position = Vector2(1471, 1524)
+sprite = ExtResource("5_sstdv")
 tipo_seguimiento = 1
 
-[node name="ibon" parent="." unique_id=186543396 instance=ExtResource("2_jns4i")]
-position = Vector2(1432, 1180)
-sprite = ExtResource("6_ibon")
+[node name="chef" parent="." unique_id=186543396 instance=ExtResource("2_jns4i")]
+position = Vector2(1207, 1200)
+sprite = ExtResource("6_ir3er")
 tipo_seguimiento = 1
 
-[node name="charo" parent="." unique_id=1247965314 instance=ExtResource("2_jns4i")]
-position = Vector2(1523, 1026)
-sprite = ExtResource("6_ibon")
+[node name="ejecutivo" parent="." unique_id=1247965314 instance=ExtResource("2_jns4i")]
+position = Vector2(1532, 789)
+sprite = ExtResource("7_nnw51")
 
-[node name="luis" parent="." unique_id=552112840 instance=ExtResource("2_jns4i")]
-position = Vector2(2147, 1128)
-sprite = ExtResource("6_ibon")
+[node name="limpiador" parent="." unique_id=552112840 instance=ExtResource("2_jns4i")]
+position = Vector2(2312, 1117)
+sprite = ExtResource("8_e16na")
 tipo_seguimiento = 0
 
-[node name="peter" parent="." unique_id=187825920 instance=ExtResource("2_jns4i")]
-position = Vector2(1997, 962)
-sprite = ExtResource("6_ibon")
+[node name="medico" parent="." unique_id=187825920 instance=ExtResource("2_jns4i")]
+position = Vector2(2077, 808)
+sprite = ExtResource("9_bm4e6")
 
-[node name="paco" parent="." unique_id=1383033262 instance=ExtResource("2_jns4i")]
-position = Vector2(1848, 1058)
-sprite = ExtResource("6_ibon")
+[node name="obrero_madera" parent="." unique_id=1383033262 instance=ExtResource("2_jns4i")]
+position = Vector2(2136, 1466)
+sprite = ExtResource("10_lqgry")
 tipo_seguimiento = 0
 
 [node name="colisiones" type="StaticBody2D" parent="." unique_id=894876693]

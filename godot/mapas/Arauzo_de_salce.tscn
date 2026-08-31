@@ -2,7 +2,12 @@
 
 [ext_resource type="Texture2D" uid="uid://dkasmkdkfbyqn" path="res://art/preview/salce.PNG" id="1_aeglk"]
 [ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="1_jtpdi"]
-[ext_resource type="Texture2D" uid="uid://c36wafwmad47r" path="res://art/personajes/aldea/ibon.png" id="3_aeglk"]
+[ext_resource type="Texture2D" uid="uid://bb0kgifkx4up6" path="res://art/mapas/skyrim.jpg" id="2_r2tag"]
+[ext_resource type="Texture2D" uid="uid://c4e7affltbwlu" path="res://art/personajes/salce/profesora.png" id="3_kh0t6"]
+[ext_resource type="Texture2D" uid="uid://davw761kgr6ua" path="res://art/personajes/salce/reportera.png" id="4_r2tag"]
+[ext_resource type="Texture2D" uid="uid://d288q5sfejdxr" path="res://art/personajes/salce/secretaria.png" id="5_b4h6c"]
+[ext_resource type="Texture2D" uid="uid://cy06ljirshfyt" path="res://art/personajes/salce/cientifico.png" id="6_xpywm"]
+[ext_resource type="Texture2D" uid="uid://kktngs3lvr8p" path="res://art/personajes/repartidor.png" id="7_5f5e7"]
 
 [node name="salce" type="Node2D" unique_id=493802413]
 
@@ -10,28 +15,33 @@
 visible = false
 texture = ExtResource("1_aeglk")
 
-[node name="SpawnPlayer" type="Marker2D" parent="." unique_id=957641453]
-position = Vector2(567, 301)
+[node name="Fondo" type="Sprite2D" parent="." unique_id=191530859]
+z_index = -10
+texture = ExtResource("2_r2tag")
+centered = false
 
-[node name="juan" parent="." unique_id=1491293733 instance=ExtResource("1_jtpdi")]
-position = Vector2(171, 116)
-sprite = ExtResource("3_aeglk")
+[node name="SpawnPlayer" type="Marker2D" parent="." unique_id=957641453]
+position = Vector2(1561, 1471)
+
+[node name="profesora" parent="." unique_id=1491293733 instance=ExtResource("1_jtpdi")]
+position = Vector2(1225, 979)
+sprite = ExtResource("3_kh0t6")
 tipo_seguimiento = 1
 
-[node name="charo" parent="." unique_id=1247965314 instance=ExtResource("1_jtpdi")]
-position = Vector2(102, 331)
-sprite = ExtResource("3_aeglk")
+[node name="reportera" parent="." unique_id=1247965314 instance=ExtResource("1_jtpdi")]
+position = Vector2(1096, 1593)
+sprite = ExtResource("4_r2tag")
 
-[node name="luis" parent="." unique_id=552112840 instance=ExtResource("1_jtpdi")]
-position = Vector2(719, 303)
-sprite = ExtResource("3_aeglk")
+[node name="secretaria" parent="." unique_id=552112840 instance=ExtResource("1_jtpdi")]
+position = Vector2(1775, 1577)
+sprite = ExtResource("5_b4h6c")
 tipo_seguimiento = 0
 
-[node name="peter" parent="." unique_id=187825920 instance=ExtResource("1_jtpdi")]
-position = Vector2(705, 158)
-sprite = ExtResource("3_aeglk")
+[node name="cientifico" parent="." unique_id=187825920 instance=ExtResource("1_jtpdi")]
+position = Vector2(1787, 1077)
+sprite = ExtResource("6_xpywm")
 
-[node name="paco" parent="." unique_id=1383033262 instance=ExtResource("1_jtpdi")]
-position = Vector2(458, 430)
-sprite = ExtResource("3_aeglk")
+[node name="repartidor" parent="." unique_id=1383033262 instance=ExtResource("1_jtpdi")]
+position = Vector2(1468, 1822)
+sprite = ExtResource("7_5f5e7")
 tipo_seguimiento = 0
