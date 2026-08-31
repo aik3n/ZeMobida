@@ -23,6 +23,6 @@ Dokumentazio nagusia:
 - [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md)
 - [`docs/MAP_PACKS_FUTURE.md`](docs/MAP_PACKS_FUTURE.md)
 
-Gidoi ofizialak `aik3n/ZeMobida_guiones` biltegi bereizian bertsionatzen dira.
+Gidoi ofizialak `aik3n/ZeMobida_guiones` biltegi bereizian bertsionatzen dira. Gidoi-editoreko `ENVIAR` aukerak lehenik tokiko fitxategia gordetzen du eta ondoren posta-mezua prestatzen du `zemobida@gmail.com` helbidera, erabiltzailearen posta-aplikazioa erabiliz.
 
 GNU GPL v3.0.

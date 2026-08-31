@@ -25,7 +25,7 @@ ZeMobida es un videojuego de código abierto desarrollado con Godot y centrado e
 - Diálogos ramificados en `.txt` UTF-8.
 - Sincronización de guiones oficiales desde `aik3n/ZeMobida_guiones`.
 - Variantes locales por archivo en `user://custom_dialogues/`.
-- Editor ligero de guiones dentro del juego.
+- Editor ligero de guiones dentro del juego con guardado y envío por correo.
 - Condiciones de inventario y efectos.
 - XP y niveles derivados: `a1`, `a2`, `b1`, `b2`, `c1`, `c2`.
 - HUD/estado global y feedback flotante de cambios de XP/inventario.
@@ -72,7 +72,7 @@ Consulta [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 - [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md)
 - [`docs/MAP_PACKS_FUTURE.md`](docs/MAP_PACKS_FUTURE.md)
 
-Los guiones oficiales se versionan exclusivamente en `aik3n/ZeMobida_guiones`; `user://dialogues/` es la caché runtime y `user://custom_dialogues/` contiene las variantes locales.
+Los guiones oficiales se versionan exclusivamente en `aik3n/ZeMobida_guiones`; `user://dialogues/` es la caché runtime y `user://custom_dialogues/` contiene las variantes locales. Desde el editor, `ENVIAR` guarda primero la versión local y después prepara un correo a `zemobida@gmail.com` mediante la aplicación de correo del jugador.
 
 ## Estado técnico
 

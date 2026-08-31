@@ -278,7 +278,27 @@ aik3n/ZeMobida_guiones
 
 `DialogueUpdater` transporta/sincroniza archivos oficiales; no interpreta la sintaxis.
 
-El editor local usa `CodeEdit`, resaltado visual y un gutter rojo informativo. Guardar nunca queda bloqueado por esos avisos.
+El editor local usa `CodeEdit`, resaltado visual y un gutter rojo informativo. Los avisos no bloquean ninguna acción.
+
+Acciones actuales del editor:
+
+```text
+GUARDAR → guarda en user://custom_dialogues/ y cierra el editor
+ENVIAR  → guarda primero; si el guardado funciona, abre el correo y mantiene el editor abierto
+CERRAR  → cierra sin guardar cambios posteriores
+```
+
+`GUARDAR` y `ENVIAR` reutilizan la misma lógica de escritura. `ENVIAR` nunca intenta enviar una versión que no se haya guardado correctamente antes.
+
+El envío no utiliza SMTP, credenciales de Gmail, OAuth ni backend. Tras guardar, el juego abre una URI `mailto:` mediante `OS.shell_open()` con:
+
+```text
+Para:    zemobida@gmail.com
+Asunto:  ZeMobida - <nombre_archivo>
+Cuerpo:  nombre del archivo + contenido exacto guardado
+```
+
+El `.txt` no se adjunta automáticamente: el contenido se incluye en el cuerpo del correo. La aplicación de correo del jugador es la que muestra y confirma el envío. Cancelar ese correo no deshace el guardado local realizado previamente.
 
 El runtime actual continúa usando `DialogueParser` y `DialogueValidator` al iniciar un diálogo. La responsabilidad conceptual del parser es interpretar el formato; cualquier cambio futuro en la política de validación debe debatirse por separado.
 

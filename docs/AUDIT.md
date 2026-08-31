@@ -1,7 +1,7 @@
 # ZeMobida — Technical Audit
 
 **Revisión:** 2026-08-31  
-**Base GitHub revisada:** `974d24a1b5d9fa1f3379194e8b9a83ceb4439354` más los cambios runtime validados inmediatamente posteriores de navegación y posición por mapa.  
+**Base GitHub revisada:** `411e173221f6462c46be8444d7aa1a4788b76cc3` más la función `ENVIAR` del editor validada inmediatamente después en runtime.  
 **Estado:** prototipo funcional; deuda localizada. No se recomienda una reescritura general.
 
 ## Resumen
@@ -17,7 +17,8 @@ La arquitectura se mantiene coherente y deliberadamente sencilla:
 - sincronización remota con temporal + backup;
 - persistencia consolidada en `user://settings.cfg`;
 - regreso global al selector de mapas;
-- posición independiente recordada por mapa.
+- posición independiente recordada por mapa;
+- envío voluntario de guiones locales mediante la aplicación de correo del jugador.
 
 Las prioridades altas pendientes continúan concentradas en robustez del runtime de diálogo, no en la arquitectura general.
 
@@ -60,6 +61,24 @@ Un diálogo activo se cierra antes de salir. La salida se bloquea mientras el ed
 Las posiciones se conservan en `[map_positions]` dentro de `user://settings.cfg` y se guardan al abandonar el mapa, en cierre normal de ventana y al pausar la aplicación.
 
 El botón Stop del editor puede matar externamente el proceso y no se considera una ruta de cierre fiable.
+
+
+### Envío de guiones locales
+
+El editor incorpora `ENVIAR` junto a `GUARDAR` y `CERRAR`.
+
+Contrato validado:
+
+```text
+ENVIAR
+→ guardar primero en user://custom_dialogues/
+→ si falla el guardado, no abrir correo
+→ si funciona, preparar mailto: a zemobida@gmail.com
+→ mantener abierto el editor
+```
+
+El asunto contiene el nombre del archivo y el cuerpo contiene el texto exacto guardado. No se incluyen credenciales ni se conecta directamente con Gmail/SMTP. El usuario confirma o cancela el envío desde su propia aplicación de correo.
+
 
 ## Backlog actual
 

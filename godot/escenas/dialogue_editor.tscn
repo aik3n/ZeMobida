@@ -62,8 +62,7 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(0.92, 0.95, 0.98, 1)
 theme_override_constants/line_spacing = 8
 theme_override_font_sizes/font_size = 30
-placeholder_text = "# INICIO
-Escribe aquí tu diálogo."
+placeholder_text = "# INICIO\nEscribe aquí tu diálogo."
 scroll_past_end_of_file = true
 
 [node name="SaveButton" type="Button" parent="Panel" unique_id=1177657783]
@@ -71,26 +70,40 @@ layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.04
 anchor_top = 0.865
-anchor_right = 0.48
+anchor_right = 0.32
 anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 29
 text = "GUARDAR"
+
+[node name="SendButton" type="Button" parent="Panel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.36
+anchor_top = 0.865
+anchor_right = 0.64
+anchor_bottom = 0.95
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 29
+text = "ENVIAR"
 
 [node name="CloseButton" type="Button" parent="Panel" unique_id=1710235549]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.52
+anchor_left = 0.68
 anchor_top = 0.865
 anchor_right = 0.96
 anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 29
 text = "CERRAR"
 
 [connection signal="pressed" from="Panel/SaveButton" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="Panel/SendButton" to="." method="_on_send_pressed"]
 [connection signal="pressed" from="Panel/CloseButton" to="." method="_on_close_pressed"]

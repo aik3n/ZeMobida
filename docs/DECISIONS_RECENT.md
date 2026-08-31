@@ -147,3 +147,52 @@ Al restaurar posición se sincroniza igualmente `player_actual.destino`.
 Cada mapa recuerda de forma independiente dónde quedó el jugador sin introducir checkpoints ni un sistema de respawn más complejo.
 
 El Stop del editor de Godot puede finalizar el proceso externamente y no se considera una ruta de guardado garantizada.
+
+---
+
+## ADR-030 — Enviar guiones mediante correo local después de guardarlos
+
+**Status:** Accepted  
+**Fecha:** 2026-08-31
+
+### Context
+
+Se quiere permitir que el jugador envíe un guion creado o modificado para su revisión sin introducir cuentas de usuario, servidor, SMTP ni credenciales dentro de ZeMobida.
+
+Además, enviar una versión no guardada podría crear confusión si después se cierra el editor y el contenido enviado no coincide con el archivo local.
+
+### Decision
+
+El editor muestra:
+
+```text
+GUARDAR | ENVIAR | CERRAR
+```
+
+`ENVIAR` reutiliza exactamente la misma lógica de escritura que `GUARDAR` y sigue este orden:
+
+1. guardar el contenido actual en `user://custom_dialogues/<archivo>`;
+2. si el guardado falla, abortar;
+3. si funciona, abrir una URI `mailto:` mediante `OS.shell_open()`;
+4. mantener abierto el editor.
+
+El correo se prepara con:
+
+```text
+Para:   zemobida@gmail.com
+Asunto: ZeMobida - <nombre_archivo>
+Cuerpo: nombre del archivo + contenido exacto guardado
+```
+
+No se adjunta automáticamente el `.txt`. No se almacenan credenciales de la cuenta receptora ni se envía correo directamente desde el juego. El usuario conserva la confirmación final en su aplicación de correo.
+
+### Consequences
+
+La versión que se intenta enviar siempre existe ya como copia local. Cancelar el correo no pierde esa edición.
+
+El mecanismo depende de que el sistema disponga de una aplicación capaz de manejar `mailto:`. Si no puede abrirla, el guion permanece guardado y sólo falla la apertura del correo.
+
+### Verification
+
+Se validó manualmente que `ENVIAR` guarda el contenido antes de abrir el cliente de correo y que el texto permanece guardado incluso si se cancela el envío.
+

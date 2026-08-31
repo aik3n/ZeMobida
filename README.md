@@ -25,7 +25,7 @@ ZeMobida is an open-source Godot game built around exploration, NPC interaction,
 - Branching dialogue from UTF-8 `.txt` files.
 - Official dialogue synchronization from the separate repository `aik3n/ZeMobida_guiones`.
 - Per-file local dialogue overrides under `user://custom_dialogues/`.
-- Lightweight in-game dialogue editor.
+- Lightweight in-game dialogue editor with save-and-submit by email.
 - Inventory conditions and effects.
 - XP-derived progression levels: `a1`, `a2`, `b1`, `b2`, `c1`, `c2`.
 - Global HUD/status UI and floating feedback for XP/inventory changes.
@@ -89,7 +89,7 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Dialogue content
 
-Official dialogue content is versioned in the separate repository `aik3n/ZeMobida_guiones`. Runtime official files are cached under `user://dialogues/`; local player-created variants live under `user://custom_dialogues/`.
+Official dialogue content is versioned in the separate repository `aik3n/ZeMobida_guiones`. Runtime official files are cached under `user://dialogues/`; local player-created variants live under `user://custom_dialogues/`. The editor can save a local variant and prepare an email submission to `zemobida@gmail.com` using the player's configured mail application.
 
 See [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md).
 

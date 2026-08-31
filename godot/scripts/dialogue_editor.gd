@@ -2,6 +2,7 @@ extends CanvasLayer
 
 
 const CUSTOM_DIALOGUE_FOLDER := "user://custom_dialogues/"
+const SUBMISSION_EMAIL := "zemobida@gmail.com"
 
 const ERROR_GUTTER_WIDTH := 34
 const ERROR_MARKER := "●"
@@ -499,15 +500,15 @@ func _are_effects_locally_valid(
 	return true
 
 
-func _on_save_pressed() -> void:
+func _save_current_text() -> bool:
 	if file_name.is_empty():
-		return
+		return false
 
 	if not _ensure_custom_folder():
 		push_warning(
 			"No se pudo crear la carpeta de guiones locales."
 		)
-		return
+		return false
 
 	var file := FileAccess.open(
 		CUSTOM_DIALOGUE_FOLDER + file_name,
@@ -519,18 +520,68 @@ func _on_save_pressed() -> void:
 			"No se pudo guardar el guion local: "
 			+ file_name
 		)
-		return
+		return false
 
 	file.store_string(code_edit.text)
+	var write_error: Error = file.get_error()
 	file.close()
+
+	if write_error != OK:
+		push_warning(
+			"No se pudo completar el guardado del guion local: "
+			+ file_name
+		)
+		return false
 
 	print(
 		"Guion local guardado: ",
 		file_name
 	)
 
+	return true
+
+
+func _on_save_pressed() -> void:
+	if not _save_current_text():
+		return
+
 	# Guardar confirma la edición y vuelve inmediatamente al juego.
 	queue_free()
+
+
+func _on_send_pressed() -> void:
+	# Nunca se abre el correo con una versión que no se haya guardado.
+	if not _save_current_text():
+		return
+
+	var subject: String = (
+		"ZeMobida - " + file_name
+	).uri_encode()
+
+	var body: String = (
+		"Archivo: "
+		+ file_name
+		+ "\n\n"
+		+ code_edit.text
+	).uri_encode()
+
+	var mailto_uri: String = (
+		"mailto:"
+		+ SUBMISSION_EMAIL
+		+ "?subject="
+		+ subject
+		+ "&body="
+		+ body
+	)
+
+	var error: Error = OS.shell_open(
+		mailto_uri
+	)
+
+	if error != OK:
+		push_warning(
+			"El guion se guardó, pero no se pudo abrir la aplicación de correo."
+		)
 
 
 func _ensure_custom_folder() -> bool:
