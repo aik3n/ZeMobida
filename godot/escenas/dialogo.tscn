@@ -31,7 +31,6 @@ layer = 10
 script = ExtResource("1_l0sow")
 
 [node name="PanelTexto" type="Panel" parent="." unique_id=1311012228]
-layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.045
 anchor_top = 0.02
@@ -55,7 +54,7 @@ theme_override_font_sizes/font_size = 42
 text = "PNJ"
 vertical_alignment = 1
 
-[node name="EditButton" type="Button" parent="PanelTexto"]
+[node name="EditButton" type="Button" parent="PanelTexto" unique_id=81456818]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.64
@@ -77,14 +76,13 @@ anchor_right = 0.95
 anchor_bottom = 0.235
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.52, 0.87, 0.88, 1)
 theme_override_font_sizes/font_size = 44
 text = "▼"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ScrollTexto" type="ScrollContainer" parent="PanelTexto"]
+[node name="ScrollTexto" type="ScrollContainer" parent="PanelTexto" unique_id=1836638185]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.04
@@ -99,15 +97,13 @@ horizontal_scroll_mode = 0
 custom_minimum_size = Vector2(1, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.94, 0.96, 0.98, 1)
-theme_override_font_sizes/font_size = 34
 theme_override_constants/line_spacing = 7
+theme_override_font_sizes/font_size = 34
 text = "Texto del diálogo"
 autowrap_mode = 2
 
 [node name="PanelOpciones" type="Panel" parent="." unique_id=534952449]
-layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.045
 anchor_top = 0.72
@@ -117,7 +113,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleOptions")
 
-[node name="ScrollOpciones" type="ScrollContainer" parent="PanelOpciones"]
+[node name="ScrollOpciones" type="ScrollContainer" parent="PanelOpciones" unique_id=1616379698]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -136,6 +132,4 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 16
 
 [connection signal="gui_input" from="PanelTexto" to="." method="_on_panel_texto_gui_input"]
-
 [connection signal="pressed" from="PanelTexto/EditButton" to="." method="_on_edit_button_pressed"]
-

@@ -110,6 +110,8 @@ grow_horizontal = 2
 grow_vertical = 2
 show_percentage = false
 
+
+
 [node name="BotonEstado" type="Button" parent="UI" unique_id=2034402367]
 layout_mode = 1
 anchors_preset = -1
@@ -241,13 +243,30 @@ theme_override_font_sizes/font_size = 34
 text = "INVENTARIO"
 vertical_alignment = 1
 
+
+[node name="VolverMapas" type="Button" parent="EstadoUI/Estado/Panel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.22
+anchor_top = 0.84
+anchor_right = 0.78
+anchor_bottom = 0.915
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleButton")
+theme_override_styles/hover = SubResource("StyleButton")
+theme_override_styles/pressed = SubResource("StyleButton")
+text = "VOLVER A MAPAS"
+
 [node name="Scroll" type="ScrollContainer" parent="EstadoUI/Estado/Panel" unique_id=416746288]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.06
 anchor_top = 0.3
 anchor_right = 0.94
-anchor_bottom = 0.93
+anchor_bottom = 0.81
 grow_horizontal = 2
 grow_vertical = 2
 

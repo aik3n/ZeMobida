@@ -2,6 +2,8 @@ extends Node
 
 
 const BIENVENIDA_SCENE := "res://escenas/bienvenida.tscn"
+const SETTINGS_FILE := "user://settings.cfg"
+const MAP_POSITIONS_SECTION := "map_positions"
 
 const NIVELES_DATA := preload(
 	"res://scripts/niveles.gd"
@@ -18,9 +20,12 @@ const NIVELES_DATA := preload(
 @onready var hud_progreso: Label = $UI/HUD/lbl_Progreso
 @onready var hud_barra_xp: ProgressBar = $UI/HUD/bar_Progreso
 
+# Navegación y estado
+@onready var boton_mapas: Button = $EstadoUI/Estado/Panel/VolverMapas
+@onready var boton_estado: Button = $UI/BotonEstado
+
 # Panel de estado
 @onready var estado_panel: Panel = $EstadoUI/Estado/Panel
-@onready var boton_estado: Button = $UI/BotonEstado
 @onready var boton_cerrar: Button = $EstadoUI/Estado/Panel/Cerrar
 
 @onready var estado_titulo: Label = $EstadoUI/Estado/Panel/Titulo
@@ -41,6 +46,10 @@ func _ready() -> void:
 	player_actual.set_physics_process(false)
 	player_actual.set_process_unhandled_input(false)
 
+	boton_mapas.pressed.connect(
+		_volver_a_mapas
+	)
+
 	boton_estado.pressed.connect(
 		_abrir_estado
 	)
@@ -60,10 +69,21 @@ func _ready() -> void:
 	)
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		_guardar_posicion_mapa_actual()
+
+	elif what == NOTIFICATION_APPLICATION_PAUSED:
+		_guardar_posicion_mapa_actual()
+
+
 
 func cargar_escena(
 	scene_path: String
 ) -> void:
+
+	# Si venimos de un mapa, conservar la última posición del Player.
+	_guardar_posicion_mapa_actual()
 
 	# Desactivar Player y su cámara mientras no hay mapa cargado.
 	player_actual.visible = false
@@ -148,13 +168,15 @@ func _configurar_player() -> void:
 
 		return
 
-	player_actual.global_position = (
+	var posicion_inicial: Vector2 = _obtener_posicion_mapa(
 		spawn.global_position
 	)
 
+	player_actual.global_position = posicion_inicial
+
 	# Player es persistente: al cambiarlo de posición también hay que
 	# sincronizar su destino para que no intente volver al punto anterior.
-	player_actual.destino = spawn.global_position
+	player_actual.destino = posicion_inicial
 
 	player_actual.visible = true
 	player_actual.set_physics_process(true)
@@ -164,6 +186,94 @@ func _configurar_player() -> void:
 
 	_actualizar_hud()
 
+
+
+func _get_map_id(mapa: Node) -> String:
+	if mapa == null:
+		return ""
+
+	var scene_path: String = mapa.scene_file_path
+
+	if scene_path.is_empty():
+		return ""
+
+	return scene_path.get_file().get_basename()
+
+
+
+func _guardar_posicion_mapa_actual() -> void:
+	if mapa_actual == null:
+		return
+
+	if player_actual == null or not player_actual.visible:
+		return
+
+	var map_id: String = _get_map_id(
+		mapa_actual
+	)
+
+	if map_id.is_empty():
+		return
+
+	var config := ConfigFile.new()
+	var error := config.load(
+		SETTINGS_FILE
+	)
+
+	if error != OK and error != ERR_FILE_NOT_FOUND:
+		push_warning(
+			"No se pudo leer settings.cfg para guardar la posición."
+		)
+		return
+
+	config.set_value(
+		MAP_POSITIONS_SECTION,
+		map_id,
+		player_actual.global_position
+	)
+
+	error = config.save(
+		SETTINGS_FILE
+	)
+
+	if error != OK:
+		push_warning(
+			"No se pudo guardar la posición del mapa."
+		)
+
+
+
+func _obtener_posicion_mapa(
+	fallback: Vector2
+) -> Vector2:
+	if mapa_actual == null:
+		return fallback
+
+	var map_id: String = _get_map_id(
+		mapa_actual
+	)
+
+	if map_id.is_empty():
+		return fallback
+
+	var config := ConfigFile.new()
+	var error := config.load(
+		SETTINGS_FILE
+	)
+
+	if error != OK:
+		return fallback
+
+	var value: Variant = config.get_value(
+		MAP_POSITIONS_SECTION,
+		map_id,
+		fallback
+	)
+
+	if value is Vector2:
+		return value
+
+	return fallback
 
 
 func _configurar_camera() -> void:
@@ -302,6 +412,24 @@ func _configurar_limites_desde_fondo(camera: Camera2D) -> bool:
 func ir_a_mapa(mapa_path: String) -> void:
 
 	cargar_escena(mapa_path)
+
+
+
+func _volver_a_mapas() -> void:
+
+	# El editor puede contener cambios sin guardar. El usuario debe
+	# cerrarlo o guardarlo antes de abandonar el mapa.
+	if DialogueManager.editor_active:
+		return
+
+	if DialogueManager.dialogue_active:
+		DialogueManager.end_dialogue()
+
+	estado_panel.visible = false
+
+	cargar_escena(
+		BIENVENIDA_SCENE
+	)
 
 
 

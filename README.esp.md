@@ -5,8 +5,7 @@
 **Estado:** prototipo / desarrollo activo  
 **Motor:** Godot 4.7  
 **Renderizado:** GL Compatibility  
-**Licencia:** GNU GPLv3  
-**Revisión auditada:** `12ea5386c03d53dd51dae26fd172775e281544f8`
+**Licencia:** GNU GPLv3
 
 ## Descripción
 
@@ -14,22 +13,28 @@ ZeMobida es un videojuego de código abierto desarrollado con Godot y centrado e
 
 ## Funcionalidades actuales
 
-- Mundo 2D explorable (`aldea`).
+- Selección dinámica de mapas descubiertos desde `res://mapas/`.
 - `Player` persistente propiedad de `Game`.
-- Spawn y límites de cámara por mapa.
+- `SpawnPlayer` inicial por mapa y restauración posterior de la última posición guardada.
+- Regreso al selector de mapas desde el panel global de estado.
+- Mapas ilustrados top-down con `Fondo`, `Frontal`, `Preview` y colisiones locales opcionales según el mapa.
+- Exploración táctil con tap para mover, arrastre de cámara y pinch zoom.
 - Interacción y seguimiento de PNJ.
-- Diálogos ramificados en `.txt`.
+- Identidad técnica del PNJ derivada del nombre del nodo.
+- Sprite del PNJ asignable desde el Inspector mediante una propiedad `Texture2D` exportada y reflejado en `Sprite2D` durante la edición.
+- Diálogos ramificados en `.txt` UTF-8.
+- Sincronización de guiones oficiales desde `aik3n/ZeMobida_guiones`.
+- Variantes locales por archivo en `user://custom_dialogues/`.
+- Editor ligero de guiones dentro del juego.
 - Condiciones de inventario y efectos.
-- XP y niveles `a1`, `a2`, `b1`, `b2`, `c1`.
-- HUD y estado/inventario global.
-- Guardado local en `user://`.
-- Sincronización de guiones desde GitHub.
-- Parser y validador de diálogos.
+- XP y niveles derivados: `a1`, `a2`, `b1`, `b2`, `c1`, `c2`.
+- HUD/estado global y feedback flotante de cambios de XP/inventario.
+- Persistencia consolidada en `user://settings.cfg`.
 
 ## Requisitos
 
 - Godot **4.7**.
-- Conexión de red para la sincronización online.
+- Conexión de red cuando esté habilitada la sincronización online de guiones.
 - Presets de Windows Desktop y Android.
 
 ## Ejecutar
@@ -39,38 +44,41 @@ git clone https://github.com/aik3n/ZeMobida.git
 cd ZeMobida
 ```
 
-Abre `godot/project.godot` con Godot 4.7 y ejecuta `res://escenas/Game.tscn`.
+Abre `godot/project.godot` y ejecuta `res://escenas/Game.tscn`.
 
 ## Arquitectura
 
 | Componente | Responsabilidad |
-|---|---|
-| `Game` | Coordinación global, mapas, Player persistente y UI |
-| `Player` | Movimiento, XP y nivel |
-| `DialogueManager` | Diálogos, efectos, inventario y persistencia |
-| `DialogueParser` | Parser de guiones |
-| `DialogueValidator` | Validación |
-| `DialogueUI` | Presentación |
-| `DialogueUpdater` | Sincronización GitHub |
-| `PNJ` | Movimiento y diálogos |
+| --- | --- |
+| `Game` | Coordinación global, carga de mapas, Player persistente, posición por mapa y UI |
+| `Player` | Movimiento, cámara, XP y nivel derivado |
+| `PNJ` | Movimiento/seguimiento, inicio de diálogo y presentación del sprite en edición |
+| `DialogueManager` | Runtime de diálogo, efectos, inventario, resolución local/oficial y persistencia |
+| `DialogueParser` | Interpreta el formato de guiones |
+| `DialogueValidator` | Validación estructural runtime actual |
+| `DialogueUI` | Presentación del diálogo |
+| `DialogueUpdater` | Sincronización de guiones oficiales |
+| `CarruselMapas` | Descubrimiento y selección dinámica de mapas |
 
 Consulta [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Documentación
 
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-- [`docs/DECISIONS.md`](docs/DECISIONS.md)
-- [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md)
-- [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)
 - [`docs/AUDIT.md`](docs/AUDIT.md)
+- [`docs/DECISIONS.md`](docs/DECISIONS.md)
+- [`docs/DECISIONS_RECENT.md`](docs/DECISIONS_RECENT.md)
+- [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)
+- [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md)
+- [`docs/MAP_PACKS_FUTURE.md`](docs/MAP_PACKS_FUTURE.md)
 
-## Estado del audit
+Los guiones oficiales se versionan exclusivamente en `aik3n/ZeMobida_guiones`; `user://dialogues/` es la caché runtime y `user://custom_dialogues/` contiene las variantes locales.
 
-Desde el audit inicial se han resuelto varios puntos: sincronización incremental, comprobación de integridad del conjunto temporal antes de activar la caché, fallback a caché, persistencia unificada, selección dinámica de mapas y separación de los guiones en `aik3n/ZeMobida_guiones`.
+## Estado técnico
 
-Siguen pendientes de revisión antes de una release la referencia mutable `main` para contenido, la detección de ciclos automáticos de diálogo, algunos metadatos de distribución y una suite automatizada de tests/CI.
+El proyecto sigue en fase de prototipo. Entre los principales puntos pendientes están la protección frente a ciclos automáticos de diálogo, la propiedad del diálogo cuando se solapan PNJ, tests/CI, metadatos de release y una referencia reproducible para el contenido remoto.
 
-Consulta [`docs/AUDIT.md`](docs/AUDIT.md) para el estado actual.
+Consulta [`docs/AUDIT.md`](docs/AUDIT.md).
 
 ## Licencia
 
