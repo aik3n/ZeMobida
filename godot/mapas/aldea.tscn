@@ -3,13 +3,8 @@
 [ext_resource type="Texture2D" uid="uid://di4y2fkshmt31" path="res://art/preview/aldea.PNG" id="1_sru6s"]
 [ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="2_jns4i"]
 [ext_resource type="Texture2D" uid="uid://bms6oms14c8ui" path="res://art/mapas/aldea.PNG" id="3_fondo"]
-[ext_resource type="Texture2D" path="res://art/personajes/aldea/juan.png" id="4_juan"]
-[ext_resource type="Texture2D" path="res://art/personajes/aldea/ibon.png" id="6_ibon"]
-[ext_resource type="Texture2D" path="res://art/personajes/aldea/charo.png" id="7_charo"]
-[ext_resource type="Texture2D" path="res://art/personajes/aldea/luis.png" id="8_luis"]
-[ext_resource type="Texture2D" path="res://art/personajes/aldea/peter.png" id="9_peter"]
-[ext_resource type="Texture2D" path="res://art/personajes/aldea/paco.png" id="10_paco"]
 [ext_resource type="Texture2D" uid="uid://dpyw518c5ss7y" path="res://art/mapas/frontal_prueba.png" id="5_frontal"]
+[ext_resource type="Texture2D" uid="uid://c36wafwmad47r" path="res://art/personajes/aldea/ibon.png" id="6_ibon"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fmk2k"]
 size = Vector2(179, 55)
@@ -32,9 +27,12 @@ centered = false
 visible = false
 texture = ExtResource("1_sru6s")
 
+[node name="SpawnPlayer" type="Marker2D" parent="." unique_id=957641453]
+position = Vector2(1667, 1134)
+
 [node name="juan" parent="." unique_id=1491293733 instance=ExtResource("2_jns4i")]
 position = Vector2(1582, 1301)
-sprite = ExtResource("4_juan")
+sprite = ExtResource("6_ibon")
 tipo_seguimiento = 1
 
 [node name="ibon" parent="." unique_id=186543396 instance=ExtResource("2_jns4i")]
@@ -44,23 +42,20 @@ tipo_seguimiento = 1
 
 [node name="charo" parent="." unique_id=1247965314 instance=ExtResource("2_jns4i")]
 position = Vector2(1523, 1026)
-sprite = ExtResource("7_charo")
+sprite = ExtResource("6_ibon")
 
 [node name="luis" parent="." unique_id=552112840 instance=ExtResource("2_jns4i")]
 position = Vector2(2147, 1128)
-sprite = ExtResource("8_luis")
+sprite = ExtResource("6_ibon")
 tipo_seguimiento = 0
 
 [node name="peter" parent="." unique_id=187825920 instance=ExtResource("2_jns4i")]
 position = Vector2(1997, 962)
-sprite = ExtResource("9_peter")
-
-[node name="SpawnPlayer" type="Marker2D" parent="." unique_id=957641453]
-position = Vector2(1667, 1134)
+sprite = ExtResource("6_ibon")
 
 [node name="paco" parent="." unique_id=1383033262 instance=ExtResource("2_jns4i")]
 position = Vector2(1848, 1058)
-sprite = ExtResource("10_paco")
+sprite = ExtResource("6_ibon")
 tipo_seguimiento = 0
 
 [node name="colisiones" type="StaticBody2D" parent="." unique_id=894876693]
@@ -69,5 +64,5 @@ tipo_seguimiento = 0
 position = Vector2(1874, 1257)
 shape = SubResource("RectangleShape2D_fmk2k")
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="colisiones" unique_id=847719243]
+[node name="lago" type="CollisionPolygon2D" parent="colisiones" unique_id=847719243]
 polygon = PackedVector2Array(909, 880, 796, 1040, 505, 1050, 256, 1640, 1091, 1617, 978, 1091, 1060, 870)

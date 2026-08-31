@@ -3,8 +3,9 @@
 [ext_resource type="Script" uid="uid://drgmoxoncth27" path="res://scripts/player.gd" id="1_kkt6c"]
 [ext_resource type="Texture2D" uid="uid://bh4ceyphgna5d" path="res://art/personajes/aldea/charo.png" id="2_kkt6c"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_4kxuq"]
-radius = 35.057095
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_qwqyf"]
+radius = 21.0
+height = 150.0
 
 [node name="player" type="CharacterBody2D" unique_id=750046266]
 script = ExtResource("1_kkt6c")
@@ -13,7 +14,7 @@ script = ExtResource("1_kkt6c")
 texture = ExtResource("2_kkt6c")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=627423854]
-shape = SubResource("CircleShape2D_4kxuq")
+shape = SubResource("CapsuleShape2D_qwqyf")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=460678938]
 

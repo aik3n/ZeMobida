@@ -2,25 +2,27 @@
 
 [ext_resource type="Script" uid="uid://caqkk62ge7skt" path="res://scripts/pnj.gd" id="1_q4jto"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_4kxuq"]
-radius = 50.08992
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1o3pt"]
+radius = 20.0
+height = 152.0
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_mti6b"]
-radius = 60.133186
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_62yky"]
+radius = 22.0
+height = 160.0
 
 [node name="pnj1" type="CharacterBody2D" unique_id=1491293733]
 script = ExtResource("1_q4jto")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=690181880]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1828085130]
-shape = SubResource("CircleShape2D_4kxuq")
+[node name="Collision" type="CollisionShape2D" parent="." unique_id=1828085130]
+shape = SubResource("CapsuleShape2D_1o3pt")
 
 [node name="InteractionArea" type="Area2D" parent="." unique_id=925753730]
 collision_layer = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id=347202529]
-shape = SubResource("CircleShape2D_mti6b")
+[node name="Collision_Interaccion" type="CollisionShape2D" parent="InteractionArea" unique_id=347202529]
+shape = SubResource("CapsuleShape2D_62yky")
 
 [connection signal="area_exited" from="InteractionArea" to="." method="_on_interaction_area_area_exited"]
 [connection signal="body_entered" from="InteractionArea" to="." method="_on_interaction_area_body_entered"]
