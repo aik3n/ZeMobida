@@ -141,8 +141,21 @@ func open_current_dialogue_editor() -> void:
 		)
 		return
 
-	var scene_path: String = mapa_actual.scene_file_path
-	var map_name := scene_path.get_file().get_basename()
+	# El editor debe usar la misma identidad de mapa que el runtime.
+	# En un PCK, scene_file_path apunta a .../<id>/mapa.tscn y el
+	# basename por sí solo sería "mapa", no el ID real del paquete.
+	var map_name: String = ""
+
+	if game.has_method("get_map_id_actual"):
+		map_name = str(
+			game.call("get_map_id_actual")
+		)
+
+	# Fallback para conservar compatibilidad si DialogueManager se usa
+	# temporalmente con una escena Game anterior.
+	if map_name.is_empty():
+		var scene_path: String = mapa_actual.scene_file_path
+		map_name = scene_path.get_file().get_basename()
 
 	var speaker_name := current_speaker
 

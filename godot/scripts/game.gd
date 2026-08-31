@@ -4,6 +4,7 @@ extends Node
 const BIENVENIDA_SCENE := "res://escenas/bienvenida.tscn"
 const SETTINGS_FILE := "user://settings.cfg"
 const MAP_POSITIONS_SECTION := "map_positions"
+const EXTERNAL_MAPS_NAMESPACE := "res://maps/"
 
 const NIVELES_DATA := preload(
 	"res://scripts/niveles.gd"
@@ -152,24 +153,16 @@ func _configurar_player() -> void:
 
 		return
 
+	var fallback_position := Vector2.ZERO
 	var spawn := mapa_actual.get_node_or_null(
 		"SpawnPlayer"
 	)
 
-	if spawn == null:
-
-		push_warning(
-			"No se encontró SpawnPlayer en el mapa."
-		)
-
-		player_actual.visible = false
-		player_actual.set_physics_process(false)
-		player_actual.set_process_unhandled_input(false)
-
-		return
+	if spawn is Node2D:
+		fallback_position = (spawn as Node2D).global_position
 
 	var posicion_inicial: Vector2 = _obtener_posicion_mapa(
-		spawn.global_position
+		fallback_position
 	)
 
 	player_actual.global_position = posicion_inicial
@@ -197,7 +190,20 @@ func _get_map_id(mapa: Node) -> String:
 	if scene_path.is_empty():
 		return ""
 
+	if scene_path.begins_with(EXTERNAL_MAPS_NAMESPACE):
+		var relative: String = scene_path.trim_prefix(
+			EXTERNAL_MAPS_NAMESPACE
+		)
+		var separator: int = relative.find("/")
+
+		if separator > 0:
+			return relative.substr(0, separator)
+
 	return scene_path.get_file().get_basename()
+
+
+func get_map_id_actual() -> String:
+	return _get_map_id(mapa_actual)
 
 
 
@@ -290,9 +296,11 @@ func _configurar_camera() -> void:
 
 		return
 
+	_reset_camera_limits(camera)
+
 	# Los mapas ilustrados pueden definir sus límites directamente con
 	# un Sprite2D llamado Fondo. Su textura se usa a escala 1:1.
-	if _configurar_limites_desde_fondo(camera):
+	if _configurar_limites_desde_background(camera):
 		camera.enabled = true
 		return
 
@@ -301,11 +309,10 @@ func _configurar_camera() -> void:
 	)
 
 	if camera_bounds == null:
-
-		push_warning(
-			"No se encontró CameraBounds en el mapa."
-		)
-
+		# Background y CameraBounds son opcionales. Sin ninguno de ellos,
+		# la cámara funciona sin límites específicos del mapa.
+		camera.position = Vector2.ZERO
+		camera.enabled = true
 		return
 
 	var collision_shape: CollisionShape2D = (
@@ -365,26 +372,44 @@ func _configurar_camera() -> void:
 
 
 
-func _configurar_limites_desde_fondo(camera: Camera2D) -> bool:
-	var fondo_node := mapa_actual.get_node_or_null("Fondo")
+func _reset_camera_limits(camera: Camera2D) -> void:
+	camera.limit_left = -10000000
+	camera.limit_right = 10000000
+	camera.limit_top = -10000000
+	camera.limit_bottom = 10000000
+	camera.limit_enabled = true
 
-	if not fondo_node is Sprite2D:
+
+func _configurar_limites_desde_background(
+	camera: Camera2D
+) -> bool:
+	var background_node := mapa_actual.get_node_or_null(
+		"Background"
+	)
+
+	if not background_node is Sprite2D:
 		return false
 
-	var fondo := fondo_node as Sprite2D
+	var background := background_node as Sprite2D
 
-	if fondo.texture == null:
+	if background.texture == null:
 		return false
 
-	var local_rect := fondo.get_rect()
+	var local_rect := background.get_rect()
 	var corners: Array[Vector2] = [
-		fondo.to_global(local_rect.position),
-		fondo.to_global(
-			Vector2(local_rect.end.x, local_rect.position.y)
+		background.to_global(local_rect.position),
+		background.to_global(
+			Vector2(
+				local_rect.end.x,
+				local_rect.position.y
+			)
 		),
-		fondo.to_global(local_rect.end),
-		fondo.to_global(
-			Vector2(local_rect.position.x, local_rect.end.y)
+		background.to_global(local_rect.end),
+		background.to_global(
+			Vector2(
+				local_rect.position.x,
+				local_rect.end.y
+			)
 		)
 	]
 

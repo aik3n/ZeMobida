@@ -173,6 +173,9 @@ func get_map_name() -> String:
 
 		return ""
 
+	if game.has_method("get_map_id_actual"):
+		return str(game.call("get_map_id_actual"))
+
 	var mapa_actual = game.get("mapa_actual")
 
 	if mapa_actual == null:
