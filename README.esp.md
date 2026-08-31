@@ -23,6 +23,7 @@ ZeMobida es un videojuego de código abierto desarrollado con Godot y centrado e
 - Identidad técnica del PNJ derivada del nombre del nodo.
 - Sprite del PNJ asignable desde el Inspector mediante una propiedad `Texture2D` exportada y reflejado en `Sprite2D` durante la edición.
 - Diálogos ramificados en `.txt` UTF-8.
+- Protección runtime frente a cadenas descontroladas de saltos automáticos de diálogo.
 - Sincronización de guiones oficiales desde `aik3n/ZeMobida_guiones`.
 - Variantes locales por archivo en `user://custom_dialogues/`.
 - Editor ligero de guiones dentro del juego con guardado y envío por correo.
@@ -76,7 +77,7 @@ Los guiones oficiales se versionan exclusivamente en `aik3n/ZeMobida_guiones`; `
 
 ## Estado técnico
 
-El proyecto sigue en fase de prototipo. Entre los principales puntos pendientes están la protección frente a ciclos automáticos de diálogo, la propiedad del diálogo cuando se solapan PNJ, tests/CI, metadatos de release y una referencia reproducible para el contenido remoto.
+El proyecto sigue en fase de prototipo. Entre los principales puntos pendientes están tests/CI, metadatos de release, una referencia reproducible para el contenido remoto y decisiones aún abiertas sobre efectos/recompensas de diálogo.
 
 Consulta [`docs/AUDIT.md`](docs/AUDIT.md).
 

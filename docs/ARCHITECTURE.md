@@ -300,7 +300,21 @@ Cuerpo:  nombre del archivo + contenido exacto guardado
 
 El `.txt` no se adjunta automáticamente: el contenido se incluye en el cuerpo del correo. La aplicación de correo del jugador es la que muestra y confirma el envío. Cancelar ese correo no deshace el guardado local realizado previamente.
 
-El runtime actual continúa usando `DialogueParser` y `DialogueValidator` al iniciar un diálogo. La responsabilidad conceptual del parser es interpretar el formato; cualquier cambio futuro en la política de validación debe debatirse por separado.
+El runtime continúa usando `DialogueParser` y `DialogueValidator` al iniciar un diálogo. La responsabilidad conceptual del parser es interpretar el formato; el validator actual comprueba la coherencia estructural del diccionario resultante.
+
+### Contingencia de saltos automáticos
+
+`DialogueManager.show_node()` recorre iterativamente las condiciones y saltos automáticos. Una cadena puede realizar como máximo:
+
+```text
+100 transiciones automáticas consecutivas
+```
+
+El conteo termina cuando el diálogo llega a un nodo que devuelve el control al jugador. Una opción seleccionada por el jugador inicia una nueva cadena.
+
+Si se intenta superar el límite, el runtime detiene la cadena sin aplicar efectos ni continuar saltando, escribe el diagnóstico como mensaje normal en Output y mantiene el diálogo activo con el panel visible, sin opciones y con `EDITAR` disponible.
+
+Esta protección no declara inválidos los ciclos interactivos ni intenta analizar el grafo completo del guion. Es una contingencia runtime contra guiones accidentales o maliciosos que no devuelven el control.
 
 ## Persistencia
 

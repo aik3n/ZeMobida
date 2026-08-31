@@ -36,6 +36,7 @@ const SETTINGS_FILE := "user://settings.cfg"
 const PLAYER_SECTION := "player"
 const PLAYER_KEY_XP := "xp"
 const PLAYER_KEY_INVENTORY := "inventory"
+const MAX_AUTOMATIC_TRANSITIONS := 100
 
 
 func _ready() -> void:
@@ -319,61 +320,112 @@ func _load_error_dialogue() -> void:
 
 
 func show_node(node_name: String):
-	if not dialogue_data.has(node_name):
-		push_warning(
-			"Nodo inexistente: " + node_name
-		)
+	var next_node := node_name
+	var automatic_transitions := 0
 
-		end_dialogue()
-		return
-
-	current_node = node_name
-
-	var node: Dictionary = dialogue_data[node_name]
-
-	for condition in node["conditions"]:
-		if _has_all_items(condition["items"]):
-			show_node(
-				condition["next"]
+	while true:
+		if not dialogue_data.has(next_node):
+			push_warning(
+				"Nodo inexistente: " + next_node
 			)
 
+			end_dialogue()
 			return
 
-	var jump: String = node["jump"]
+		current_node = next_node
 
-	if not jump.is_empty():
-		if jump == "random":
-			var random_node := _get_random_node()
+		var node: Dictionary = dialogue_data[current_node]
+		var automatic_next := ""
 
-			if random_node.is_empty():
-				push_warning(
-					"No hay nodos disponibles para RANDOM."
+		for condition in node["conditions"]:
+			if _has_all_items(condition["items"]):
+				automatic_next = condition["next"]
+				break
+
+		if not automatic_next.is_empty():
+			automatic_transitions += 1
+
+			if automatic_transitions > MAX_AUTOMATIC_TRANSITIONS:
+				print(
+					"[DialogueManager] Diálogo detenido por superar ",
+					MAX_AUTOMATIC_TRANSITIONS,
+					" transiciones automáticas consecutivas. Archivo: ",
+					current_dialogue_file,
+					" Nodo: ",
+					current_node
 				)
 
-				end_dialogue()
+				if dialogue_ui != null:
+					dialogue_ui.show_dialogue()
+					dialogue_ui.show_text(
+						current_speaker,
+						""
+					)
+					dialogue_ui.show_options([])
+
 				return
 
-			show_node(random_node)
-			return
+			next_node = automatic_next
+			continue
 
-		show_node(jump)
+		var jump: String = node["jump"]
+
+		if not jump.is_empty():
+			if jump == "random":
+				automatic_next = _get_random_node()
+
+				if automatic_next.is_empty():
+					push_warning(
+						"No hay nodos disponibles para RANDOM."
+					)
+
+					end_dialogue()
+					return
+			else:
+				automatic_next = jump
+
+			automatic_transitions += 1
+
+			if automatic_transitions > MAX_AUTOMATIC_TRANSITIONS:
+				print(
+					"[DialogueManager] Diálogo detenido por superar ",
+					MAX_AUTOMATIC_TRANSITIONS,
+					" transiciones automáticas consecutivas. Archivo: ",
+					current_dialogue_file,
+					" Nodo: ",
+					current_node
+				)
+
+				if dialogue_ui != null:
+					dialogue_ui.show_dialogue()
+					dialogue_ui.show_text(
+						current_speaker,
+						""
+					)
+					dialogue_ui.show_options([])
+
+				return
+
+			next_node = automatic_next
+			continue
+
+		if dialogue_ui != null:
+			_apply_effects(
+				node["effects"]
+			)
+
+			dialogue_ui.show_dialogue()
+
+			dialogue_ui.show_text(
+				current_speaker,
+				node["text"]
+			)
+
+			dialogue_ui.show_options(
+				node["options"]
+			)
+
 		return
-
-	if dialogue_ui != null:
-		_apply_effects(
-			node["effects"]
-		)
-
-		dialogue_ui.show_dialogue()
-
-		dialogue_ui.show_text(
-			current_speaker,
-			node["text"]
-		)
-
-		dialogue_ui.show_options(
-			node["options"]
-		)
 
 
 func select_option(option: Dictionary):

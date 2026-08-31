@@ -233,3 +233,69 @@ El sistema de mapas vuelve al modelo simple y ya validado.
 La investigación se conserva en `MAP_PACKS_FUTURE.md` como experimento
 cerrado, pero los mapas externos no forman parte de la arquitectura prevista
 ni del backlog activo.
+
+---
+
+## ADR-032 — Limitar cadenas automáticas de diálogo en runtime
+
+**Status:** Accepted  
+**Fecha:** 2026-08-31
+
+### Context
+
+Un guion puede ser sintáctica y estructuralmente válido y, aun así, formar un ciclo de saltos automáticos que nunca devuelve el control al jugador.
+
+Analizar todos los ciclos posibles en Validator añadiría complejidad y podría confundir ciclos interactivos legítimos con errores de ejecución.
+
+### Decision
+
+`DialogueManager.show_node()` recorre los saltos automáticos de forma iterativa y permite un máximo de `100` transiciones automáticas consecutivas por cadena.
+
+Al superar el límite:
+
+- se detiene la ejecución automática;
+- se escribe un mensaje normal en Output;
+- no se aplican efectos del nodo de contingencia;
+- el diálogo permanece activo, sin opciones, con `EDITAR` disponible.
+
+Una intervención del jugador inicia una nueva cadena y un nuevo conteo.
+
+No se añade un validator previo del texto ni análisis estático de grafos.
+
+### Consequences
+
+Un guion accidental o malicioso no puede bloquear el runtime mediante una cadena automática infinita.
+
+Los ciclos que dependen de elecciones del jugador siguen siendo posibles.
+
+Quien esté probando el guion puede abrir inmediatamente el editor desde el propio panel detenido y corregir el archivo.
+
+### Verification
+
+Se validó manualmente con un ciclo automático entre dos nodos: el runtime alcanza el límite, se detiene, escribe el diagnóstico en Output y mantiene accesible `EDITAR`.
+
+---
+
+## ADR-033 — No introducir propiedad exclusiva del diálogo entre PNJ
+
+**Status:** Accepted  
+**Fecha:** 2026-08-31
+
+### Context
+
+Actualmente cualquier PNJ puede cerrar un diálogo activo cuando el Player sale de su `InteractionArea`, aunque otro PNJ haya iniciado ese diálogo.
+
+Resolverlo exigiría registrar y comprobar explícitamente el PNJ propietario de cada diálogo.
+
+### Decision
+
+Se mantiene el comportamiento actual.
+
+El ritmo del juego permite asumir un cierre accidental: el jugador puede volver a acercarse al PNJ deseado y reiniciar la conversación.
+
+### Consequences
+
+No se añade estado ni acoplamiento adicional al sistema de diálogo.
+
+La decisión puede revisarse si los mapas reales demuestran que áreas solapadas o PNJ móviles provocan cierres frecuentes o confusos.
+

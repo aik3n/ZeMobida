@@ -23,6 +23,7 @@ ZeMobida is an open-source Godot game built around exploration, NPC interaction,
 - NPC technical identity derived from the node name.
 - NPC sprite selected from the Inspector through an exported `Texture2D` property and reflected in the internal `Sprite2D` in edit time.
 - Branching dialogue from UTF-8 `.txt` files.
+- Runtime protection against runaway chains of automatic dialogue transitions.
 - Official dialogue synchronization from the separate repository `aik3n/ZeMobida_guiones`.
 - Per-file local dialogue overrides under `user://custom_dialogues/`.
 - Lightweight in-game dialogue editor with save-and-submit by email.
@@ -105,7 +106,7 @@ See [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md).
 
 ## Known limitations
 
-The project is still a prototype. Important remaining areas include automatic dialogue-transition cycle protection, dialogue ownership between overlapping NPCs, automated tests/CI, release metadata and reproducible versioning of remote dialogue content.
+The project is still a prototype. Important remaining areas include automated tests/CI, release metadata, reproducible versioning of remote dialogue content and unresolved design decisions around dialogue effects/rewards.
 
 See [`docs/AUDIT.md`](docs/AUDIT.md) for the current status.
 

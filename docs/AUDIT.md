@@ -1,7 +1,7 @@
 # ZeMobida — Technical Audit
 
 **Revisión:** 2026-08-31  
-**Base GitHub revisada:** `411e173221f6462c46be8444d7aa1a4788b76cc3` más la función `ENVIAR` del editor validada inmediatamente después en runtime.  
+**Base GitHub de partida:** `322befb4acdfd2705795c47f2497bfe375dcd97c`; revisión ampliada con la protección A-02 validada en runtime antes del siguiente commit.  
 **Estado:** prototipo funcional; deuda localizada. No se recomienda una reescritura general.
 
 ## Resumen
@@ -20,7 +20,7 @@ La arquitectura se mantiene coherente y deliberadamente sencilla:
 - posición independiente recordada por mapa;
 - envío voluntario de guiones locales mediante la aplicación de correo del jugador.
 
-Las prioridades altas pendientes continúan concentradas en robustez del runtime de diálogo, no en la arquitectura general.
+Los dos riesgos altos de diálogo revisados quedan resueltos sin ampliar la arquitectura: A-02 mediante una contingencia runtime y A-03 aceptado por diseño.
 
 ## Cambios cerrados desde la auditoría anterior
 
@@ -92,25 +92,34 @@ Android exporta con permiso de Internet y la sincronización remota fue probada 
 
 ### A-02 — Protección frente a ciclos automáticos de diálogo
 **Prioridad:** Alta  
-**Estado:** PENDIENTE
+**Estado:** CERRADO — VALIDADO EN RUNTIME
 
-`DialogueManager.show_node()` sigue condiciones/saltos automáticos recursivamente. Un ciclo automático puede producir recursión indefinida.
+`DialogueManager.show_node()` limita a `100` las transiciones automáticas consecutivas dentro de una misma cadena de ejecución.
 
-Los ciclos que requieren seleccionar opciones del jugador no son el mismo problema y pueden ser intencionados.
+Las transiciones automáticas se recorren iterativamente, sin recursión entre nodos. Al intentar superar el límite:
 
-**Siguiente solución preferida:** límite runtime sencillo de transiciones automáticas antes que análisis de grafos complejo.
+- se detiene la cadena;
+- se escribe un mensaje normal en Output;
+- no se muestran opciones ni se aplican efectos del nodo de contingencia;
+- el diálogo permanece activo con el panel abierto y `EDITAR` disponible.
+
+Así el jugador no queda bloqueado y quien esté probando el guion puede abrir el editor y corregirlo inmediatamente.
+
+Una elección del jugador inicia una nueva cadena y, por tanto, un nuevo conteo. Los ciclos que requieren intervención del jugador siguen siendo válidos.
+
+No se añade análisis de grafos ni un validator adicional: Parser interpreta, Validator comprueba la estructura y Runtime garantiza la contingencia de ejecución.
 
 ---
 
 ### A-03 — Propiedad del diálogo entre PNJ
-**Prioridad:** Alta  
-**Estado:** PENDIENTE
+**Prioridad:** Alta (evaluación original)  
+**Estado:** ACEPTADO POR DISEÑO — NO ACTUAR
 
-Cualquier PNJ puede cerrar un diálogo activo al detectar que el Player sale de su `InteractionArea`.
+Cualquier PNJ puede cerrar un diálogo activo al detectar que el Player sale de su `InteractionArea`, incluso si otro PNJ inició ese diálogo.
 
-**Riesgo:** áreas solapadas o PNJ móviles pueden cerrar el diálogo iniciado por otro PNJ.
+En el ritmo actual del juego se acepta este comportamiento: un cierre accidental no bloquea progreso y el jugador puede acercarse de nuevo al PNJ deseado.
 
-**Objetivo:** registrar el interlocutor propietario del diálogo y permitir que sólo él lo cierre por salida de área.
+No se añade propiedad explícita del diálogo ni complejidad adicional mientras este comportamiento no produzca un problema real de jugabilidad.
 
 ---
 
@@ -334,10 +343,9 @@ del backlog activo.
 
 ## Orden de trabajo recomendado
 
-1. A-03 — propiedad del diálogo entre PNJ.
-2. A-02 — límite simple de transiciones automáticas.
-3. Debatir A-18, A-09 y A-04 antes de implementar.
-4. Tests/CI mínimos cuando el núcleo deje de cambiar con tanta frecuencia.
-5. Metadatos/versionado de contenido al acercarse a distribución.
+1. Debatir A-18, A-09 y A-04 antes de implementar.
+2. Tests/CI mínimos cuando el núcleo deje de cambiar con tanta frecuencia.
+3. Metadatos/versionado de contenido al acercarse a distribución.
+4. Mantener A-03 sin cambios salvo que aparezca un problema real de jugabilidad.
 
 No se recomienda abordar varios puntos a la vez si no existe dependencia entre ellos.
