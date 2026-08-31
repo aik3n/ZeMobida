@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://di4y2fkshmt31" path="res://art/preview/aldea.PNG" id="1_sru6s"]
 [ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="2_jns4i"]
-[ext_resource type="Texture2D" uid="uid://bms6oms14c8ui" path="res://art/mapas/aldea.PNG" id="3_background"]
+[ext_resource type="Texture2D" uid="uid://bms6oms14c8ui" path="res://art/mapas/aldea.PNG" id="3_fondo"]
 [ext_resource type="Texture2D" uid="uid://dpyw518c5ss7y" path="res://art/mapas/frontal_prueba.png" id="5_frontal"]
 [ext_resource type="Texture2D" uid="uid://d288q5sfejdxr" path="res://art/personajes/salce/secretaria.png" id="5_sstdv"]
 [ext_resource type="Texture2D" uid="uid://dce4bpgo04sn0" path="res://art/personajes/aldea/chef.png" id="6_ir3er"]
@@ -16,9 +16,9 @@ size = Vector2(179, 55)
 
 [node name="aldea2" type="Node2D" unique_id=493802413]
 
-[node name="Background" type="Sprite2D" parent="." unique_id=2086253541]
+[node name="Fondo" type="Sprite2D" parent="." unique_id=2086253541]
 z_index = -10
-texture = ExtResource("3_background")
+texture = ExtResource("3_fondo")
 centered = false
 
 [node name="FrontalPrueba" type="Sprite2D" parent="." unique_id=296919881]

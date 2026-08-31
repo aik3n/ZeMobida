@@ -15,7 +15,7 @@
 visible = false
 texture = ExtResource("1_aeglk")
 
-[node name="Background" type="Sprite2D" parent="." unique_id=191530859]
+[node name="Fondo" type="Sprite2D" parent="." unique_id=191530859]
 z_index = -10
 texture = ExtResource("2_r2tag")
 centered = false

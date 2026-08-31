@@ -1,128 +1,66 @@
-# ZeMobida — Posible separación futura de mapas
+# ZeMobida — Experimento de mapas externos
 
-**Estado:** propuesta de mejora futura. No implementada.
+**Estado:** cerrado / descartado para el prototipo actual.
 
-## Objetivo
+## Qué se probó
 
-Separar el desarrollo del juego/motor del desarrollo de los mapas para que varias personas puedan crear mapas sin trabajar sobre el mismo proyecto principal ni interferir entre sí.
+Se investigó y probó la carga de mapas desarrollados en proyectos Godot
+independientes y distribuidos como paquetes `.pck` y `.zip` mediante:
 
-La idea sería tratar los mapas como contenido distribuible, mientras ZeMobida conserva toda la lógica de juego.
-
-## Posible modelo
-
-Cada mapa podría desarrollarse en un proyecto Godot independiente y exportarse como un paquete `.pck`.
-
-Ejemplo:
-
-```text
-ZeMobida
-    → juego / motor
-
-ZeMobida-map-aldea
-    → proyecto de trabajo del mapa Aldea
-    → exporta aldea.pck
-
-ZeMobida-map-urrea
-    → proyecto de trabajo del mapa Urrea
-    → exporta urrea.pck
+```gdscript
+ProjectSettings.load_resource_pack()
 ```
 
-ZeMobida cargaría posteriormente esos paquetes mediante `ProjectSettings.load_resource_pack()`.
+La carga funcionó y permitió comprobar que mapas internos y externos podían
+ser descubiertos y ejecutados.
 
-## Responsabilidades
+También se probó mantener la identidad técnica del mapa separada del nombre
+de su escena para diálogos y persistencia.
 
-El mapa debería definir únicamente contenido y configuración:
+## Problema encontrado
 
-```text
-mapa
-├── Fondo
-├── Preview
-├── SpawnPlayer
-├── colisiones
-├── capa frontal opcional
-└── definiciones de PNJ
-```
-
-El motor seguiría siendo responsable de:
+Los resource packs montados por Godot comparten el mismo espacio virtual:
 
 ```text
-Player
-PNJ real
-seguimiento
-interacción
-diálogos
-inventario
-XP
-persistencia
-cámara
-UI
+res://
 ```
 
-## PNJ: definición en el mapa, comportamiento en el motor
-
-Una posible mejora especialmente interesante es que el paquete del mapa **no contenga `pnj.gd` ni una copia funcional de `pnj.tscn`**.
-
-El creador del mapa sólo definiría los datos necesarios de cada PNJ, por ejemplo:
+Dos proyectos independientes pueden exportar, sin saberlo, rutas idénticas:
 
 ```text
-juan
-├── posición
-├── sprite
-└── tipo_seguimiento
+res://aldea.tscn
+res://fondo.png
+res://personajes/juan.png
 ```
 
-Al cargar el mapa, ZeMobida utilizaría esa definición para instanciar **su propio** `pnj.tscn` y aplicarle la configuración:
+Al montar ambos paquetes esas rutas entran en conflicto. El problema no
+depende de usar PCK o ZIP: ambos utilizan el mismo sistema de recursos.
 
-```text
-definición de Juan en el mapa
-        ↓
-ZeMobida instancia su pnj.tscn
-        ↓
-aplica nombre
-aplica posición
-aplica sprite
-aplica tipo de seguimiento
-        ↓
-PNJ funcionando con la lógica del motor
-```
+Evitarlo de forma garantizada exigiría alguna de estas concesiones:
 
-De esta forma, el creador del mapa decide **qué PNJ existe y cómo se presenta**, pero no puede modificar la implementación del comportamiento del PNJ.
+- imponer a todos los diseñadores un namespace interno único;
+- reescribir/reubicar automáticamente recursos y referencias del paquete;
+- aceptar que unos paquetes puedan sustituir recursos de otros;
+- introducir una arquitectura de carga más compleja.
 
-## Ventajas
-
-- Cada creador puede trabajar en un repositorio/proyecto independiente.
-- Un mapa no necesita incluir ni mantener una copia de `pnj.gd`.
-- Una corrección en el PNJ del motor se aplicaría automáticamente a todos los mapas compatibles.
-- El contenido queda separado de la lógica de juego.
-- Se reduce el riesgo de que un creador de mapas modifique accidentalmente scripts centrales.
-- Los mapas podrían distribuirse o actualizarse independientemente del ejecutable principal.
-
-## Rutas y aislamiento
-
-Si se adopta este sistema, cada mapa debería tener un espacio de rutas propio para evitar colisiones entre paquetes.
-
-Ejemplo:
-
-```text
-res://map_packs/aldea/...
-res://map_packs/urrea/...
-res://map_packs/casco_viejo/...
-```
-
-## Seguridad
-
-Un `.pck` no es una sandbox.
-
-Si se admitieran paquetes creados por usuarios no confiables, no deberían poder introducir scripts arbitrarios que el juego ejecute. El modelo basado en datos y en PNJ instanciados por el motor ayudaría a limitar esa superficie.
+Ninguna de esas opciones compensa en la fase actual del prototipo.
 
 ## Decisión actual
 
-No se implementa todavía.
+ZeMobida **no carga mapas externos**.
 
-El proyecto continúa usando los mapas integrados en:
+Los mapas forman parte del proyecto principal y se descubren directamente en:
 
 ```text
 res://mapas/
 ```
 
-Esta propuesta se conserva como posible evolución de producción/distribución cuando la separación entre motor y creación de mapas sea necesaria.
+El sistema actual se mantiene deliberadamente sencillo.
+
+El experimento PCK/ZIP queda documentado para no repetir la investigación,
+pero no constituye una funcionalidad prevista ni un compromiso de
+arquitectura futura.
+
+Si Godot incorpora en el futuro aislamiento o namespaces nativos para
+resource packs, o si las necesidades de producción cambian de forma
+sustancial, el tema podrá reevaluarse desde cero.

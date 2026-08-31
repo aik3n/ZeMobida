@@ -356,13 +356,24 @@ Se utilizan canales positivo/negativo independientes con separación aproximada 
 
 La carga de estado persistido no genera feedback.
 
-## Separación futura de mapas
+## Mapas externos: experimento cerrado
 
-La arquitectura actual mantiene los mapas dentro del proyecto principal.
+La arquitectura actual utiliza exclusivamente mapas integrados en:
 
-Está documentada, pero **no implementada**, una posible evolución de producción basada en proyectos de mapas independientes y paquetes `.pck`. La dirección preferida sería que el paquete describa contenido/PNJ como datos y que ZeMobida instancie su propio `pnj.tscn`, conservando la lógica en el motor.
+```text
+res://mapas/
+```
 
-Ver [`MAP_PACKS_FUTURE.md`](MAP_PACKS_FUTURE.md).
+Se probó la carga de proyectos de mapas independientes mediante paquetes
+PCK/ZIP. El experimento se descartó para el prototipo porque todos los
+resource packs comparten `res://` y dos autores independientes pueden
+exportar rutas de recursos iguales, provocando colisiones.
+
+No existe soporte runtime para mapas externos y esta posibilidad no debe
+condicionar la arquitectura actual.
+
+El resultado del experimento se conserva en
+[`MAP_PACKS_FUTURE.md`](MAP_PACKS_FUTURE.md).
 
 ## Límites y deuda deliberada
 

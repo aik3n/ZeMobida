@@ -101,7 +101,7 @@ See [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md).
 - [`docs/DECISIONS_RECENT.md`](docs/DECISIONS_RECENT.md) — recent accepted decisions pending later consolidation into the historical ADR log.
 - [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — development/runtime checks.
 - [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md) — dialogue syntax.
-- [`docs/MAP_PACKS_FUTURE.md`](docs/MAP_PACKS_FUTURE.md) — deferred production idea for independent map packages.
+- [`docs/MAP_PACKS_FUTURE.md`](docs/MAP_PACKS_FUTURE.md) — closed experiment on external PCK/ZIP map packages.
 
 ## Known limitations
 

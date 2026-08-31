@@ -316,11 +316,21 @@ La posición se guarda usando el nombre base de la escena como clave. Renombrar 
 
 Esto es coherente con el modelo actual, pero refuerza la conveniencia de estabilizar la convención técnica de nombres de mapa.
 
-### PCK / separación futura de mapas
+### PCK / ZIP externos — experimento cerrado
 
-La propuesta de proyectos independientes y `.pck` está documentada en `MAP_PACKS_FUTURE.md`.
+Se probó la carga de mapas externos mediante resource packs PCK y ZIP.
 
-No forma parte del runtime actual y no debe condicionar el desarrollo inmediato.
+La prueba funcional fue válida, pero se descartó su incorporación al
+prototipo: todos los packs comparten el mismo `res://`, de modo que dos
+proyectos independientes pueden exportar rutas iguales y entrar en
+conflicto sin que sus autores sean conscientes.
+
+No se añade un sistema de namespaces, reescritura de paquetes ni otra capa
+de aislamiento. El runtime vuelve a utilizar exclusivamente
+`res://mapas/`.
+
+El experimento queda registrado en `MAP_PACKS_FUTURE.md` y no forma parte
+del backlog activo.
 
 ## Orden de trabajo recomendado
 

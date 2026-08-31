@@ -2,8 +2,7 @@ extends Control
 
 signal jugar(mapa_path: String)
 
-const INTERNAL_MAPS_FOLDER := "res://mapas/"
-const ZIP_MAPS_NAMESPACE := "res://maps/"
+const MAPS_FOLDER := "res://mapas/"
 const SETTINGS_FILE := "user://settings.cfg"
 const SETTINGS_SECTION := "maps"
 const SETTINGS_KEY_LAST_MAP := "last_map"
@@ -61,141 +60,19 @@ func _input(event: InputEvent) -> void:
 func _discover_maps() -> void:
 	mapas.clear()
 
-	var map_ids: Dictionary = {}
-
-	_discover_internal_maps(map_ids)
-	_discover_zip_maps(map_ids)
-
-	mapas.sort_custom(_sort_map_paths)
-
-
-func _discover_internal_maps(map_ids: Dictionary) -> void:
 	# ResourceLoader conserva los nombres originales de los recursos
-	# también en builds exportadas.
-	var entries := ResourceLoader.list_directory(
-		INTERNAL_MAPS_FOLDER
-	)
+	# también en builds exportadas. DirAccess sobre res:// puede no
+	# devolver los .tscn porque Godot remapea recursos dentro del PCK.
+	var entries := ResourceLoader.list_directory(MAPS_FOLDER)
 
 	for file_name in entries:
 		if file_name.ends_with("/"):
 			continue
 
-		if not file_name.to_lower().ends_with(".tscn"):
-			continue
+		if file_name.to_lower().ends_with(".tscn"):
+			mapas.append(MAPS_FOLDER + file_name)
 
-		var map_id: String = file_name.get_basename()
-		map_ids[map_id] = true
-		mapas.append(INTERNAL_MAPS_FOLDER + file_name)
-
-
-func _discover_zip_maps(map_ids: Dictionary) -> void:
-	var folder: String = _get_external_maps_folder()
-	var dir := DirAccess.open(folder)
-
-	# La carpeta externa es opcional. Si no existe, simplemente
-	# seguimos mostrando los mapas incluidos en el proyecto.
-	if dir == null:
-		return
-
-	for file_name in dir.get_files():
-		if not file_name.to_lower().ends_with(".zip"):
-			continue
-
-		var map_id: String = file_name.get_basename()
-
-		if map_id.is_empty():
-			continue
-
-		if map_ids.has(map_id):
-			push_warning(
-				"Mapa duplicado '%s': se conserva el mapa interno."
-				% map_id
-			)
-			continue
-
-		var map_folder: String = (
-			ZIP_MAPS_NAMESPACE
-			+ map_id
-			+ "/"
-		)
-
-		# Si el ZIP ya quedó montado al volver al selector, podemos
-		# reutilizar directamente su escena.
-		var scene_path: String = _find_first_map_scene(
-			map_folder
-		)
-
-		if scene_path.is_empty():
-			var zip_path: String = folder.path_join(file_name)
-
-			# false impide que un ZIP externo sustituya recursos
-			# ya existentes en el proyecto principal.
-			if not ProjectSettings.load_resource_pack(
-				zip_path,
-				false
-			):
-				push_warning(
-					"No se pudo cargar el mapa ZIP: " + file_name
-				)
-				continue
-
-			scene_path = _find_first_map_scene(
-				map_folder
-			)
-
-		if scene_path.is_empty():
-			push_warning(
-				"El ZIP '%s' no contiene un .tscn directo en %s"
-				% [file_name, map_folder]
-			)
-			continue
-
-		map_ids[map_id] = true
-		mapas.append(scene_path)
-
-		print(
-			"Mapa ZIP cargado: ",
-			file_name,
-			" -> ",
-			scene_path
-		)
-
-
-func _find_first_map_scene(map_folder: String) -> String:
-	# Contrato deliberadamente mínimo: se usa el primer .tscn
-	# situado directamente en res://maps/<id>/. No hay recursión.
-	for entry in ResourceLoader.list_directory(map_folder):
-		if entry.ends_with("/"):
-			continue
-
-		if entry.to_lower().ends_with(".tscn"):
-			return map_folder + entry
-
-	return ""
-
-
-func _get_external_maps_folder() -> String:
-	# Desde Godot, res:// es ZeMobida/godot/. Los ZIP externos viven
-	# en ZeMobida/mapas_zip/, separados de res://mapas/.
-	if OS.has_feature("editor"):
-		var project_dir: String = ProjectSettings.globalize_path(
-			"res://"
-		).trim_suffix("/")
-		return project_dir.get_base_dir().path_join(
-			"mapas_zip"
-		)
-
-	# En Android se usa el mismo nombre dentro del almacenamiento
-	# de usuario de la aplicación.
-	if OS.has_feature("android"):
-		return ProjectSettings.globalize_path(
-			"user://mapas_zip"
-		)
-
-	# Export de escritorio: mapas_zip/ junto al ejecutable.
-	return OS.get_executable_path().get_base_dir().path_join(
-		"mapas_zip"
-	)
+	mapas.sort_custom(_sort_map_paths)
 
 
 func _sort_map_paths(a: String, b: String) -> bool:
@@ -239,27 +116,13 @@ func _refresh() -> void:
 		return
 
 	var mapa_path := mapas[indice_actual]
-	var nombre: String = _get_map_id_from_path(
-		mapa_path
-	).replace("_", " ")
+	var file_name := mapa_path.get_file()
+	var nombre := file_name.get_basename().replace("_", " ")
 
 	lbl_nombre.text = nombre
 	indicadores.text = "%d / %d" % [indice_actual + 1, mapas.size()]
 
 	_load_preview(mapa_path)
-
-
-func _get_map_id_from_path(mapa_path: String) -> String:
-	if mapa_path.begins_with(ZIP_MAPS_NAMESPACE):
-		var relative: String = mapa_path.trim_prefix(
-			ZIP_MAPS_NAMESPACE
-		)
-		var separator: int = relative.find("/")
-
-		if separator > 0:
-			return relative.substr(0, separator)
-
-	return mapa_path.get_file().get_basename()
 
 
 func _load_preview(mapa_path: String) -> void:

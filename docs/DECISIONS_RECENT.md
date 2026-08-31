@@ -196,3 +196,40 @@ El mecanismo depende de que el sistema disponga de una aplicación capaz de mane
 
 Se validó manualmente que `ENVIAR` guarda el contenido antes de abrir el cliente de correo y que el texto permanece guardado incluso si se cancela el envío.
 
+---
+
+## ADR-031 — Mantener los mapas dentro del proyecto principal
+
+**Status:** Accepted  
+**Fecha:** 2026-08-31
+
+### Context
+
+Se probó la separación de mapas en proyectos Godot independientes cargados
+como resource packs PCK y ZIP.
+
+Aunque la carga funciona, todos los paquetes comparten el espacio virtual
+`res://`. Dos autores independientes pueden exportar recursos con las mismas
+rutas internas y provocar sustituciones o colisiones sin saberlo.
+
+Garantizar aislamiento exigiría imponer namespaces a los diseñadores o
+introducir reescritura/carga especial de recursos.
+
+### Decision
+
+Durante la fase de prototipo, ZeMobida utiliza exclusivamente los mapas
+integrados directamente en:
+
+```text
+res://mapas/
+```
+
+Se elimina del runtime el experimento de carga externa PCK/ZIP.
+
+### Consequences
+
+El sistema de mapas vuelve al modelo simple y ya validado.
+
+La investigación se conserva en `MAP_PACKS_FUTURE.md` como experimento
+cerrado, pero los mapas externos no forman parte de la arquitectura prevista
+ni del backlog activo.
