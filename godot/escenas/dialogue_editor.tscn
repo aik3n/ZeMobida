@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://dnvvingbo01b2"]
 
 [ext_resource type="Script" uid="uid://0446qb4544yx" path="res://scripts/dialogue_editor.gd" id="1_editor"]
+[ext_resource type="Texture2D" path="res://art/ui/guardar.png" id="2_guardar"]
+[ext_resource type="Texture2D" path="res://art/ui/enviar.png" id="3_enviar"]
+[ext_resource type="Texture2D" path="res://art/ui/cerrar.png" id="4_cerrar"]
 
 [sub_resource type="StyleBoxFlat" id="StyleEditor"]
 bg_color = Color(0.025, 0.037, 0.058, 0.99)
@@ -75,8 +78,10 @@ anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
-theme_override_font_sizes/font_size = 29
-text = "GUARDAR"
+icon = ExtResource("2_guardar")
+expand_icon = true
+icon_alignment = 1
+theme_override_constants/icon_max_width = 64
 
 [node name="SendButton" type="Button" parent="Panel"]
 layout_mode = 1
@@ -88,8 +93,10 @@ anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
-theme_override_font_sizes/font_size = 29
-text = "ENVIAR"
+icon = ExtResource("3_enviar")
+expand_icon = true
+icon_alignment = 1
+theme_override_constants/icon_max_width = 64
 
 [node name="CloseButton" type="Button" parent="Panel" unique_id=1710235549]
 layout_mode = 1
@@ -101,8 +108,10 @@ anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
-theme_override_font_sizes/font_size = 29
-text = "CERRAR"
+icon = ExtResource("4_cerrar")
+expand_icon = true
+icon_alignment = 1
+theme_override_constants/icon_max_width = 64
 
 [connection signal="pressed" from="Panel/SaveButton" to="." method="_on_save_pressed"]
 [connection signal="pressed" from="Panel/SendButton" to="." method="_on_send_pressed"]

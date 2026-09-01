@@ -532,6 +532,7 @@ func _apply_effects(effects: Array):
 	if state_changed:
 		_save_player_status()
 
+
 func _mostrar_feedback_objeto(
 	texto: String,
 	positivo: bool
@@ -604,6 +605,16 @@ func remove_item(item: String) -> bool:
 	return true
 
 
+func clear_inventory() -> bool:
+	if inventory.is_empty():
+		return false
+
+	inventory.clear()
+	_save_player_status()
+
+	return true
+
+
 func end_dialogue():
 	if not dialogue_active:
 		return
@@ -618,7 +629,6 @@ func end_dialogue():
 
 	if dialogue_ui != null:
 		dialogue_ui.hide_dialogue()
-
 
 
 func load_player_status() -> void:
@@ -637,7 +647,6 @@ func load_player_status() -> void:
 			"No se pudo cargar el estado del jugador."
 		)
 		return
-
 
 	var game = get_tree().current_scene
 

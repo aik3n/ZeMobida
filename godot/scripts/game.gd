@@ -27,6 +27,18 @@ const NIVELES_DATA := preload(
 # Panel de estado
 @onready var estado_panel: Panel = $EstadoUI/Estado/Panel
 @onready var boton_cerrar: Button = $EstadoUI/Estado/Panel/Cerrar
+@onready var boton_vaciar_inventario: Button = (
+	$EstadoUI/Estado/Panel/VaciarInventario
+)
+@onready var confirmar_vaciar_inventario: Control = (
+	$EstadoUI/Estado/ConfirmarVaciarInventario
+)
+@onready var confirmar_vaciar_ok: Button = (
+	$EstadoUI/Estado/ConfirmarVaciarInventario/Panel/Ok
+)
+@onready var confirmar_vaciar_cancel: Button = (
+	$EstadoUI/Estado/ConfirmarVaciarInventario/Panel/Cancel
+)
 
 @onready var estado_titulo: Label = $EstadoUI/Estado/Panel/Titulo
 @onready var estado_nivel: Label = $EstadoUI/Estado/Panel/Nivel
@@ -56,6 +68,18 @@ func _ready() -> void:
 
 	boton_cerrar.pressed.connect(
 		_cerrar_estado
+	)
+
+	boton_vaciar_inventario.pressed.connect(
+		_pedir_vaciar_inventario
+	)
+
+	confirmar_vaciar_ok.pressed.connect(
+		_vaciar_inventario
+	)
+
+	confirmar_vaciar_cancel.pressed.connect(
+		_cancelar_vaciado_inventario
 	)
 
 	if player_actual.has_signal("xp_changed"):
@@ -425,6 +449,7 @@ func _volver_a_mapas() -> void:
 	if DialogueManager.dialogue_active:
 		DialogueManager.end_dialogue()
 
+	confirmar_vaciar_inventario.visible = false
 	estado_panel.visible = false
 
 	cargar_escena(
@@ -519,6 +544,7 @@ func _actualizar_hud() -> void:
 
 func _abrir_estado() -> void:
 
+	confirmar_vaciar_inventario.visible = false
 	_actualizar_estado()
 
 	estado_panel.visible = true
@@ -527,7 +553,29 @@ func _abrir_estado() -> void:
 
 func _cerrar_estado() -> void:
 
+	confirmar_vaciar_inventario.visible = false
 	estado_panel.visible = false
+
+
+
+func _pedir_vaciar_inventario() -> void:
+	if DialogueManager.inventory.is_empty():
+		return
+
+	confirmar_vaciar_inventario.visible = true
+
+
+
+func _vaciar_inventario() -> void:
+	confirmar_vaciar_inventario.visible = false
+
+	if DialogueManager.clear_inventory():
+		_actualizar_inventario()
+
+
+
+func _cancelar_vaciado_inventario() -> void:
+	confirmar_vaciar_inventario.visible = false
 
 
 
@@ -646,6 +694,8 @@ func _actualizar_inventario() -> void:
 	var inventario: Array[String] = (
 		DialogueManager.inventory
 	)
+
+	boton_vaciar_inventario.disabled = inventario.is_empty()
 
 	if inventario.is_empty():
 
