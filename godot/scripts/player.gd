@@ -23,6 +23,7 @@ var destino: Vector2
 
 const DRAG_THRESHOLD := 28.0
 const CAMERA_RECENTER_TIME := 0.8
+const CAMERA_FOLLOW_SMOOTHING_SPEED := 6.0
 
 const ZOOM_MIN := 0.7
 const ZOOM_MAX := 1.4
@@ -76,6 +77,9 @@ func _ready():
 	xp = clamp(xp, 0, _xp_maximo())
 	_actualizar_nivel()
 	destino = global_position
+
+	camera.position_smoothing_speed = CAMERA_FOLLOW_SMOOTHING_SPEED
+	_enable_camera_follow_smoothing()
 
 	feedback_label.pivot_offset = feedback_label.size * 0.5
 	feedback_label.visible = false
@@ -209,6 +213,7 @@ func _handle_screen_drag(drag: InputEventScreenDrag) -> void:
 
 func _start_pinch() -> void:
 	_stop_camera_recenter()
+	_disable_camera_follow_smoothing()
 
 	# Dos dedos significan exclusivamente exploración/zoom.
 	destino = global_position
@@ -296,6 +301,7 @@ func _update_pointer(screen_position: Vector2) -> void:
 			return
 
 		_pointer_dragging = true
+		_disable_camera_follow_smoothing()
 
 		# Al superar el umbral se aplica todo lo recorrido hasta ahora,
 		# para que el mapa alcance la posición del dedo sin salto raro.
@@ -329,7 +335,13 @@ func _start_camera_recenter() -> void:
 	if position_is_normal and zoom_is_normal:
 		camera.position = Vector2.ZERO
 		camera.zoom = Vector2.ONE
+
+		if not camera.position_smoothing_enabled:
+			_enable_camera_follow_smoothing()
+
 		return
+
+	_disable_camera_follow_smoothing()
 
 	# Volver al Player significa restaurar la cámara estándar completa:
 	# posición centrada y zoom 1.0. Ambos cambios ocurren en paralelo para
@@ -352,6 +364,40 @@ func _start_camera_recenter() -> void:
 		Vector2.ONE,
 		CAMERA_RECENTER_TIME
 	)
+
+	_camera_recenter_tween.finished.connect(
+		_on_camera_recenter_finished,
+		CONNECT_ONE_SHOT
+	)
+
+
+func _on_camera_recenter_finished() -> void:
+	_camera_recenter_tween = null
+	_enable_camera_follow_smoothing()
+
+
+func _enable_camera_follow_smoothing() -> void:
+	camera.position_smoothing_speed = CAMERA_FOLLOW_SMOOTHING_SPEED
+
+	if camera.position_smoothing_enabled:
+		return
+
+	camera.position_smoothing_enabled = true
+	camera.reset_smoothing()
+
+
+func _disable_camera_follow_smoothing() -> void:
+	if not camera.position_smoothing_enabled:
+		return
+
+	# Conservar el centro que el jugador está viendo evita un salto al
+	# pasar del seguimiento suavizado al control manual de la cámara.
+	var visual_center := camera.get_screen_center_position()
+
+	camera.position_smoothing_enabled = false
+	camera.position = visual_center - global_position
+
+	_clamp_camera_to_limits()
 
 
 func _stop_camera_recenter() -> void:
@@ -629,6 +675,7 @@ func _physics_process(_delta):
 		_stop_camera_recenter()
 		camera.position = Vector2.ZERO
 		camera.zoom = Vector2.ONE
+		_enable_camera_follow_smoothing()
 		velocity = input_direction * vel
 		move_and_slide()
 		return

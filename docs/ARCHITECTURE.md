@@ -387,6 +387,32 @@ Zoom temporal:
 
 Después de explorar, un nuevo tap calcula primero el destino en coordenadas de mundo y después restaura cámara y zoom con Tween cúbico `EASE_OUT` de `0.8 s`.
 
+### Suavizado de seguimiento
+
+El movimiento físico del Player sigue siendo directo: no se añade aceleración ni frenado artificial. La suavidad visual pertenece exclusivamente a `Camera2D`.
+
+Durante el seguimiento normal del Player se utiliza `position_smoothing` para amortiguar los cambios bruscos al empezar y terminar un desplazamiento.
+
+La separación de responsabilidades es:
+
+```text
+seguimiento normal del Player
+→ smoothing de Camera2D activo
+
+arrastre / pinch / exploración manual
+→ smoothing desactivado
+
+recentrado tras explorar
+→ smoothing desactivado; se usa el Tween existente
+
+recentrado terminado
+→ smoothing activo otra vez
+```
+
+Al pasar de seguimiento suavizado a control manual se conserva primero el centro visual actual de la cámara para evitar un salto. Teclado y mando mantienen su recentrado inmediato y después continúan con seguimiento suavizado.
+
+El valor inicial de `position_smoothing_speed` es `6.0`; es un ajuste visual, no un contrato de gameplay.
+
 ## Feedback de XP, inventario y nivel
 
 Los cambios reales muestran mensajes flotantes:
