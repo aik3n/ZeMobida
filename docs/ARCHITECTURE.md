@@ -23,7 +23,8 @@ Game
 │       ├── datos de Player
 │       ├── inventario
 │       └── VolverMapas
-└── Dialogo                    CanvasLayer 10
+├── Dialogo                    CanvasLayer 10
+└── DiplomaNivel               CanvasLayer 40
 
 DialogueManager (autoload)
 ├── runtime de diálogo
@@ -386,7 +387,7 @@ Zoom temporal:
 
 Después de explorar, un nuevo tap calcula primero el destino en coordenadas de mundo y después restaura cámara y zoom con Tween cúbico `EASE_OUT` de `0.8 s`.
 
-## Feedback de XP e inventario
+## Feedback de XP, inventario y nivel
 
 Los cambios reales muestran mensajes flotantes:
 
@@ -397,7 +398,40 @@ pérdida  → rojo, baja
 
 Se utilizan canales positivo/negativo independientes con separación aproximada de `0.25 s` por canal. Cada mensaje dura aproximadamente `1.2 s`.
 
-La carga de estado persistido no genera feedback.
+Cuando `Player.add_xp()` provoca también un cambio de nivel, se encola un segundo feedback destacado con la transición completa, por ejemplo:
+
+```text
+A1 → A2
+B1 → A2
+```
+
+El cambio puede ser ascendente o descendente y puede saltar varios niveles. La carga de estado persistido no genera estos feedbacks.
+
+### Diploma al terminar un diálogo
+
+`DialogueManager.current_dialogue_level` conserva el nivel con el que comenzó la conversación. Al cerrarse el diálogo se compara ese nivel inicial con el nivel final del Player.
+
+Regla:
+
+```text
+nivel final == nivel inicial
+→ no mostrar diploma
+
+nivel final != nivel inicial
+→ mostrar un único diploma del nivel final
+```
+
+Sólo importa el resultado final del diálogo. Si durante una misma conversación el Player atraviesa varios niveles, no se encadenan diplomas; y si termina otra vez en el nivel inicial, no se muestra ninguno. Subidas y bajadas se consideran igualmente relevantes.
+
+El diálogo desaparece antes de presentar el diploma. Los recursos se resuelven por nivel desde:
+
+```text
+res://art/diplomas/<nivel>.png
+```
+
+El diploma aparece como overlay modal por encima de la UI. Su entrada parte de una escala casi nula y `35°` de rotación y termina a escala normal y `0°` mediante Tween. Mientras dura la entrada no puede cerrarse; después, cualquier toque o clic en la pantalla lo descarta.
+
+La ausencia del PNG correspondiente no bloquea el juego. Los cierres usados para abrir el editor de diálogos o abandonar el mapa no deben presentar el diploma.
 
 ## Exportación
 

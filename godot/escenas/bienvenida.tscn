@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://buic8l4pj5del" path="res://scripts/bienvenida.gd" id="1_hpq5i"]
 [ext_resource type="PackedScene" uid="uid://dn6whg1fqoc87" path="res://escenas/carrusel_mapas.tscn" id="2_carrusel"]
+[ext_resource type="PackedScene" path="res://escenas/creditos.tscn" id="3_creditos"]
+[ext_resource type="Texture2D" path="res://art/ui/info.png" id="4_info"]
 
 [sub_resource type="StyleBoxFlat" id="StylePanel"]
 bg_color = Color(0.055, 0.067, 0.09, 0.97)
@@ -120,30 +122,30 @@ grow_vertical = 2
 [node name="chk_ActualizarGuiones" type="Button" parent="PanelCargaEscenas" unique_id=1149192314]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.09
-anchor_top = 0.745
-anchor_right = 0.91
-anchor_bottom = 0.81
+anchor_left = 0.06
+anchor_top = 0.895
+anchor_right = 0.62
+anchor_bottom = 0.955
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
 theme_override_colors/font_color = Color(0.9, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 38
+theme_override_font_sizes/font_size = 28
 theme_override_styles/normal = SubResource("StyleToggle")
 theme_override_styles/hover = SubResource("StyleToggle")
 theme_override_styles/pressed = SubResource("StyleTogglePressed")
 theme_override_styles/hover_pressed = SubResource("StyleTogglePressed")
 toggle_mode = true
-alignment = 0
-text = "☐  Actualizar guiones al iniciar"
+alignment = 1
+text = "Actualizar guiones al iniciar  ☐"
 
 [node name="lbl_EstadoGuiones" type="Label" parent="PanelCargaEscenas" unique_id=529408444]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.08
-anchor_top = 0.84
+anchor_top = 0.785
 anchor_right = 0.92
-anchor_bottom = 0.89
+anchor_bottom = 0.835
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.57, 0.82, 0.68, 1)
@@ -156,9 +158,9 @@ vertical_alignment = 1
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.08
-anchor_top = 0.91
+anchor_top = 0.845
 anchor_right = 0.92
-anchor_bottom = 0.955
+anchor_bottom = 0.885
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.44, 0.52, 0.6, 1)
@@ -166,3 +168,28 @@ theme_override_font_sizes/font_size = 24
 text = "Desliza o usa las flechas para cambiar de mapa"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="BotonCreditos" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -148.0
+offset_top = -188.0
+offset_right = -48.0
+offset_bottom = -88.0
+grow_horizontal = 0
+grow_vertical = 0
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleToggle")
+theme_override_styles/hover = SubResource("StyleToggle")
+theme_override_styles/pressed = SubResource("StyleTogglePressed")
+icon = ExtResource("4_info")
+expand_icon = true
+icon_alignment = 1
+theme_override_constants/icon_max_width = 58
+
+[node name="Creditos" parent="." instance=ExtResource("3_creditos")]
+layout_mode = 1

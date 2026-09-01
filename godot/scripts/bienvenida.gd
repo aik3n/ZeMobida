@@ -5,6 +5,8 @@ signal jugar(mapa_path: String)
 @onready var panel_carga_escenas: Panel = $PanelCargaEscenas
 @onready var chk_actualizar: Button = $PanelCargaEscenas/chk_ActualizarGuiones
 @onready var lbl_estado_guiones: Label = $PanelCargaEscenas/lbl_EstadoGuiones
+@onready var boton_creditos: Button = $BotonCreditos
+@onready var creditos: Control = $Creditos
 
 
 func _ready() -> void:
@@ -28,6 +30,10 @@ func _ready() -> void:
 
 	$PanelCargaEscenas/CarruselMapas.jugar.connect(
 		_on_carrusel_jugar
+	)
+
+	boton_creditos.pressed.connect(
+		_abrir_creditos
 	)
 
 	_actualizar_estado_inicial()
@@ -54,9 +60,9 @@ func _on_actualizar_guiones_toggled(enabled: bool) -> void:
 func _actualizar_texto_check() -> void:
 
 	if chk_actualizar.button_pressed:
-		chk_actualizar.text = "☑  Actualizar guiones al iniciar"
+		chk_actualizar.text = "Actualizar guiones al iniciar  ☑"
 	else:
-		chk_actualizar.text = "☐  Actualizar guiones al iniciar"
+		chk_actualizar.text = "Actualizar guiones al iniciar  ☐"
 
 
 func _on_guiones_disponibles_changed() -> void:
@@ -84,3 +90,7 @@ func _habilitar_carga_escenas() -> void:
 
 func _on_carrusel_jugar(mapa_path: String) -> void:
 	jugar.emit(mapa_path)
+
+
+func _abrir_creditos() -> void:
+	creditos.abrir()

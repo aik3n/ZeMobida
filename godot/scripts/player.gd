@@ -41,6 +41,7 @@ const FEEDBACK_INTERVAL := 0.25
 const FEEDBACK_FADE_DELAY := 0.68
 const FEEDBACK_FADE_TIME := 0.42
 const FEEDBACK_ROTATION_DEGREES := 4.0
+const FEEDBACK_HIGHLIGHT_SCALE := 1.4
 
 enum PointerSource {
 	NONE,
@@ -423,14 +424,16 @@ func _clamp_camera_axis(
 
 func mostrar_feedback(
 	texto: String,
-	positivo: bool
+	positivo: bool,
+	destacado := false
 ) -> void:
 	if texto.is_empty():
 		return
 
 	var data := {
 		"texto": texto,
-		"positivo": positivo
+		"positivo": positivo,
+		"destacado": destacado
 	}
 
 	if positivo:
@@ -472,7 +475,8 @@ func _lanzar_siguiente_feedback_positivo() -> void:
 
 	_crear_feedback(
 		str(data["texto"]),
-		true
+		true,
+		bool(data.get("destacado", false))
 	)
 
 	positive_feedback_timer.start(
@@ -489,7 +493,8 @@ func _lanzar_siguiente_feedback_negativo() -> void:
 
 	_crear_feedback(
 		str(data["texto"]),
-		false
+		false,
+		bool(data.get("destacado", false))
 	)
 
 	negative_feedback_timer.start(
@@ -499,7 +504,8 @@ func _lanzar_siguiente_feedback_negativo() -> void:
 
 func _crear_feedback(
 	texto: String,
-	positivo: bool
+	positivo: bool,
+	destacado := false
 ) -> void:
 	var label := feedback_label.duplicate() as Label
 
@@ -533,10 +539,16 @@ func _crear_feedback(
 		else FEEDBACK_NEGATIVE_COLOR
 	)
 
+	var escala := (
+		FEEDBACK_HIGHLIGHT_SCALE
+		if destacado
+		else 1.0
+	)
+
 	if positivo:
-		label.scale = Vector2.ONE * 0.72
+		label.scale = Vector2.ONE * 0.72 * escala
 	else:
-		label.scale = Vector2.ONE * 1.24
+		label.scale = Vector2.ONE * 1.24 * escala
 
 	var target_position := base_position
 
@@ -578,14 +590,14 @@ func _crear_feedback(
 		tween.tween_property(
 			label,
 			"scale",
-			Vector2.ONE * 1.18,
+			Vector2.ONE * 1.18 * escala,
 			0.17
 		)
 
 		tween.tween_property(
 			label,
 			"scale",
-			Vector2.ONE,
+			Vector2.ONE * escala,
 			0.30
 		).set_delay(
 			0.17
@@ -594,7 +606,7 @@ func _crear_feedback(
 		tween.tween_property(
 			label,
 			"scale",
-			Vector2.ONE * 0.86,
+			Vector2.ONE * 0.86 * escala,
 			0.68
 		)
 
@@ -631,6 +643,7 @@ func _physics_process(_delta):
 
 func add_xp(amount: int) -> void:
 	var xp_anterior := xp
+	var nivel_anterior := nivel
 
 	var nueva_xp: int = clamp(
 		xp + amount,
@@ -652,6 +665,16 @@ func add_xp(amount: int) -> void:
 		"%s%d XP" % [prefijo, cambio_real],
 		cambio_real > 0
 	)
+
+	if nivel != nivel_anterior:
+		mostrar_feedback(
+			"%s → %s" % [
+				nivel_anterior.to_upper(),
+				nivel.to_upper()
+			],
+			cambio_real > 0,
+			true
+		)
 
 
 func _actualizar_nivel() -> void:
