@@ -197,7 +197,7 @@ func _get_map_id(mapa: Node) -> String:
 	if scene_path.is_empty():
 		return ""
 
-	return scene_path.get_file().get_basename()
+	return scene_path.get_file().get_basename().to_lower()
 
 
 

@@ -7,6 +7,7 @@ var dialogue_ui = null
 var dialogue_editor = null
 var editor_active := false
 var current_dialogue_file := ""
+var current_dialogue_level := ""
 var current_speaker := ""
 
 var dialogue_data: Dictionary = {}
@@ -143,17 +144,21 @@ func open_current_dialogue_editor() -> void:
 		return
 
 	var scene_path: String = mapa_actual.scene_file_path
-	var map_name := scene_path.get_file().get_basename()
+	var map_name := scene_path.get_file().get_basename().to_lower()
 
 	var speaker_name := current_speaker
 
-	if map_name.is_empty() or speaker_name.is_empty():
+	if (
+		map_name.is_empty()
+		or speaker_name.is_empty()
+		or current_dialogue_level.is_empty()
+	):
 		return
 
 	var file_name := get_level_dialogue_file_name(
 		map_name,
 		speaker_name,
-		str(player.nivel)
+		current_dialogue_level
 	)
 
 	var initial_text := _get_editable_dialogue_source(
@@ -232,7 +237,19 @@ func start_dialogue(
 
 	dialogue_active = true
 	current_dialogue_file = file_path
+	current_dialogue_level = ""
 	current_speaker = speaker_name
+
+	var game = get_tree().current_scene
+
+	if game != null:
+		var player = game.get("player_actual")
+
+		if player == null:
+			player = game.get_node_or_null("Player")
+
+		if player != null:
+			current_dialogue_level = str(player.nivel)
 
 	load_dialogue(file_path)
 
@@ -468,17 +485,21 @@ func _get_random_node() -> String:
 
 
 func _apply_effects(effects: Array):
+	var state_changed := false
+
 	for effect in effects:
 		match effect["type"]:
 			"add_item":
-				add_item(
+				if add_item(
 					effect["item"]
-				)
+				):
+					state_changed = true
 
 			"remove_item":
-				remove_item(
+				if remove_item(
 					effect["item"]
-				)
+				):
+					state_changed = true
 
 			"xp":
 				var game = get_tree().current_scene
@@ -499,10 +520,17 @@ func _apply_effects(effects: Array):
 
 					continue
 
+				var xp_anterior: int = player.xp
+
 				player.add_xp(
 					int(effect["value"])
 				)
 
+				if player.xp != xp_anterior:
+					state_changed = true
+
+	if state_changed:
+		_save_player_status()
 
 func _mostrar_feedback_objeto(
 	texto: String,
@@ -583,6 +611,7 @@ func end_dialogue():
 	dialogue_active = false
 	current_node = ""
 	current_dialogue_file = ""
+	current_dialogue_level = ""
 	current_speaker = ""
 
 	dialogue_data.clear()
@@ -590,7 +619,6 @@ func end_dialogue():
 	if dialogue_ui != null:
 		dialogue_ui.hide_dialogue()
 
-	_save_player_status()
 
 
 func load_player_status() -> void:

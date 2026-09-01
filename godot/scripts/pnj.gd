@@ -185,7 +185,7 @@ func get_map_name() -> String:
 
 	var scene_path: String = mapa_actual.scene_file_path
 
-	return scene_path.get_file().get_basename()
+	return scene_path.get_file().get_basename().to_lower()
 
 
 func get_dialogue_path() -> String:
