@@ -299,3 +299,97 @@ No se añade estado ni acoplamiento adicional al sistema de diálogo.
 
 La decisión puede revisarse si los mapas reales demuestran que áreas solapadas o PNJ móviles provocan cierres frecuentes o confusos.
 
+---
+
+## ADR-034 — Persistir inmediatamente los efectos que cambian el estado
+
+**Status:** Accepted  
+**Fecha:** 2026-09-01
+
+### Context
+
+XP e inventario se guardaban al terminar un diálogo. Si la aplicación se cerraba después de aplicar una recompensa pero antes de alcanzar esa ruta de cierre, el efecto visible podía no quedar persistido.
+
+Guardar tras cualquier intento de efecto introduciría escrituras innecesarias para operaciones que no cambian el estado, como añadir un objeto ya existente.
+
+### Decision
+
+`DialogueManager._apply_effects()` mantiene un indicador de cambio real.
+
+Se considera cambio cuando:
+
+- `add_item()` añade realmente un objeto;
+- `remove_item()` retira realmente un objeto;
+- `Player.add_xp()` produce una XP final distinta de la anterior.
+
+Si al menos un efecto cambia el estado, se llama inmediatamente a `_save_player_status()`.
+
+`end_dialogue()` deja de ser el mecanismo del que depende el guardado de recompensas.
+
+### Consequences
+
+Una recompensa aplicada queda persistida en el mismo flujo que la produjo.
+
+Los efectos sin variación real no generan escrituras adicionales ni feedback falso.
+
+---
+
+## ADR-035 — El editor conserva el nivel con el que comenzó el diálogo
+
+**Status:** Accepted  
+**Fecha:** 2026-09-01
+
+### Context
+
+El nombre editable es `<mapa>_<pnj>_<nivel>.txt`.
+
+Un diálogo puede conceder XP suficiente para cambiar de nivel antes de que el jugador pulse `EDITAR`. Recalcular el nivel en ese momento haría que el editor abriera un archivo distinto del contexto que originó la conversación.
+
+### Decision
+
+`DialogueManager.start_dialogue()` captura el nivel actual del Player en `current_dialogue_level`.
+
+Mientras esa conversación permanece activa, `open_current_dialogue_editor()` utiliza ese nivel capturado para construir el nombre exacto del archivo.
+
+El valor se limpia al terminar el diálogo.
+
+### Consequences
+
+`EDITAR` representa de forma estable el diálogo que se inició, aunque sus propios efectos cambien posteriormente XP o nivel.
+
+No se crea una identidad adicional para la conversación ni se congela el nivel global del Player; sólo se conserva el contexto necesario para elegir el archivo editable.
+
+---
+
+## ADR-036 — Normalizar a minúsculas el ID técnico de mapa
+
+**Status:** Accepted  
+**Fecha:** 2026-09-01
+
+### Context
+
+El ID de mapa se deriva del nombre del archivo de escena. Una escena como `Arauzo_de_salce.tscn` conservaba la mayúscula inicial mientras la identidad de PNJ ya se normalizaba a minúsculas.
+
+Esto hacía que nombres de guion y claves persistentes dependieran del case del filename y podía producir diferencias entre plataformas.
+
+### Decision
+
+El ID técnico de mapa es:
+
+```text
+scene_file_path.get_file().get_basename().to_lower()
+```
+
+La misma normalización se utiliza para:
+
+- claves de `[map_positions]` en `Game`;
+- resolución de diálogo desde `PNJ`;
+- cálculo del archivo exacto del editor.
+
+No se introduce una propiedad `map_id` separada y no es necesario renombrar físicamente las escenas existentes.
+
+### Consequences
+
+Un mismo mapa utiliza una identidad técnica coherente para persistencia y diálogo independientemente de diferencias de mayúsculas/minúsculas.
+
+El cambio no migra automáticamente datos creados antes de `bb3f058`: una clave de posición o variante local de diálogo que conservara mayúsculas puede dejar de resolverse. Durante el prototipo se acepta esta compatibilidad limitada; si fuera necesario preservar esos datos, la migración deberá ser pequeña y explícita.

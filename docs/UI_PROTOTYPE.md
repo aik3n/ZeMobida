@@ -1,8 +1,8 @@
 # Prototipo de UI, mapas, control táctil y creador de guiones
 
-**Estado:** maquetación funcional, flujo del mapa piloto y creador local de guiones revisados manualmente en runtime el 2026-08-30.
+**Estado:** maquetación funcional, flujo del mapa piloto, persistencia por mapa y creador local de guiones revisados hasta el 2026-09-01.
 
-La sincronización de guiones y el descubrimiento de mapas exportados ya fueron validados previamente en dispositivo Android. El nuevo fondo ilustrado y el control tap/arrastre deben mantenerse dentro de la regresión Android antes de una release.
+La sincronización de guiones y el descubrimiento de mapas exportados ya fueron validados previamente en dispositivo Android. El fondo ilustrado y el control tap/arrastre deben mantenerse dentro de la regresión Android antes de una release. Existe además un preset Web, todavía sin una validación funcional equivalente documentada.
 
 ## Resolución de diseño
 
@@ -47,11 +47,13 @@ IBON                         [EDITAR]
 Hola, aventurero...
 ```
 
-El botón siempre representa el archivo específico del contexto actual:
+El botón representa el archivo específico del contexto con el que comenzó la conversación:
 
 ```text
-<mapa>_<pnj>_<nivel>.txt
+<mapa>_<pnj>_<nivel_al_inicio>.txt
 ```
+
+El nivel se captura al iniciar el diálogo. Si un efecto cambia XP/nivel antes de pulsar `EDITAR`, el archivo objetivo no cambia durante esa conversación.
 
 Al pulsarlo, el diálogo se cierra y se abre `DialogueEditor` por encima del resto de UI.
 
@@ -69,7 +71,7 @@ aldea_ibon_a1.txt
 │   = Salir > FINAL            │
 └──────────────────────────────┘
 
-[ GUARDAR ]      [ CERRAR ]
+[ GUARDAR ]   [ ENVIAR ]   [ CERRAR ]
 ```
 
 El `CodeEdit` no hace wrap. Una línea larga permanece como una sola línea visual y se consulta mediante scroll horizontal.
@@ -91,7 +93,9 @@ El highlight actual diferencia:
 
 `GUARDAR` escribe el guion local y cierra. `CERRAR` sale sin guardar cambios pendientes. Si la escritura falla, `GUARDAR` no cierra.
 
-Las marcas `●` nunca deshabilitan ni modifican `GUARDAR`; un guion puede dejarse a medias y conservarse para continuar después.
+`ENVIAR` guarda primero mediante la misma ruta de escritura. Sólo si el guardado funciona prepara un `mailto:` a `zemobida@gmail.com` con el nombre y contenido exacto del archivo; el editor permanece abierto. Cancelar o no poder abrir el cliente de correo no elimina la copia local ya guardada.
+
+Las marcas `●` nunca deshabilitan ni modifican `GUARDAR` o `ENVIAR`; un guion puede dejarse a medias y conservarse para continuar después.
 
 El diagnóstico sólo evalúa la forma de cada línea. No juzga coherencia, destinos, ciclos ni si el diálogo tiene final.
 
@@ -156,7 +160,9 @@ Al volver al Player se restauran conjuntamente `camera.position = Vector2.ZERO` 
 
 Un nuevo gesto puede cancelar el recentrado en curso.
 
-El Player persistente sincroniza su destino con `SpawnPlayer` al cargar el mapa, evitando que camine hacia una posición anterior.
+El Player persistente usa `SpawnPlayer` sólo cuando no existe una posición guardada para el mapa. En entradas posteriores recupera la última posición y sincroniza `destino` con la posición restaurada, evitando que camine hacia un destino perteneciente al mapa anterior.
+
+El ID técnico de mapa utilizado por esa persistencia es el basename de la escena normalizado a minúsculas.
 
 El ratón reproduce tap/arrastre con botón izquierdo y zoom con rueda para pruebas de escritorio.
 
@@ -181,7 +187,8 @@ separación inicial:       60 px entre positivo y negativo
 
 Cada mensaje mantiene su propia animación, por lo que varios textos pueden coexistir en pantalla.
 
-La regla funcional es estricta: si XP o inventario no cambian realmente, no aparece ningún mensaje. La restauración de una partida tampoco genera feedback.
+La regla funcional es estricta: si XP o inventario no cambian realmente, no aparece ningún mensaje. La misma comprobación decide la persistencia: cuando un efecto sí cambia realmente XP o inventario, el nuevo estado se guarda inmediatamente en `user://settings.cfg`.
+
+La restauración de una partida no genera feedback.
 
 El `CanvasLayer 15` permite que el mensaje sea visible durante un diálogo y conserve un tamaño estable aunque la cámara use zoom.
-

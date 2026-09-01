@@ -1,6 +1,6 @@
 # ZeMobida — Development Guide
 
-**Estado:** subsistemas de guiones y diálogo validados; maquetación, mapa piloto ilustrado, control táctil, feedback del Player y creador local de guiones revisados en runtime hasta el 2026-08-30.  
+**Estado:** subsistemas de guiones y diálogo, navegación/posición por mapa, creador local de guiones y cambios de persistencia revisados hasta el 2026-09-01; validación de dispositivo documentada para Android.  
 **Godot:** 4.7.
 
 ## Reglas
@@ -94,6 +94,8 @@ El jugador sólo puede editar:
 <mapa>_<pnj>_<nivel>.txt
 ```
 
+Los componentes técnicos de mapa y PNJ se normalizan a minúsculas.
+
 Los fallbacks:
 
 ```text
@@ -102,6 +104,20 @@ generico.txt
 ```
 
 son oficiales y no se editan desde el juego.
+
+### Nivel objetivo estable
+
+El nivel que forma parte del nombre editable se captura cuando comienza la conversación.
+
+Si un efecto del propio diálogo modifica XP y cambia el nivel antes de pulsar `EDITAR`, el editor sigue apuntando al archivo correspondiente al nivel inicial:
+
+```text
+inicio en a1
+→ efecto cambia Player a a2
+→ EDITAR sigue abriendo <mapa>_<pnj>_a1.txt
+```
+
+El nivel global del Player sí cambia normalmente; sólo se conserva el contexto del archivo editable.
 
 ### Prioridad runtime
 
@@ -146,16 +162,19 @@ EDITAR
 
 La copia local sólo existe después de un guardado correcto.
 
-El editor utiliza `CodeEdit` y sólo expone:
+El editor utiliza `CodeEdit` y expone:
 
 ```text
 GUARDAR
+ENVIAR
 CERRAR
 ```
 
 `GUARDAR` escribe el `.txt` en `user://custom_dialogues/` y cierra inmediatamente después de una escritura correcta. Si no puede crear la carpeta o abrir el archivo para escritura, no cierra el editor.
 
-`CERRAR` no guarda cambios pendientes.
+`ENVIAR` reutiliza el mismo guardado. Sólo después de escribir correctamente prepara un `mailto:` a `zemobida@gmail.com` con el nombre del archivo y su contenido exacto; el editor permanece abierto. Si falla el guardado, no se intenta abrir correo. Si falla o se cancela el cliente de correo, la copia local ya guardada permanece.
+
+`CERRAR` no guarda cambios pendientes posteriores al último guardado.
 
 ### Highlight y lectura por línea
 
@@ -185,7 +204,7 @@ es local a una única línea
 no usa DialogueParser
 no usa DialogueValidator
 no comprueba otras líneas
-no bloquea GUARDAR
+no bloquea GUARDAR ni ENVIAR
 ```
 
 Reglas actuales:
@@ -244,9 +263,9 @@ Un diálogo que no termina puede ser deliberado y no se considera error.
 
 ### Guardado y validación
 
-**Guardar no valida el guion y las marcas rojas no bloquean el guardado.**
+**Guardar o enviar no valida el guion y las marcas rojas no bloquean esas acciones.**
 
-El flujo es deliberadamente:
+El flujo de prueba sigue siendo deliberadamente:
 
 ```text
 editar
@@ -269,9 +288,13 @@ Comprobar:
 - no existe exacto local/oficial → se mantienen los fallbacks oficiales;
 - `EDITAR` sobre oficial exacto → carga exactamente su contenido;
 - `EDITAR` sin exacto oficial → muestra el boceto;
+- diálogo iniciado en un nivel + efecto que cambia de nivel → `EDITAR` conserva el nivel inicial;
 - abrir oficial exacto y cerrar sin guardar → no crea archivo local;
 - modificar y pulsar `CERRAR` → cambios descartados;
 - `GUARDAR` → escribe local y cierra;
+- `ENVIAR` → guarda primero y mantiene abierto el editor;
+- fallo de guardado al pulsar `ENVIAR` → no abre correo;
+- cancelar/fallar el cliente de correo → el archivo local guardado permanece;
 - siguiente interacción → usa la versión local guardada;
 - reabrir `EDITAR` → muestra la versión local;
 - guion local inválido → runtime lo detecta al cargarlo;
@@ -286,7 +309,7 @@ Comprobar:
 - dos efectos XP en una misma línea → `●`;
 - orden estructural incorrecto → `●`;
 - diálogo sin final o con ciclos narrativos → no se marca por ese motivo;
-- una o muchas líneas con `●` → `GUARDAR` continúa disponible y cierra tras escritura correcta.
+- una o muchas líneas con `●` → `GUARDAR` y `ENVIAR` continúan disponibles.
 
 
 ## Selección de mapas
@@ -323,6 +346,18 @@ Se toma el nombre del archivo:
 nuevo_mapa.tscn → nuevo mapa
 ```
 
+### ID técnico
+
+Para persistencia y resolución de diálogo, el ID técnico es el basename de la escena normalizado a minúsculas:
+
+```text
+Arauzo_de_salce.tscn → arauzo_de_salce
+```
+
+La escena física no se renombra por esta normalización. Cambiar el filename sí cambia la identidad técnica.
+
+No existe migración automática para claves de posición o variantes locales de diálogo creadas antes de `bb3f058` con mayúsculas en el prefijo de mapa.
+
 ### Preview
 
 La escena puede contener un nodo opcional `Preview`. Si el nodo es `Sprite2D` o `TextureRect` y tiene textura, ésta se muestra en el carrusel. Si no existe o no tiene textura, se muestra sólo el nombre.
@@ -330,11 +365,14 @@ La escena puede contener un nodo opcional `Preview`. Si el nodo es `Sprite2D` o 
 ### Persistencia
 
 El último mapa se guarda al pulsar `JUGAR`, no al desplazarse por el carrusel. Se almacena como ruta de escena en `user://settings.cfg`.
-XP e inventario también se almacenan en `user://settings.cfg`; no se contempla migración desde formatos anteriores.
 
-La persistencia de jugador comparte ese mismo archivo. La XP y el inventario se guardan en la sección `[player]`; no se crea un archivo de partida separado.
+La persistencia de jugador comparte ese mismo archivo. XP e inventario se guardan en la sección `[player]`; no se crea un archivo de partida separado.
 
-Al iniciar se intenta recuperar esa ruta. Si el archivo ya no existe, se selecciona el primer mapa disponible.
+Cuando un efecto de diálogo produce un cambio real de XP o inventario, `[player]` se guarda inmediatamente. El guardado de la recompensa no espera a que termine la conversación.
+
+La última posición de Player se guarda por ID técnico de mapa en `[map_positions]` y se restaura al volver a entrar. `SpawnPlayer` sólo actúa como entrada/fallback cuando no existe una posición previa.
+
+Al iniciar el carrusel se intenta recuperar la última ruta seleccionada. Si el archivo ya no existe, se selecciona el primer mapa disponible.
 
 ### Regresión recomendada
 
@@ -351,7 +389,10 @@ Además de las pruebas generales, comprobar:
 - recordar último mapa tras reiniciar;
 - último mapa eliminado → primer mapa;
 - añadir un nuevo `.tscn` → aparece sin modificar el selector;
-- `JUGAR` → `Game` carga la escena seleccionada.
+- `JUGAR` → `Game` carga la escena seleccionada;
+- primera entrada sin posición → `SpawnPlayer`;
+- salida y reentrada → restaura última posición;
+- ID de mapa con mayúsculas en el filename → clave técnica normalizada a minúsculas.
 
 
 ## Creación de mapas top-down
@@ -406,7 +447,7 @@ Esto evita usar una imagen grande del mundo como miniatura.
 
 ### Colisiones
 
-Las colisiones se dibujarán en Godot encima de la ilustración.
+Las colisiones se dibujan en Godot encima de la ilustración.
 
 Reglas prácticas:
 
@@ -415,7 +456,7 @@ Reglas prácticas:
 - no perseguir el contorno exacto de cada píxel;
 - agrupar la geometría por zonas comprensibles cuando ayude al mantenimiento.
 
-La incorporación de colisiones al mapa piloto es el siguiente paso del modelo visual.
+El mapa piloto `aldea` ya incorpora colisiones locales sobre la ilustración; su ajuste seguirá evolucionando con el arte y las pruebas de recorrido.
 
 ### Frontal
 
@@ -451,16 +492,21 @@ No se utiliza recorte dinámico ni `Polygon2D` para generar esta capa en runtime
 
 ### SpawnPlayer
 
-Al cargar un mapa, `Game` coloca el Player persistente en `SpawnPlayer` y sincroniza su variable `destino` con esa misma posición.
+`SpawnPlayer` es obligatorio como posición inicial/fallback, pero no sustituye la memoria de posición por mapa.
 
 La regla es:
 
 ```text
-global_position = SpawnPlayer
-destino         = SpawnPlayer
+sin posición guardada
+→ global_position = SpawnPlayer
+→ destino         = SpawnPlayer
+
+con posición guardada
+→ global_position = posición guardada
+→ destino         = posición guardada
 ```
 
-Así el personaje aparece quieto en el nuevo spawn aunque conserve estado entre escenas.
+Sincronizar `destino` evita que el Player persistente intente caminar hacia una posición perteneciente al mapa anterior.
 
 
 ## Control táctil del mapa
@@ -572,6 +618,8 @@ Comprobar:
 
 Una línea de texto puede terminar en un bloque de efectos, por ejemplo `Has elegido bien [xp+30]`. El parser separa el texto de los efectos y `DialogueManager` los aplica únicamente cuando el nodo alcanza la fase de presentación.
 
+Si esos efectos producen un cambio real en XP o inventario, el nuevo estado se guarda inmediatamente en `user://settings.cfg`.
+
 
 ## Feedback flotante de XP e inventario
 
@@ -610,18 +658,18 @@ Cada mensaje duplica el `Label` de plantilla, ejecuta su propio `Tween` y se des
 
 ### Regla de cambio real
 
-No debe generarse feedback si el estado final no cambia.
+No debe generarse feedback si el estado final no cambia. Esa misma regla decide si hace falta persistir el estado después de los efectos.
 
 Comprobar:
 
 - XP positiva → texto `+N XP`;
 - XP negativa → texto `-N XP`;
 - XP en límite → mostrar sólo la variación real;
-- variación real `0` → no mostrar nada;
-- objeto nuevo → `+ Objeto`;
-- objeto eliminado → `- Objeto`;
-- objeto repetido al añadir → no mostrar;
-- objeto inexistente al quitar → no mostrar;
+- variación real `0` → no mostrar nada ni guardar por ese efecto;
+- objeto nuevo → `+ Objeto` y persistencia inmediata;
+- objeto eliminado → `- Objeto` y persistencia inmediata;
+- objeto repetido al añadir → no mostrar ni guardar por ese efecto;
+- objeto inexistente al quitar → no mostrar ni guardar por ese efecto;
 - varios positivos → salida cada `0.25 s`;
 - varios negativos → salida cada `0.25 s`;
 - positivo y negativo simultáneos → ambos canales comienzan sin esperarse;
@@ -643,16 +691,18 @@ El layer sigue la posición del Player en pantalla. Esto evita que el diálogo t
 
 ## Backlog técnico
 
-La lista priorizada de mejoras y riesgos pendientes se mantiene en `docs/AUDIT.md`, sección **Backlog de auditoría completa — 2026-08-29**.
+La lista priorizada de mejoras, decisiones abiertas y riesgos pendientes se mantiene en `docs/AUDIT.md`.
 
-Los puntos se resolverán individualmente siguiendo el ciclo:
+Los puntos se resuelven individualmente siguiendo el ciclo:
 
 ```text
 especificar → implementar → probar en runtime → documentar → cerrar
 ```
 
 
-## Exportación Android y sincronización de guiones
+## Exportación y sincronización de guiones
+
+### Android
 
 El preset Android debe mantener:
 
@@ -662,13 +712,21 @@ permissions/internet=true
 
 `DialogueUpdater` utiliza `HTTPRequest` para consultar y descargar los guiones desde GitHub. En una instalación Android nueva no existe todavía `user://dialogues/`, por lo que el permiso de Internet es necesario para obtener la caché inicial.
 
+### Windows Desktop
+
+El preset Windows Desktop utiliza actualmente PCK embebido en el ejecutable.
+
+### Web
+
+Existe un preset Web en `export_presets.cfg` con salida configurada para `ZeMobida.html`.
+
+Su existencia documenta una configuración de exportación, no una validación cerrada de plataforma. Antes de considerar Web una plataforma soportada para release hay que comprobar en navegador el flujo completo que depende de entrada, persistencia local, `HTTPRequest`, sincronización de guiones y apertura de `mailto:` cuando proceda.
 
 ### Descubrimiento de mapas en exportación
 
 Los recursos bajo `res://mapas/` se enumeran con `ResourceLoader.list_directory()` y no con `DirAccess`. Esto es necesario porque los recursos pueden quedar remapeados en el PCK de una build exportada, mientras `ResourceLoader` conserva sus nombres originales.
 
 El contrato sigue siendo el mismo: sólo se descubren escenas `.tscn` directamente dentro de `res://mapas/`.
-
 
 ### Validación Android completada
 

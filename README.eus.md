@@ -9,9 +9,9 @@
 
 ZeMobida Godotekin garatutako kode irekiko bideo-jokoa da. Esplorazioa, PNJak, elkarrizketa adarkatuak, inbentarioa, XP eta jokalariaren erabakiak dira oinarriak.
 
-Uneko arkitekturak mapa-hautaketa dinamikoa, `Game`-en Player iraunkorra, mapa bakoitzeko azken posizioa berreskuratzea, PNJen spritea Inspectorretik esleitzea eta `a1`, `a2`, `b1`, `b2`, `c1`, `c2` mailak ditu.
+Uneko arkitekturak mapa-hautaketa dinamikoa, `Game`-en Player iraunkorra, mapa bakoitzeko azken posizioa berreskuratzea, PNJen spritea Inspectorretik esleitzea eta `a1`, `a2`, `b1`, `b2`, `c1`, `c2` mailak ditu. Elkarrizketa-efektu batek XP edo inbentarioa benetan aldatzen duenean, egoera berehala gordetzen da.
 
-Beharrezkoa da Godot **4.7**. Proiektu nagusia `res://escenas/Game.tscn` da.
+Beharrezkoa da Godot **4.7**. Proiektu nagusia `res://escenas/Game.tscn` da. Windows Desktop, Android eta Web esportazio-presetak daude; Android gailuan balioztatuta dago, baina Web preseta ez da oraindik nabigatzaile-euskarri balioztatu gisa hartu behar.
 
 Dokumentazio nagusia:
 
@@ -22,6 +22,7 @@ Dokumentazio nagusia:
 - [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)
 - [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md)
 - [`docs/MAP_PACKS_FUTURE.md`](docs/MAP_PACKS_FUTURE.md)
+- [`docs/UI_PROTOTYPE.md`](docs/UI_PROTOTYPE.md)
 
 Gidoi ofizialak `aik3n/ZeMobida_guiones` biltegi bereizian bertsionatzen dira. Gidoi-editoreko `ENVIAR` aukerak lehenik tokiko fitxategia gordetzen du eta ondoren posta-mezua prestatzen du `zemobida@gmail.com` helbidera, erabiltzailearen posta-aplikazioa erabiliz.
 

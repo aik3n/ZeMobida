@@ -1,6 +1,6 @@
 # ZeMobida — Architecture
 
-**Estado:** arquitectura funcional revisada el 2026-08-31.  
+**Estado:** arquitectura funcional revisada el 2026-09-01.  
 **Godot:** 4.7.x.  
 **Principio:** preferir soluciones pequeñas, explícitas y editables desde Godot antes que capas de abstracción innecesarias.
 
@@ -104,7 +104,18 @@ Las posiciones se almacenan en:
 
 dentro de `user://settings.cfg`.
 
-El identificador usado actualmente es el nombre base del archivo de escena del mapa. Tras restaurar una posición, `Game` sincroniza también `player_actual.destino` para impedir que el Player intente volver a un destino anterior.
+El identificador técnico usado actualmente es el nombre base del archivo de escena normalizado a minúsculas:
+
+```text
+Arauzo_de_salce.tscn → arauzo_de_salce
+aldea.tscn           → aldea
+```
+
+La normalización se realiza en runtime; no requiere renombrar físicamente la escena. Renombrar el archivo sí cambia deliberadamente la identidad técnica del mapa.
+
+No existe migración automática de claves antiguas que conservaran mayúsculas antes de `bb3f058`.
+
+Tras restaurar una posición, `Game` sincroniza también `player_actual.destino` para impedir que el Player intente volver a un destino anterior.
 
 ## Contrato actual de mapa
 
@@ -187,12 +198,12 @@ Los valores son parte del ajuste visual/jugable actual y pueden revisarse si cam
 
 ### Identidad
 
-El nombre del nodo de la instancia es la identidad técnica del PNJ.
+El nombre del nodo de la instancia, normalizado a minúsculas, es la identidad técnica del PNJ.
 
 Ejemplo:
 
 ```text
-pedro_luis
+Pedro_Luis → pedro_luis
 ```
 
 - identidad técnica: `pedro_luis`;
@@ -270,6 +281,8 @@ Prioridad para un PNJ/nivel:
 4. oficial  generico.txt
 ```
 
+Los componentes técnicos `<mapa>` y `<pnj>` se normalizan a minúsculas antes de resolver el nombre del archivo.
+
 Los guiones oficiales se versionan exclusivamente en:
 
 ```text
@@ -299,6 +312,18 @@ Cuerpo:  nombre del archivo + contenido exacto guardado
 ```
 
 El `.txt` no se adjunta automáticamente: el contenido se incluye en el cuerpo del correo. La aplicación de correo del jugador es la que muestra y confirma el envío. Cancelar ese correo no deshace el guardado local realizado previamente.
+
+### Nivel objetivo del editor
+
+Al iniciar una conversación, `DialogueManager.start_dialogue()` captura el nivel actual del Player en `current_dialogue_level`.
+
+Ese valor representa el contexto del diálogo abierto y permanece estable hasta que la conversación termina. Si un efecto cambia XP y con ello el nivel del Player antes de pulsar `EDITAR`, el archivo objetivo continúa siendo:
+
+```text
+<mapa>_<pnj>_<nivel_al_inicio>.txt
+```
+
+No se recalcula con el nivel posterior al efecto.
 
 El runtime continúa usando `DialogueParser` y `DialogueValidator` al iniciar un diálogo. La responsabilidad conceptual del parser es interpretar el formato; el validator actual comprueba la coherencia estructural del diccionario resultante.
 
@@ -332,6 +357,10 @@ Secciones actuales:
 [player]          XP e inventario
 [map_positions]   última posición del Player por mapa
 ```
+
+Los efectos de diálogo que producen una variación real de XP o inventario guardan inmediatamente la sección `[player]`. El guardado no depende de que el diálogo llegue posteriormente a `end_dialogue()`.
+
+Un efecto que no cambia el estado final —por ejemplo añadir un objeto ya presente, retirar uno ausente o intentar superar un límite de XP sin variación— no provoca una escritura adicional.
 
 El manifest de sincronización de guiones permanece separado porque describe el estado de la caché remota, no la partida.
 
@@ -369,6 +398,22 @@ pérdida  → rojo, baja
 Se utilizan canales positivo/negativo independientes con separación aproximada de `0.25 s` por canal. Cada mensaje dura aproximadamente `1.2 s`.
 
 La carga de estado persistido no genera feedback.
+
+## Exportación
+
+`godot/export_presets.cfg` contiene actualmente presets para:
+
+```text
+Windows Desktop
+Android
+Web
+```
+
+Android mantiene permiso de Internet para la sincronización de guiones y su flujo básico fue validado en dispositivo.
+
+Windows utiliza actualmente PCK embebido en el ejecutable.
+
+El preset Web forma parte de la configuración del proyecto, pero todavía no existe en esta documentación una validación funcional equivalente de ejecución en navegador. Su presencia no debe interpretarse por sí sola como soporte Web cerrado para release.
 
 ## Mapas externos: experimento cerrado
 

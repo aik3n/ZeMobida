@@ -1,7 +1,7 @@
 # ZeMobida — Technical Audit
 
-**Revisión:** 2026-08-31  
-**Base GitHub de partida:** `322befb4acdfd2705795c47f2497bfe375dcd97c`; revisión ampliada con la protección A-02 validada en runtime antes del siguiente commit.  
+**Revisión:** 2026-09-01  
+**Base GitHub revisada:** `bb3f058e68a24140375e8b28fb9fb282bef50a4c` (`mejoras y bug fix`).  
 **Estado:** prototipo funcional; deuda localizada. No se recomienda una reescritura general.
 
 ## Resumen
@@ -12,15 +12,19 @@ La arquitectura se mantiene coherente y deliberadamente sencilla:
 - mapas dinámicos dentro de `SceneContainer`;
 - niveles/XP centralizados;
 - identidad técnica de PNJ basada en el nombre del nodo;
+- identidad técnica de mapa derivada del nombre de escena y normalizada a minúsculas;
 - sprite de PNJ configurable desde Inspector con reflejo `@tool`;
 - diálogo oficial/local separado;
 - sincronización remota con temporal + backup;
 - persistencia consolidada en `user://settings.cfg`;
+- persistencia inmediata cuando un efecto modifica realmente XP o inventario;
 - regreso global al selector de mapas;
 - posición independiente recordada por mapa;
 - envío voluntario de guiones locales mediante la aplicación de correo del jugador.
 
-Los dos riesgos altos de diálogo revisados quedan resueltos sin ampliar la arquitectura: A-02 mediante una contingencia runtime y A-03 aceptado por diseño.
+Los dos riesgos altos de diálogo revisados anteriormente quedan resueltos sin ampliar la arquitectura: A-02 mediante una contingencia runtime y A-03 aceptado por diseño.
+
+El commit `bb3f058` cierra además A-04, A-18 y A-19 con cambios pequeños en `DialogueManager`, `Game` y `PNJ`: guardado inmediato de efectos reales, nivel de diálogo fijado al comenzar la conversación y normalización a minúsculas del identificador técnico de mapa.
 
 ## Cambios cerrados desde la auditoría anterior
 
@@ -62,7 +66,6 @@ Las posiciones se conservan en `[map_positions]` dentro de `user://settings.cfg`
 
 El botón Stop del editor puede matar externamente el proceso y no se considera una ruta de cierre fiable.
 
-
 ### Envío de guiones locales
 
 El editor incorpora `ENVIAR` junto a `GUARDAR` y `CERRAR`.
@@ -79,6 +82,35 @@ ENVIAR
 
 El asunto contiene el nombre del archivo y el cuerpo contiene el texto exacto guardado. No se incluyen credenciales ni se conecta directamente con Gmail/SMTP. El usuario confirma o cancela el envío desde su propia aplicación de correo.
 
+### Persistencia inmediata de efectos
+
+`DialogueManager._apply_effects()` distingue entre intentar un efecto y producir un cambio real.
+
+Sólo cuando XP o inventario cambian realmente se guarda de inmediato la sección `[player]` de `user://settings.cfg`. Añadir un objeto ya existente, retirar uno inexistente o aplicar XP sin variación efectiva no provoca un guardado innecesario.
+
+`end_dialogue()` deja de ser el punto del que depende la persistencia de recompensas.
+
+### Nivel estable para el archivo del editor
+
+Al comenzar un diálogo, `DialogueManager` conserva el nivel actual del Player en `current_dialogue_level`.
+
+Si un efecto modifica XP y el Player cambia de nivel durante esa misma conversación, `EDITAR` continúa apuntando al archivo exacto correspondiente al nivel con el que comenzó el diálogo.
+
+### ID técnico de mapa normalizado
+
+`Game._get_map_id()`, `PNJ.get_map_name()` y el cálculo del archivo objetivo del editor usan el basename de la escena normalizado con `.to_lower()`.
+
+Ejemplo:
+
+```text
+Arauzo_de_salce.tscn → arauzo_de_salce
+```
+
+No se renombra físicamente la escena. La normalización evita que posición persistente y nombres de guion dependan de diferencias de mayúsculas/minúsculas entre plataformas.
+
+### Preset Web y empaquetado Windows
+
+`export_presets.cfg` incorpora un preset Web y el preset Windows pasa a exportar con PCK embebido. Esto amplía la configuración disponible, pero no equivale a una validación funcional Web: la validación de dispositivo documentada sigue siendo Android.
 
 ## Backlog actual
 
@@ -125,11 +157,11 @@ No se añade propiedad explícita del diálogo ni complejidad adicional mientras
 
 ### A-04 — Persistencia inmediata de efectos importantes
 **Prioridad:** Media  
-**Estado:** PENDIENTE DE DECISIÓN
+**Estado:** CERRADO — IMPLEMENTADO EN `bb3f058`
 
-XP/inventario se guardan normalmente al terminar diálogo. Un cierre inesperado justo después de un efecto puede perder ese cambio.
+Cada conjunto de efectos guarda inmediatamente el estado de Player cuando existe una variación real de XP o inventario.
 
-La nueva persistencia de posición no resuelve este caso; son responsabilidades diferentes.
+Los efectos sin cambio real no disparan escritura. `end_dialogue()` ya no es necesario para consolidar la recompensa de un efecto aplicado.
 
 ---
 
@@ -155,9 +187,11 @@ No se propone una infraestructura grande mientras el proyecto siga en prototipo.
 **Prioridad:** Media  
 **Estado:** PENDIENTE
 
-Persisten valores de prototipo en nombre de aplicación, outputs/presets, package ID y metadatos.
+Existen presets de Windows Desktop, Android y Web; Windows utiliza actualmente PCK embebido. Persisten valores de prototipo en outputs, package ID, versión y otros metadatos.
 
-Resolver antes de distribución real.
+El preset Web existe como configuración, pero todavía no hay una validación funcional Web documentada equivalente a la realizada en Android.
+
+Resolver los metadatos y la validación de las plataformas objetivo antes de distribución real.
 
 ---
 
@@ -265,31 +299,37 @@ Las escenas que serializan `sprite = ...` vuelven a ser válidas. No se usa `Edi
 
 ### A-18 — Nivel objetivo del editor puede cambiar durante un diálogo
 **Prioridad:** Media  
-**Estado:** PENDIENTE
+**Estado:** CERRADO — IMPLEMENTADO EN `bb3f058`
 
-Si el diálogo comienza en un nivel y un efecto cambia XP/nivel antes de pulsar `EDITAR`, el nombre del archivo objetivo se calcula actualmente con el nivel del Player en ese momento.
+`start_dialogue()` captura el nivel del Player al comenzar la conversación. El editor utiliza ese valor estable para construir `<mapa>_<pnj>_<nivel>.txt`.
 
-Antes de corregirlo hay que fijar semántica. Solución simple probable: recordar el nivel/archivo exacto asociado al inicio del diálogo.
+Un efecto que cambie XP/nivel durante el diálogo ya no cambia el archivo objetivo de `EDITAR`.
 
 ---
 
 ### A-19 — Normalización del ID técnico de mapa
 **Prioridad:** Media  
-**Estado:** PENDIENTE
+**Estado:** CERRADO — IMPLEMENTADO EN `bb3f058`
 
-El identificador de mapa se deriva del nombre del archivo. `Arauzo_de_salce.tscn` conserva mayúscula inicial mientras PNJ se normaliza a minúsculas.
+El identificador técnico de mapa se deriva del basename de la escena y se normaliza con `.to_lower()` en los puntos que lo consumen para posición persistente y diálogos.
 
-En sistemas sensibles a mayúsculas esto puede afectar nombres de guion y claves de posición.
+Ejemplo:
 
-**Dirección simple recomendada:** convención de nombres de archivo de mapa en minúsculas + guiones bajos, en lugar de añadir lógica compleja.
+```text
+Arauzo_de_salce.tscn → arauzo_de_salce
+```
+
+No se añade una capa de IDs separada ni se exige renombrar inmediatamente las escenas existentes.
+
+**Compatibilidad del prototipo:** no existe migración automática de claves `[map_positions]` ni de archivos locales creados anteriormente con un prefijo de mapa que conservara mayúsculas. Si se necesitara conservar datos de testers anteriores a `bb3f058`, habría que tratar esa migración explícitamente.
 
 ---
 
 ### A-20 — Deriva de documentación
 **Prioridad:** Media  
-**Estado:** CERRADO CON REVISIÓN 2026-08-31
+**Estado:** CERRADO CON REVISIÓN 2026-09-01
 
-Se actualizan README, arquitectura, auditoría y decisiones recientes para reflejar niveles centralizados, identidad/sprite PNJ, colisiones, navegación y posición por mapa.
+Se actualiza la documentación vigente para reflejar el comportamiento de `bb3f058`: A-04/A-18/A-19, preset Web, persistencia por mapa y flujo actual del editor.
 
 ---
 
@@ -321,9 +361,11 @@ El movimiento de seguimiento es directo hacia el Player y no usa navegación. Pu
 
 ### ID de mapa y posición persistente
 
-La posición se guarda usando el nombre base de la escena como clave. Renombrar un archivo de mapa crea, de hecho, una nueva identidad para esa posición guardada.
+La posición se guarda usando el nombre base normalizado a minúsculas de la escena como clave. Renombrar un archivo de mapa continúa creando, de hecho, una nueva identidad para esa posición guardada.
 
-Esto es coherente con el modelo actual, pero refuerza la conveniencia de estabilizar la convención técnica de nombres de mapa.
+La normalización evita diferencias de case entre plataformas, pero el cambio introducido en `bb3f058` no migra claves antiguas que conservaran mayúsculas. Lo mismo aplica a variantes locales de diálogo cuyo nombre utilizara el ID antiguo.
+
+Durante el prototipo puede aceptarse la pérdida de esa compatibilidad. Si se decide preservar datos anteriores, debe resolverse mediante una migración pequeña y explícita, no mediante una segunda fuente de identidad.
 
 ### PCK / ZIP externos — experimento cerrado
 
@@ -343,9 +385,9 @@ del backlog activo.
 
 ## Orden de trabajo recomendado
 
-1. Debatir A-18, A-09 y A-04 antes de implementar.
+1. Debatir A-09 antes de introducir semántica de recompensas de un solo uso.
 2. Tests/CI mínimos cuando el núcleo deje de cambiar con tanta frecuencia.
-3. Metadatos/versionado de contenido al acercarse a distribución.
+3. Metadatos, validación de plataformas y versionado de contenido al acercarse a distribución.
 4. Mantener A-03 sin cambios salvo que aparezca un problema real de jugabilidad.
 
 No se recomienda abordar varios puntos a la vez si no existe dependencia entre ellos.

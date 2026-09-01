@@ -29,6 +29,7 @@ ZeMobida es un videojuego de código abierto desarrollado con Godot y centrado e
 - Editor ligero de guiones dentro del juego con guardado y envío por correo.
 - Condiciones de inventario y efectos.
 - XP y niveles derivados: `a1`, `a2`, `b1`, `b2`, `c1`, `c2`.
+- Persistencia inmediata cuando un efecto de diálogo cambia realmente XP o inventario.
 - HUD/estado global y feedback flotante de cambios de XP/inventario.
 - Persistencia consolidada en `user://settings.cfg`.
 
@@ -36,7 +37,7 @@ ZeMobida es un videojuego de código abierto desarrollado con Godot y centrado e
 
 - Godot **4.7**.
 - Conexión de red cuando esté habilitada la sincronización online de guiones.
-- Presets de Windows Desktop y Android.
+- Presets de Windows Desktop, Android y Web. Android tiene validación documentada en dispositivo; el preset Web todavía no equivale a soporte de navegador validado.
 
 ## Ejecutar
 
@@ -72,12 +73,13 @@ Consulta [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 - [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)
 - [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md)
 - [`docs/MAP_PACKS_FUTURE.md`](docs/MAP_PACKS_FUTURE.md)
+- [`docs/UI_PROTOTYPE.md`](docs/UI_PROTOTYPE.md)
 
 Los guiones oficiales se versionan exclusivamente en `aik3n/ZeMobida_guiones`; `user://dialogues/` es la caché runtime y `user://custom_dialogues/` contiene las variantes locales. Desde el editor, `ENVIAR` guarda primero la versión local y después prepara un correo a `zemobida@gmail.com` mediante la aplicación de correo del jugador.
 
 ## Estado técnico
 
-El proyecto sigue en fase de prototipo. Entre los principales puntos pendientes están tests/CI, metadatos de release, una referencia reproducible para el contenido remoto y decisiones aún abiertas sobre efectos/recompensas de diálogo.
+El proyecto sigue en fase de prototipo. Entre los principales puntos pendientes están tests/CI, metadatos de release, una referencia reproducible para el contenido remoto y decisiones aún abiertas sobre recompensas de diálogo repetibles.
 
 Consulta [`docs/AUDIT.md`](docs/AUDIT.md).
 

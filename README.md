@@ -29,6 +29,7 @@ ZeMobida is an open-source Godot game built around exploration, NPC interaction,
 - Lightweight in-game dialogue editor with save-and-submit by email.
 - Inventory conditions and effects.
 - XP-derived progression levels: `a1`, `a2`, `b1`, `b2`, `c1`, `c2`.
+- Immediate persistence when a dialogue effect actually changes XP or inventory.
 - Global HUD/status UI and floating feedback for XP/inventory changes.
 - Consolidated local persistence in `user://settings.cfg`.
 
@@ -50,7 +51,8 @@ ZeMobida is an open-source Godot game built around exploration, NPC interaction,
 │   ├── DECISIONS_RECENT.md
 │   ├── DEVELOPMENT.md
 │   ├── DIALOGUE_FORMAT.md
-│   └── MAP_PACKS_FUTURE.md
+│   ├── MAP_PACKS_FUTURE.md
+│   └── UI_PROTOTYPE.md
 ├── README.md
 ├── README.esp.md
 ├── README.eus.md
@@ -61,7 +63,7 @@ ZeMobida is an open-source Godot game built around exploration, NPC interaction,
 
 - Godot **4.7**.
 - Network connection when online dialogue synchronization is enabled.
-- Windows Desktop and Android export presets are present.
+- Windows Desktop, Android and Web export presets are present. Android has documented device validation; the Web preset should not yet be read as validated browser support.
 
 ## Run locally
 
@@ -103,10 +105,11 @@ See [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md).
 - [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) — development/runtime checks.
 - [`docs/DIALOGUE_FORMAT.md`](docs/DIALOGUE_FORMAT.md) — dialogue syntax.
 - [`docs/MAP_PACKS_FUTURE.md`](docs/MAP_PACKS_FUTURE.md) — closed experiment on external PCK/ZIP map packages.
+- [`docs/UI_PROTOTYPE.md`](docs/UI_PROTOTYPE.md) — current UI/map interaction prototype notes.
 
 ## Known limitations
 
-The project is still a prototype. Important remaining areas include automated tests/CI, release metadata, reproducible versioning of remote dialogue content and unresolved design decisions around dialogue effects/rewards.
+The project is still a prototype. Important remaining areas include automated tests/CI, release metadata, reproducible versioning of remote dialogue content and unresolved design decisions around repeatable dialogue rewards.
 
 See [`docs/AUDIT.md`](docs/AUDIT.md) for the current status.
 
