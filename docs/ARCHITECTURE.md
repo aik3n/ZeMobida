@@ -51,6 +51,16 @@ res://mapas/
 
 Todos los mapas descubiertos son seleccionables. `Preview` es opcional y puede ser `Sprite2D` o `TextureRect`.
 
+La imagen del carrusel se resuelve por prioridad:
+
+```text
+1. textura de Preview, si existe y es válida
+2. textura de Fondo, si Preview no aporta imagen
+3. res://art/ui/preview_default.png
+```
+
+`Preview` sigue siendo la opción preferida cuando se quiere una miniatura específica. Omitirlo no deja el mapa sin imagen mientras exista `Fondo` o el fallback global.
+
 Al pulsar `JUGAR`, el carrusel comunica la ruta a `Game`, que carga la escena dentro de `SceneContainer`.
 
 El último mapa seleccionado se conserva en `user://settings.cfg`, sección `[maps]`.

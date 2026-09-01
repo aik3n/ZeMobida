@@ -554,9 +554,7 @@ func _on_send_pressed() -> void:
 	if not _save_current_text():
 		return
 
-	var subject: String = (
-		"ZeMobida - " + file_name
-	).uri_encode()
+	var subject: String = file_name.uri_encode()
 
 	var body: String = (
 		"Archivo: "

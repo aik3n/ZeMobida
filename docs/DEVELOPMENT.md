@@ -360,7 +360,21 @@ No existe migración automática para claves de posición o variantes locales de
 
 ### Preview
 
-La escena puede contener un nodo opcional `Preview`. Si el nodo es `Sprite2D` o `TextureRect` y tiene textura, ésta se muestra en el carrusel. Si no existe o no tiene textura, se muestra sólo el nombre.
+La escena puede contener un nodo opcional `Preview`. Si el nodo es `Sprite2D` o `TextureRect` y tiene textura, ésta es la primera opción del carrusel.
+
+Si `Preview` no existe o no aporta una textura válida, el carrusel intenta reutilizar la textura del nodo raíz `Fondo`. Si tampoco existe un `Fondo` válido, utiliza:
+
+```text
+res://art/ui/preview_default.png
+```
+
+Prioridad:
+
+```text
+Preview
+→ Fondo
+→ preview_default.png
+```
 
 ### Persistencia
 
@@ -384,8 +398,9 @@ Además de las pruebas generales, comprobar:
 - navegación con botones;
 - navegación con teclado;
 - desplazamiento horizontal con ratón;
-- mapa con `Preview`;
-- mapa sin `Preview`;
+- mapa con `Preview` → usa `Preview`;
+- mapa sin `Preview` y con `Fondo` → usa `Fondo`;
+- mapa sin `Preview` ni `Fondo` → usa `preview_default.png`;
 - recordar último mapa tras reiniciar;
 - último mapa eliminado → primer mapa;
 - añadir un nuevo `.tscn` → aparece sin modificar el selector;
@@ -434,7 +449,7 @@ En un mapa ilustrado ya convertido, como `aldea`, `CameraBounds` es redundante y
 
 ### Preview del carrusel
 
-La imagen de carrusel es independiente del fondo jugable.
+`Preview` sigue siendo independiente del fondo jugable y es la opción preferida cuando se quiere controlar expresamente la miniatura.
 
 Por ejemplo, `aldea` puede utilizar:
 
@@ -443,7 +458,7 @@ Fondo   → res://art/mapas/aldea.PNG
 Preview → res://art/preview/aldea.PNG
 ```
 
-Esto evita usar una imagen grande del mundo como miniatura.
+Si `Preview` se omite, no hace falta configurar nada adicional: el carrusel usa `Fondo` como fallback. Sólo cuando el mapa no aporta ninguna de esas dos texturas se muestra `res://art/ui/preview_default.png`.
 
 ### Colisiones
 

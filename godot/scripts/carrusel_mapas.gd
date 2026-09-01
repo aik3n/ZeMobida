@@ -6,6 +6,9 @@ const MAPS_FOLDER := "res://mapas/"
 const SETTINGS_FILE := "user://settings.cfg"
 const SETTINGS_SECTION := "maps"
 const SETTINGS_KEY_LAST_MAP := "last_map"
+const DEFAULT_PREVIEW := preload(
+	"res://art/ui/preview_default.png"
+)
 
 @onready var btn_anterior: Button = $Contenedor/BtnAnterior
 @onready var btn_siguiente: Button = $Contenedor/BtnSiguiente
@@ -140,6 +143,15 @@ func _load_preview(mapa_path: String) -> void:
 		preview.texture = (preview_node as Sprite2D).texture
 	elif preview_node is TextureRect:
 		preview.texture = (preview_node as TextureRect).texture
+
+	if preview.texture == null:
+		var fondo_node := instance.get_node_or_null("Fondo")
+
+		if fondo_node is Sprite2D:
+			preview.texture = (fondo_node as Sprite2D).texture
+
+	if preview.texture == null:
+		preview.texture = DEFAULT_PREVIEW
 
 	preview.visible = preview.texture != null
 	instance.free()
