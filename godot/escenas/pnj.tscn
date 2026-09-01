@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://caqkk62ge7skt" path="res://scripts/pnj.gd" id="1_q4jto"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1o3pt"]
-radius = 20.0
-height = 152.0
+radius = 19.0
+height = 56.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_62yky"]
 radius = 22.0

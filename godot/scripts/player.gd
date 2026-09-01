@@ -25,6 +25,10 @@ const DRAG_THRESHOLD := 28.0
 const CAMERA_RECENTER_TIME := 0.8
 const CAMERA_FOLLOW_SMOOTHING_SPEED := 6.0
 
+const DESTINATION_FEEDBACK_DURATION := 0.7
+const DESTINATION_FEEDBACK_RADIUS := 34.0
+const DESTINATION_FEEDBACK_START_SCALE := 0.55
+
 const ZOOM_MIN := 0.7
 const ZOOM_MAX := 1.4
 const ZOOM_WHEEL_STEP := 0.1
@@ -55,6 +59,8 @@ var _pointer_start := Vector2.ZERO
 var _pointer_last := Vector2.ZERO
 var _pointer_dragging := false
 var _camera_recenter_tween: Tween
+var _camera_manual_active := false
+var _camera_manual_world_center := Vector2.ZERO
 
 # Toques activos por índice de dedo.
 var _touch_points: Dictionary = {}
@@ -213,11 +219,10 @@ func _handle_screen_drag(drag: InputEventScreenDrag) -> void:
 
 func _start_pinch() -> void:
 	_stop_camera_recenter()
-	_disable_camera_follow_smoothing()
+	_begin_camera_manual_mode()
 
 	# Dos dedos significan exclusivamente exploración/zoom.
-	destino = global_position
-	velocity = Vector2.ZERO
+	# El Player conserva el destino y continúa caminando.
 
 	_pointer_source = PointerSource.NONE
 	_pointer_dragging = false
@@ -278,6 +283,9 @@ func _set_zoom(value: float) -> void:
 
 	_clamp_camera_to_limits()
 
+	if _camera_manual_active:
+		_camera_manual_world_center = global_position + camera.position
+
 
 func _begin_pointer(screen_position: Vector2) -> void:
 	_stop_camera_recenter()
@@ -286,10 +294,8 @@ func _begin_pointer(screen_position: Vector2) -> void:
 	_pointer_last = screen_position
 	_pointer_dragging = false
 
-	# El movimiento por tap empieza al soltar. Mientras se decide si
-	# el gesto es tap o arrastre, el personaje permanece quieto.
-	destino = global_position
-	velocity = Vector2.ZERO
+	# Mientras se decide si el gesto es tap o arrastre, el Player
+	# conserva su destino y continúa caminando.
 
 
 func _update_pointer(screen_position: Vector2) -> void:
@@ -301,7 +307,7 @@ func _update_pointer(screen_position: Vector2) -> void:
 			return
 
 		_pointer_dragging = true
-		_disable_camera_follow_smoothing()
+		_begin_camera_manual_mode()
 
 		# Al superar el umbral se aplica todo lo recorrido hasta ahora,
 		# para que el mapa alcance la posición del dedo sin salto raro.
@@ -323,11 +329,13 @@ func _end_pointer(screen_position: Vector2) -> void:
 	# sobre un mapa desplazado apunte al lugar que realmente se tocó.
 	var world_position := _screen_to_world(screen_position)
 	destino = world_position
+	_show_destination_feedback(world_position)
 	_start_camera_recenter()
 
 
 func _start_camera_recenter() -> void:
 	_stop_camera_recenter()
+	_end_camera_manual_mode()
 
 	var position_is_normal := camera.position.is_zero_approx()
 	var zoom_is_normal := camera.zoom.is_equal_approx(Vector2.ONE)
@@ -400,6 +408,32 @@ func _disable_camera_follow_smoothing() -> void:
 	_clamp_camera_to_limits()
 
 
+func _begin_camera_manual_mode() -> void:
+	if _camera_manual_active:
+		return
+
+	_disable_camera_follow_smoothing()
+
+	_camera_manual_active = true
+	_camera_manual_world_center = global_position + camera.position
+
+
+func _end_camera_manual_mode() -> void:
+	_camera_manual_active = false
+
+
+func _update_camera_manual_position() -> void:
+	if not _camera_manual_active:
+		return
+
+	# La cámara permanece en el punto del mundo que está explorando el
+	# jugador aunque el Player siga caminando por debajo.
+	camera.position = _camera_manual_world_center - global_position
+	_clamp_camera_to_limits()
+
+	_camera_manual_world_center = global_position + camera.position
+
+
 func _stop_camera_recenter() -> void:
 	if _camera_recenter_tween != null:
 		if _camera_recenter_tween.is_valid():
@@ -424,8 +458,12 @@ func _pan_camera(screen_delta: Vector2) -> void:
 	# El mapa sigue el movimiento del dedo: arrastrar a la derecha
 	# desplaza el contenido visual a la derecha, por lo que la cámara
 	# se mueve en sentido contrario.
-	camera.position -= world_delta
-	_clamp_camera_to_limits()
+	if _camera_manual_active:
+		_camera_manual_world_center -= world_delta
+		_update_camera_manual_position()
+	else:
+		camera.position -= world_delta
+		_clamp_camera_to_limits()
 
 
 func _clamp_camera_to_limits() -> void:
@@ -466,6 +504,60 @@ func _clamp_camera_axis(
 		return (float(limit_min) + float(limit_max)) * 0.5
 
 	return clampf(value, min_center, max_center)
+
+
+func _show_destination_feedback(world_position: Vector2) -> void:
+	var marker := Line2D.new()
+
+	marker.width = 6.0
+	marker.default_color = Color.WHITE
+	marker.antialiased = true
+	marker.closed = true
+	marker.z_index = 100
+
+	var point_count := 24
+
+	for i in range(point_count):
+		var angle := TAU * float(i) / float(point_count)
+
+		marker.add_point(
+			Vector2.RIGHT.rotated(angle)
+			* DESTINATION_FEEDBACK_RADIUS
+		)
+
+	get_tree().current_scene.add_child(marker)
+
+	marker.global_position = world_position
+	marker.scale = (
+		Vector2.ONE
+		* DESTINATION_FEEDBACK_START_SCALE
+	)
+	marker.modulate = Color(1.0, 1.0, 1.0, 0.9)
+
+	var tween := create_tween()
+
+	tween.set_parallel(true)
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.set_ease(Tween.EASE_OUT)
+
+	tween.tween_property(
+		marker,
+		"scale",
+		Vector2.ONE,
+		DESTINATION_FEEDBACK_DURATION
+	)
+
+	tween.tween_property(
+		marker,
+		"modulate:a",
+		0.0,
+		DESTINATION_FEEDBACK_DURATION
+	)
+
+	tween.finished.connect(
+		marker.queue_free,
+		CONNECT_ONE_SHOT
+	)
 
 
 func mostrar_feedback(
@@ -673,6 +765,7 @@ func _physics_process(_delta):
 	if input_direction != Vector2.ZERO:
 		# Teclado/mandos vuelven inmediatamente a la cámara estándar.
 		_stop_camera_recenter()
+		_end_camera_manual_mode()
 		camera.position = Vector2.ZERO
 		camera.zoom = Vector2.ONE
 		_enable_camera_follow_smoothing()
@@ -686,6 +779,7 @@ func _physics_process(_delta):
 		velocity = Vector2.ZERO
 
 	move_and_slide()
+	_update_camera_manual_position()
 
 
 func add_xp(amount: int) -> void:

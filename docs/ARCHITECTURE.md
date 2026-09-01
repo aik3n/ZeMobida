@@ -370,9 +370,9 @@ El manifest de sincronización de guiones permanece separado porque describe el 
 Controles actuales:
 
 ```text
-tap y soltar       → mover Player
-arrastrar          → explorar desplazando cámara
-pinch              → zoom móvil
+tap y soltar       → fijar nuevo destino del Player
+arrastrar          → explorar desplazando cámara sin cancelar el destino
+pinch              → zoom móvil sin cancelar el destino
 rueda ratón        → zoom escritorio
 teclado/mando      → recentrar inmediatamente
 ```
@@ -386,6 +386,16 @@ Zoom temporal:
 ```
 
 Después de explorar, un nuevo tap calcula primero el destino en coordenadas de mundo y después restaura cámara y zoom con Tween cúbico `EASE_OUT` de `0.8 s`.
+
+### Destino y exploración durante movimiento
+
+Un tap válido muestra durante `0.7 s` una marca visual breve en el punto del mundo elegido como nuevo destino. Es feedback de entrada: no modifica navegación, velocidad ni colisiones.
+
+Apoyar el dedo para iniciar un gesto ya no cancela el movimiento en curso. Si el gesto termina siendo arrastre o pinch, el Player conserva su destino y continúa caminando.
+
+Durante la exploración manual, la cámara mantiene el centro del mundo que está observando aunque el Player siga desplazándose por debajo. Al soltar el arrastre, la cámara permanece en esa zona y el Player continúa hacia su destino.
+
+Un nuevo tap desde la vista explorada sustituye el destino anterior, muestra el feedback de destino y activa el recentrado existente.
 
 ### Suavizado de seguimiento
 
