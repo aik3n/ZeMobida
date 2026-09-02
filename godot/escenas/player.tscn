@@ -8,6 +8,7 @@ radius = 17.0
 height = 60.0
 
 [node name="player" type="CharacterBody2D" unique_id=750046266]
+z_index = 2
 script = ExtResource("1_kkt6c")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1661301542]

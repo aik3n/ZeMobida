@@ -20,6 +20,9 @@ enum TipoSeguimiento {
 var player_nearby := false
 
 var player: CharacterBody2D = null
+var player_depth_collision: CollisionShape2D = null
+
+@onready var depth_collision: CollisionShape2D = $Collision
 
 var posicion_seguimiento: Vector2
 var posicion_seguimiento_guardada := false
@@ -30,6 +33,11 @@ var siguiendo := false
 const VELOCIDAD_SEGUIR := 100.0
 const DISTANCIA_REANUDAR := 120.0
 const DISTANCIA_LLEGADA := 5.0
+
+# Profundidad visual respecto al Player.
+# Fondo permanece en -10 y los frontales fijos en +10.
+const PROFUNDIDAD_Z_DETRAS_PLAYER := 1
+const PROFUNDIDAD_Z_DELANTE_PLAYER := 3
 
 
 func _actualizar_sprite_visual() -> void:
@@ -56,6 +64,11 @@ func _ready() -> void:
 	if game != null:
 		player = game.get_node_or_null("Player")
 
+		if player != null:
+			player_depth_collision = (
+				player.get_node_or_null("CollisionShape2D") as CollisionShape2D
+			)
+
 
 func _physics_process(_delta: float) -> void:
 	if Engine.is_editor_hint():
@@ -64,6 +77,7 @@ func _physics_process(_delta: float) -> void:
 	if player == null:
 		return
 
+	_actualizar_profundidad_visual()
 	_actualizar_seguimiento()
 
 	match tipo_seguimiento:
@@ -97,6 +111,21 @@ func _physics_process(_delta: float) -> void:
 			else:
 
 				velocity = Vector2.ZERO
+
+
+func _actualizar_profundidad_visual() -> void:
+	if depth_collision == null or player_depth_collision == null:
+		return
+
+	var pnj_depth_y := depth_collision.global_position.y
+	var player_depth_y := player_depth_collision.global_position.y
+
+	# La posicion Y de las colisiones de los pies actua como referencia
+	# de profundidad visual.
+	if pnj_depth_y <= player_depth_y:
+		z_index = PROFUNDIDAD_Z_DETRAS_PLAYER
+	else:
+		z_index = PROFUNDIDAD_Z_DELANTE_PLAYER
 
 
 func _actualizar_seguimiento() -> void:

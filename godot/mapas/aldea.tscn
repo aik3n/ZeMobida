@@ -11,21 +11,15 @@
 [ext_resource type="Texture2D" uid="uid://bf1slfiushdtc" path="res://art/personajes/aldea/medico.png" id="9_bm4e6"]
 [ext_resource type="Texture2D" uid="uid://l6rlkvcbeieg" path="res://art/personajes/aldea/obrero_madera.png" id="10_lqgry"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_fmk2k"]
-size = Vector2(179, 55)
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_4kxuq"]
+radius = 15.25
+height = 178.0
 
 [node name="aldea2" type="Node2D" unique_id=493802413]
 
 [node name="Fondo" type="Sprite2D" parent="." unique_id=2086253541]
 z_index = -10
 texture = ExtResource("3_fondo")
-centered = false
-
-[node name="FrontalPrueba" type="Sprite2D" parent="." unique_id=296919881]
-z_index = 10
-position = Vector2(1769, 1141)
-scale = Vector2(0.6987954, 0.92391306)
-texture = ExtResource("5_frontal")
 centered = false
 
 [node name="Preview" type="Sprite2D" parent="." unique_id=1760231233]
@@ -65,9 +59,19 @@ tipo_seguimiento = 0
 
 [node name="colisiones" type="StaticBody2D" parent="." unique_id=894876693]
 
-[node name="tejado" type="CollisionShape2D" parent="colisiones" unique_id=1384321302]
-position = Vector2(1874, 1257)
-shape = SubResource("RectangleShape2D_fmk2k")
-
 [node name="lago" type="CollisionPolygon2D" parent="colisiones" unique_id=847719243]
 polygon = PackedVector2Array(909, 880, 796, 1040, 505, 1050, 256, 1640, 1091, 1617, 978, 1091, 1060, 870)
+
+[node name="Frontal" type="StaticBody2D" parent="." unique_id=706464055]
+
+[node name="valla" type="CollisionShape2D" parent="Frontal" unique_id=1384321302]
+position = Vector2(1882, 1266)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_4kxuq")
+
+[node name="FrontalPrueba" type="Sprite2D" parent="Frontal" unique_id=296919881]
+z_index = 10
+position = Vector2(1769, 1141)
+scale = Vector2(0.6987954, 0.92391306)
+texture = ExtResource("5_frontal")
+centered = false
