@@ -128,6 +128,13 @@ func _unhandled_input(event: InputEvent) -> void:
 
 		# Zoom de escritorio con rueda.
 		if mouse_button.pressed:
+			if (
+				mouse_button.button_index == MOUSE_BUTTON_WHEEL_UP
+				or mouse_button.button_index == MOUSE_BUTTON_WHEEL_DOWN
+			):
+				if _mouse_over_dialogue_scroll():
+					return
+
 			if mouse_button.button_index == MOUSE_BUTTON_WHEEL_UP:
 				_set_zoom(camera.zoom.x + ZOOM_WHEEL_STEP * mouse_button.factor)
 				return
@@ -156,6 +163,23 @@ func _unhandled_input(event: InputEvent) -> void:
 			if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				var motion := event as InputEventMouseMotion
 				_update_pointer(motion.position)
+
+
+
+func _mouse_over_dialogue_scroll() -> bool:
+
+	var hovered := get_viewport().gui_get_hovered_control()
+
+	while hovered != null:
+		if (
+			hovered.name == "ScrollTexto"
+			or hovered.name == "ScrollOpciones"
+		):
+			return true
+
+		hovered = hovered.get_parent() as Control
+
+	return false
 
 
 func _handle_screen_touch(touch: InputEventScreenTouch) -> void:
