@@ -11,6 +11,17 @@ const LOCAL_HALO_COLOR := Color("#4AA8FF")
 const DIALOGUE_TINT_STRENGTH := 0.20
 const DIALOGUE_BORDER_STRENGTH := 0.75
 
+# Altura automática de los paneles de diálogo.
+# El texto está anclado arriba y las opciones abajo.
+const TEXT_PANEL_MIN_HEIGHT := 260.0
+const TEXT_PANEL_VISIBLE_LINES := 5.5
+const TEXT_PANEL_EXTRA_HEIGHT := 140.0
+
+const OPTIONS_PANEL_MIN_HEIGHT := 160.0
+const OPTIONS_VISIBLE_BUTTONS := 4
+const OPTION_BUTTON_MIN_HEIGHT := 88.0
+const OPTIONS_PANEL_PADDING := 56.0
+
 
 @onready var panel_texto: Panel = $PanelTexto
 @onready var panel_opciones: Panel = $PanelOpciones
@@ -35,6 +46,15 @@ func _ready() -> void:
 	DialogueManager.register_ui(self)
 
 	_capture_panel_styles()
+
+	_set_panel_height_from_top(
+		panel_texto,
+		TEXT_PANEL_MIN_HEIGHT
+	)
+	_set_panel_height_from_bottom(
+		panel_opciones,
+		OPTIONS_PANEL_MIN_HEIGHT
+	)
 
 	panel_texto.visible = false
 	panel_opciones.visible = false
@@ -138,6 +158,7 @@ func show_text(
 		" "
 	)
 	dialogue_text.text = text
+	call_deferred("_update_text_panel_height")
 
 	# Cada nodo nuevo comienza mostrando el inicio del texto.
 	var scroll_texto: ScrollContainer = $PanelTexto/ScrollTexto
@@ -167,6 +188,12 @@ func show_options(options: Array) -> void:
 		var button := Button.new()
 
 		button.text = option["text"]
+
+		# El botón conserva los clics, pero deja pasar la rueda al
+		# ScrollContainer de opciones. Éste consume el scroll y evita
+		# que termine llegando al zoom del mapa.
+		button.mouse_filter = Control.MOUSE_FILTER_PASS
+
 		button.custom_minimum_size = Vector2(0, 88)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.add_theme_font_size_override("font_size", 32)
@@ -176,6 +203,95 @@ func show_options(options: Array) -> void:
 		button.pressed.connect(
 			_on_option_pressed.bind(option)
 		)
+
+	call_deferred("_update_options_panel_height")
+
+
+func _update_text_panel_height() -> void:
+
+	var line_count := maxi(
+		dialogue_text.get_line_count(),
+		1
+	)
+
+	var font_size := dialogue_text.get_theme_font_size(
+		"font_size"
+	)
+	var line_spacing := dialogue_text.get_theme_constant(
+		"line_spacing"
+	)
+	var font := dialogue_text.get_theme_font("font")
+
+	var line_height := (
+		font.get_height(font_size)
+		+ float(line_spacing)
+	)
+
+	var target_height := (
+		TEXT_PANEL_EXTRA_HEIGHT
+		+ line_height * float(line_count)
+	)
+
+	var max_height := (
+		TEXT_PANEL_EXTRA_HEIGHT
+		+ line_height * TEXT_PANEL_VISIBLE_LINES
+	)
+
+	_set_panel_height_from_top(
+		panel_texto,
+		clampf(
+			target_height,
+			TEXT_PANEL_MIN_HEIGHT,
+			max_height
+		)
+	)
+
+
+func _update_options_panel_height() -> void:
+
+	var target_height := (
+		options_container.get_combined_minimum_size().y
+		+ OPTIONS_PANEL_PADDING
+	)
+
+	var separation := float(
+		options_container.get_theme_constant("separation")
+	)
+
+	var max_height := (
+		OPTION_BUTTON_MIN_HEIGHT * float(OPTIONS_VISIBLE_BUTTONS)
+		+ separation * float(OPTIONS_VISIBLE_BUTTONS - 1)
+		+ OPTIONS_PANEL_PADDING
+	)
+
+	_set_panel_height_from_bottom(
+		panel_opciones,
+		clampf(
+			target_height,
+			OPTIONS_PANEL_MIN_HEIGHT,
+			max_height
+		)
+	)
+
+
+func _set_panel_height_from_top(
+	panel: Control,
+	height: float
+) -> void:
+
+	panel.anchor_bottom = panel.anchor_top
+	panel.offset_top = 0.0
+	panel.offset_bottom = height
+
+
+func _set_panel_height_from_bottom(
+	panel: Control,
+	height: float
+) -> void:
+
+	panel.anchor_top = panel.anchor_bottom
+	panel.offset_top = -height
+	panel.offset_bottom = 0.0
 
 
 func toggle_options() -> void:

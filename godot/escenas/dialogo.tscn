@@ -95,6 +95,7 @@ anchor_bottom = 0.91
 grow_horizontal = 2
 grow_vertical = 2
 horizontal_scroll_mode = 0
+mouse_force_pass_scroll_events = false
 
 [node name="DialogueText" type="Label" parent="PanelTexto/ScrollTexto" unique_id=2064739650]
 custom_minimum_size = Vector2(1, 0)
@@ -128,6 +129,7 @@ offset_bottom = -28.0
 grow_horizontal = 2
 grow_vertical = 2
 horizontal_scroll_mode = 0
+mouse_force_pass_scroll_events = false
 
 [node name="OptionsContainer" type="VBoxContainer" parent="PanelOpciones/ScrollOpciones" unique_id=499011989]
 layout_mode = 2

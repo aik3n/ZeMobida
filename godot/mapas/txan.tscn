@@ -6,7 +6,7 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xw7ts"]
 size = Vector2(1699, 905)
 
-[node name="casco" type="Node2D" unique_id=493802413]
+[node name="txan" type="Node2D" unique_id=493802413]
 
 [node name="Preview" type="Sprite2D" parent="." unique_id=1403445782]
 visible = false
