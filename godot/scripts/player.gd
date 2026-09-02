@@ -818,6 +818,23 @@ func add_xp(amount: int) -> void:
 		)
 
 
+# DEV TEMPORAL: usado sólo por el control de XP de bienvenida.
+# Fija XP sin mostrar feedback de gameplay.
+func set_xp_dev(value: int) -> void:
+	var nueva_xp := clampi(
+		value,
+		0,
+		_xp_maximo()
+	)
+
+	if nueva_xp == xp:
+		return
+
+	xp = nueva_xp
+	_actualizar_nivel()
+	xp_changed.emit()
+
+
 func _actualizar_nivel() -> void:
 	var nuevo_nivel := NIVELES_DATA.nivel_para_xp(
 		xp

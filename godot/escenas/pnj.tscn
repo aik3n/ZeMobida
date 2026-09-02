@@ -1,21 +1,19 @@
 [gd_scene format=3 uid="uid://dr8npeucorwqx"]
 
 [ext_resource type="Script" uid="uid://caqkk62ge7skt" path="res://scripts/pnj.gd" id="1_q4jto"]
-[ext_resource type="Texture2D" uid="uid://8a3u86e7bqr4" path="res://art/personajes/menzo/pnj1.png" id="2_nhi6k"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1o3pt"]
 radius = 17.0
 height = 54.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_62yky"]
-radius = 22.0
-height = 160.0
+radius = 38.0
+height = 174.0
 
 [node name="pnj1" type="CharacterBody2D" unique_id=1491293733]
 script = ExtResource("1_q4jto")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=690181880]
-texture = ExtResource("2_nhi6k")
 
 [node name="Collision" type="CollisionShape2D" parent="." unique_id=1828085130]
 position = Vector2(0, 54)

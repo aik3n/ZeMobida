@@ -139,6 +139,23 @@ toggle_mode = true
 alignment = 1
 text = "Actualizar guiones al iniciar  ☐"
 
+[node name="DevXP" type="SpinBox" parent="PanelCargaEscenas"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.70
+anchor_top = 0.895
+anchor_right = 0.92
+anchor_bottom = 0.955
+grow_horizontal = 2
+grow_vertical = 2
+min_value = 0.0
+max_value = 2000.0
+step = 1.0
+value = 0.0
+prefix = "DEV "
+suffix = " XP"
+theme_override_font_sizes/font_size = 24
+
 [node name="lbl_EstadoGuiones" type="Label" parent="PanelCargaEscenas" unique_id=529408444]
 layout_mode = 1
 anchors_preset = -1

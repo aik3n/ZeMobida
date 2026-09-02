@@ -1,6 +1,17 @@
 extends CanvasLayer
 
 
+const OFFICIAL_DIALOGUE_FOLDER := "user://dialogues/"
+const LOCAL_DIALOGUE_FOLDER := "user://custom_dialogues/"
+
+const OFFICIAL_HALO_COLOR := Color("#45E07B")
+const LOCAL_HALO_COLOR := Color("#4AA8FF")
+
+# El color sólo matiza el fondo oscuro existente.
+const DIALOGUE_TINT_STRENGTH := 0.20
+const DIALOGUE_BORDER_STRENGTH := 0.75
+
+
 @onready var panel_texto: Panel = $PanelTexto
 @onready var panel_opciones: Panel = $PanelOpciones
 
@@ -15,11 +26,15 @@ extends CanvasLayer
 
 
 var _has_options := false
+var _panel_text_style_base: StyleBoxFlat = null
+var _panel_options_style_base: StyleBoxFlat = null
 
 
 func _ready() -> void:
 
 	DialogueManager.register_ui(self)
+
+	_capture_panel_styles()
 
 	panel_texto.visible = false
 	panel_opciones.visible = false
@@ -30,12 +45,79 @@ func show_dialogue() -> void:
 
 	var starting_dialogue := not panel_texto.visible
 
+	_update_dialogue_halo()
 	panel_texto.visible = true
 
 	# El panel de opciones sólo se fuerza a oculto cuando empieza
 	# realmente un diálogo, no en cada cambio de nodo.
 	if starting_dialogue:
 		panel_opciones.visible = false
+
+
+func _capture_panel_styles() -> void:
+
+	var text_style := panel_texto.get_theme_stylebox("panel")
+	if text_style is StyleBoxFlat:
+		_panel_text_style_base = (
+			text_style.duplicate() as StyleBoxFlat
+		)
+
+	var options_style := panel_opciones.get_theme_stylebox("panel")
+	if options_style is StyleBoxFlat:
+		_panel_options_style_base = (
+			options_style.duplicate() as StyleBoxFlat
+		)
+
+
+func _update_dialogue_halo() -> void:
+
+	var halo_color := OFFICIAL_HALO_COLOR
+	var file_path: String = DialogueManager.current_dialogue_file
+
+	if file_path.begins_with(LOCAL_DIALOGUE_FOLDER):
+		halo_color = LOCAL_HALO_COLOR
+
+	_apply_panel_halo(
+		panel_texto,
+		_panel_text_style_base,
+		halo_color
+	)
+	_apply_panel_halo(
+		panel_opciones,
+		_panel_options_style_base,
+		halo_color
+	)
+
+
+func _apply_panel_halo(
+	panel: Panel,
+	base_style: StyleBoxFlat,
+	halo_color: Color
+) -> void:
+
+	if base_style == null:
+		return
+
+	var style := base_style.duplicate() as StyleBoxFlat
+
+	# Mantiene el panel oscuro y añade sólo un matiz de procedencia.
+	style.bg_color = base_style.bg_color.lerp(
+		halo_color,
+		DIALOGUE_TINT_STRENGTH
+	)
+
+	style.border_color = base_style.border_color.lerp(
+		halo_color,
+		DIALOGUE_BORDER_STRENGTH
+	)
+
+	# Sin resplandor exterior: el estado permanece visible en el fondo.
+	style.shadow_size = 0
+
+	panel.add_theme_stylebox_override(
+		"panel",
+		style
+	)
 
 
 func hide_dialogue() -> void:

@@ -353,6 +353,111 @@ No existe `y_sort_enabled` ni otra regla explícita general de profundidad entre
 
 Primero probar cruces reales delante/detrás. Implementar Y-sort sólo si el resultado visual es incorrecto.
 
+---
+
+### A-24 — Ciclo de vida de guiones oficiales y locales
+**Prioridad:** Media  \
+**Estado:** PENDIENTE DE DISEÑO
+
+El flujo de participación en guiones ha puesto de manifiesto una cuestión conceptual que todavía no está resuelta.
+
+Flujo real:
+
+```text
+guion oficial
+→ jugador pulsa EDITAR
+→ guarda una copia local
+→ prueba y puede ENVIAR la propuesta
+→ la propuesta se revisa externamente
+→ puede publicarse tal cual o con modificaciones
+→ el juego descarga posteriormente una nueva versión oficial
+```
+
+Actualmente una copia exacta en `user://custom_dialogues/` tiene prioridad sobre el archivo oficial equivalente en `user://dialogues/`.
+
+Esto permite probar inmediatamente una edición local, pero también puede provocar que el jugador siga utilizando indefinidamente su copia aunque exista posteriormente una versión oficial nueva.
+
+No se modifica todavía esta política. Quedan abiertos dos debates independientes.
+
+#### Qué significa que local y oficial sean el mismo guion
+
+La igualdad byte a byte puede ser demasiado estricta para texto narrativo.
+
+Dos archivos podrían ser funcionalmente equivalentes aunque cambien elementos no interpretados por runtime, por ejemplo:
+
+```text
+comentarios '
+líneas vacías
+espacios de formato irrelevantes
+```
+
+Debe decidirse si la comparación futura será:
+
+```text
+igualdad exacta de archivo
+```
+
+o una:
+
+```text
+igualdad funcional / normalizada
+```
+
+Si se adopta una normalización, debe apoyarse sólo en reglas ya compatibles con el parser y evitar alterar texto narrativo significativo.
+
+También debe considerarse que los comentarios pueden ser irrelevantes para runtime pero útiles para quien está editando, por lo que una coincidencia funcional no implica necesariamente que sea correcto borrar automáticamente la copia local.
+
+#### Puede caducar o perder prioridad un guion local
+
+No está decidido si una copia local debe:
+
+```text
+mantener prioridad indefinidamente
+```
+
+```text
+perder prioridad cuando aparece una versión oficial nueva
+```
+
+```text
+caducar según alguna regla
+```
+
+o si el sistema debe permitir alternar explícitamente entre oficial y local manteniendo ambos.
+
+Una caducidad basada únicamente en tiempo no se considera decidida ni implícitamente aceptada: el paso del tiempo no demuestra por sí mismo si una propuesta sigue siendo útil, fue rechazada o continúa en revisión.
+
+Tampoco puede inferirse de forma fiable que una nueva versión oficial signifique que la propuesta local fue aceptada, rechazada o moderada, porque el envío se realiza mediante correo y no existe un backend de estados.
+
+#### Alcance inmediato: sólo feedback visual
+
+Antes de resolver el ciclo de vida se implementará únicamente una señal visual mínima sobre la versión que está usando el diálogo:
+
+```text
+halo verde
+→ se está usando el guion oficial
+
+halo azul
+→ se está usando una copia local
+```
+
+`EDITAR` permanece siempre disponible. No se intenta detectar quién tiene o no un rol de guionista: cualquier jugador puede decidir participar pulsando `EDITAR`.
+
+No se añaden etiquetas permanentes `OFICIAL` / `LOCAL`, evitando ruido visual y dependencia innecesaria del idioma.
+
+El halo informa únicamente de la procedencia activa del guion. No implica por sí mismo estados editoriales como:
+
+```text
+pendiente
+aceptado
+rechazado
+moderado
+```
+
+Esos estados no pueden conocerse de forma fiable con la arquitectura actual.
+
+La prioridad, alternancia, eliminación, posible acción `VOLVER A OFICIAL` y criterio de equivalencia entre archivos quedan expresamente fuera de este cambio y deberán cerrarse en una decisión posterior.
+
 ## Observaciones adicionales
 
 ### Seguimiento PNJ
