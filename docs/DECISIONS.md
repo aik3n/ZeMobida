@@ -330,39 +330,47 @@ El flujo tap/arrastre, permanencia de cámara, cálculo de destino con cámara d
 
 
 
-## ADR-021 — Capa Frontal como imagen transparente opcional
+## ADR-021 — Profundidad visual automática por colisión de base
 **Status:** Accepted
 
 ### Context
 
-En un mapa top-down algunos elementos deben dibujarse por encima del Player y los PNJ para transmitir profundidad: tejados, copas de árboles, arcos, toldos, etc.
+Los mapas ilustrados necesitan que Player, PNJ y algunos objetos del escenario puedan solaparse de forma coherente al cruzarse verticalmente.
 
-Se probó reutilizar partes del propio `Fondo` mediante `Polygon2D` y coordenadas UV. Aunque técnicamente funciona, convertirlo en una herramienta cómoda requiere lógica adicional de editor y sincronización de UV.
+Un Y-sort general introduciría más estructura y acoplamiento del necesario, especialmente porque el Player es persistente y los mapas se cargan dinámicamente dentro de `SceneContainer`.
+
+También se quiere evitar que el diseñador tenga que asignar scripts, rutas o valores Z manuales a cada elemento visual.
 
 ### Decision
 
-Se adopta una solución explícita y simple: cada mapa puede proporcionar una imagen PNG `Frontal` con transparencia.
+La profundidad visual se basa en la posición Y de las colisiones situadas en los pies o en la base del objeto.
+
+Player y PNJ comparan sus `CollisionShape2D` de pies.
+
+Para objetos del escenario, `Game` descubre automáticamente al cargar el mapa los nodos que cumplen esta convención:
 
 ```text
-Fondo      z bajo
-Player/PNJ z medio
-Frontal    z alto
+StaticBody2D
+├── exactamente 1 CollisionShape2D directa
+└── 1 o más Sprite2D directos
 ```
 
-`Fondo` y `Frontal` comparten origen `(0,0)`, escala `1:1` y `centered = false`.
+El `StaticBody2D` cambia entre una profundidad situada detrás y otra delante del Player según la posición Y de su `CollisionShape2D`.
 
-`Frontal` está siempre visible; las zonas transparentes no afectan al dibujo y las zonas opacas ocultan naturalmente a los actores cuando pasan por detrás.
+Los nombres de los nodos no forman parte del contrato.
 
-No se requiere detección de entrada/salida ni recorte dinámico en runtime.
+Los elementos que deban permanecer siempre delante pueden seguir utilizando un `Sprite2D` con Z fija.
 
 ### Consequences
 
-El equipo de arte mantiene una segunda capa sólo en los mapas que la necesiten. A cambio, la implementación en Godot permanece trivial, predecible y sin herramientas personalizadas.
-
-### Verification
-
-El concepto fue probado manualmente en runtime el 2026-08-30 y se confirmó el solapamiento correcto sobre el Player.
-
+- No se introduce Y-sort general.
+- El diseñador no asigna scripts de profundidad ni `NodePath`.
+- La detección se realiza una sola vez al cargar el mapa.
+- Durante el juego sólo se actualizan los objetos ya registrados.
+- Los contenedores de colisiones sin sprites se ignoran.
+- Los `StaticBody2D` con varias `CollisionShape2D` no entran automáticamente en el sistema.
+- La colisión de referencia debe representar visualmente el punto donde el objeto toca el suelo.
+- La misma filosofía sirve para Player, PNJ y objetos estáticos.
 
 ## ADR-022 — Zoom temporal como parte de la exploración de cámara
 **Status:** Accepted

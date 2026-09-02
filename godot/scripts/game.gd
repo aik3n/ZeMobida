@@ -5,6 +5,10 @@ const BIENVENIDA_SCENE := "res://escenas/bienvenida.tscn"
 const SETTINGS_FILE := "user://settings.cfg"
 const MAP_POSITIONS_SECTION := "map_positions"
 
+# PROFUNDIDAD_AUTOMATICA_STATICBODY
+const PROFUNDIDAD_Z_DETRAS_PLAYER := 1
+const PROFUNDIDAD_Z_DELANTE_PLAYER := 3
+
 const NIVELES_DATA := preload(
 	"res://scripts/niveles.gd"
 )
@@ -12,6 +16,9 @@ const NIVELES_DATA := preload(
 
 @onready var scene_container: Node = $SceneContainer
 @onready var player_actual: Node = $Player
+@onready var player_depth_collision: CollisionShape2D = (
+	$Player/CollisionShape2D
+)
 
 @onready var ui: CanvasLayer = $UI
 
@@ -48,6 +55,7 @@ const NIVELES_DATA := preload(
 
 
 var mapa_actual: Node = null
+var objetos_profundidad: Array[Dictionary] = []
 
 
 func _ready() -> void:
@@ -93,6 +101,16 @@ func _ready() -> void:
 	)
 
 
+func _process(_delta: float) -> void:
+	if objetos_profundidad.is_empty():
+		return
+
+	if not player_actual.visible:
+		return
+
+	_actualizar_profundidad_visual()
+
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		_guardar_posicion_mapa_actual()
@@ -126,6 +144,7 @@ func cargar_escena(
 		child.queue_free()
 
 	mapa_actual = null
+	objetos_profundidad.clear()
 
 	ui.visible = scene_path != BIENVENIDA_SCENE
 
@@ -155,6 +174,8 @@ func cargar_escena(
 	if mapa_actual != null:
 
 		_configurar_player()
+		_registrar_objetos_profundidad(mapa_actual)
+		_actualizar_profundidad_visual()
 
 		DialogueManager.load_player_status()
 
@@ -164,6 +185,66 @@ func cargar_escena(
 			ir_a_mapa
 		)
 
+
+
+func _registrar_objetos_profundidad(root: Node) -> void:
+	objetos_profundidad.clear()
+	_buscar_objetos_profundidad(root)
+
+
+func _buscar_objetos_profundidad(node: Node) -> void:
+	if node is StaticBody2D:
+		var body := node as StaticBody2D
+		var depth_collision: CollisionShape2D = null
+		var collision_count := 0
+		var sprite_count := 0
+
+		for child in body.get_children():
+			if child is CollisionShape2D:
+				collision_count += 1
+				depth_collision = child as CollisionShape2D
+			elif child is Sprite2D:
+				sprite_count += 1
+
+		# Convencion automatica:
+		# StaticBody2D + exactamente una CollisionShape2D
+		# + uno o mas Sprite2D directos.
+		if (
+			collision_count == 1
+			and sprite_count >= 1
+			and depth_collision != null
+		):
+			objetos_profundidad.append({
+				"body": body,
+				"collision": depth_collision
+			})
+
+	for child in node.get_children():
+		_buscar_objetos_profundidad(child)
+
+
+func _actualizar_profundidad_visual() -> void:
+	if player_depth_collision == null:
+		return
+
+	var player_depth_y := player_depth_collision.global_position.y
+
+	for item in objetos_profundidad:
+		var body := item.get("body") as StaticBody2D
+		var collision := item.get("collision") as CollisionShape2D
+
+		if not is_instance_valid(body):
+			continue
+
+		if not is_instance_valid(collision):
+			continue
+
+		# La CollisionShape2D situada en la base del objeto
+		# representa su profundidad visual respecto a los pies del Player.
+		if collision.global_position.y <= player_depth_y:
+			body.z_index = PROFUNDIDAD_Z_DETRAS_PLAYER
+		else:
+			body.z_index = PROFUNDIDAD_Z_DELANTE_PLAYER
 
 
 func _configurar_player() -> void:

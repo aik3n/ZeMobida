@@ -1,6 +1,6 @@
 # ZeMobida — Development Guide
 
-**Estado:** subsistemas de guiones y diálogo, navegación/posición por mapa, creador local de guiones y cambios de persistencia revisados hasta el 2026-09-01; validación de dispositivo documentada para Android.  
+**Estado:** subsistemas de guiones y diálogo, navegación/posición por mapa, creador local de guiones y cambios de persistencia revisados hasta el 2026-09-02; validación de dispositivo documentada para Android.  
 **Godot:** 4.7.
 
 ## Reglas
@@ -473,37 +473,81 @@ Reglas prácticas:
 
 El mapa piloto `aldea` ya incorpora colisiones locales sobre la ilustración; su ajuste seguirá evolucionando con el arte y las pruebas de recorrido.
 
-### Frontal
+### Objetos con profundidad automática
 
-Los elementos que deban ocultar parcialmente a Player o PNJ se suministran mediante una imagen PNG transparente opcional.
+Para que un objeto del escenario pueda aparecer delante o detrás del Player no es necesario configurar ningún sistema de profundidad desde el Inspector.
 
-Flujo recomendado:
-
-```text
-aldea.PNG
-aldea_frontal.PNG
-```
-
-En la escena:
+Crear el objeto con esta estructura:
 
 ```text
-Fondo      → Sprite2D, z bajo
-Player/PNJ → z medio
-Frontal    → Sprite2D, z alto
+Objeto (StaticBody2D)
+├── CollisionShape2D
+└── Sprite2D
 ```
 
-`Fondo` y `Frontal` deben compartir:
+También puede contener varios sprites:
 
 ```text
-position = (0, 0)
-scale = (1, 1)
-centered = false
+Objeto (StaticBody2D)
+├── CollisionShape2D
+├── Sprite2D
+└── Sprite2D
 ```
 
-La imagen frontal sólo contiene los píxeles que deben quedar por encima de los actores, por ejemplo copas de árboles, tejados, arcos o toldos.
+Requisitos:
 
-No se utiliza recorte dinámico ni `Polygon2D` para generar esta capa en runtime. Esa posibilidad se probó y se descartó por complejidad innecesaria.
+- exactamente una `CollisionShape2D` directa;
+- uno o más `Sprite2D` directos;
+- colocar la colisión en la base visual del objeto, donde toca el suelo;
+- no asignar scripts de profundidad;
+- no configurar rutas `NodePath`;
+- no configurar Z manual para el comportamiento delante/detrás;
+- los nombres de `StaticBody2D`, `CollisionShape2D` y `Sprite2D` son libres.
 
+`Game` descubre automáticamente esta estructura al cargar el mapa.
+
+Ejemplo:
+
+```text
+Valla (StaticBody2D)
+├── Colision (CollisionShape2D)
+└── Imagen (Sprite2D)
+```
+
+produce automáticamente:
+
+```text
+Player por encima de la base de Valla
+→ Valla delante del Player
+
+Player por debajo de la base de Valla
+→ Player delante de Valla
+```
+
+Un `StaticBody2D` usado únicamente como contenedor de colisiones:
+
+```text
+colisiones (StaticBody2D)
+├── CollisionShape2D
+├── CollisionPolygon2D
+└── CollisionShape2D
+```
+
+no participa automáticamente porque no cumple el contrato visual.
+
+Los elementos que deban permanecer siempre delante pueden seguir utilizando un `Sprite2D` frontal con Z fija y sin `StaticBody2D` asociado.
+
+La misma regla de profundidad se utiliza entre Player y PNJ: las colisiones situadas en los pies actúan como referencia vertical.
+
+Regresión recomendada:
+
+- Player pasa por arriba y por abajo de un PNJ → cambia correctamente delante/detrás;
+- objeto con `StaticBody2D + CollisionShape2D + Sprite2D` → profundidad automática;
+- renombrar los nodos → comportamiento sin cambios;
+- objeto con varios `Sprite2D` → todos mantienen conjuntamente la profundidad del objeto;
+- `StaticBody2D` sin `Sprite2D` → ignorado;
+- contenedor con varias colisiones → ignorado;
+- frontal permanente con Z fija → permanece siempre delante.
 
 ### SpawnPlayer
 

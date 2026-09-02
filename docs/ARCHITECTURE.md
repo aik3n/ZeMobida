@@ -1,6 +1,6 @@
 # ZeMobida — Architecture
 
-**Estado:** arquitectura funcional revisada el 2026-09-01.  
+**Estado:** arquitectura funcional revisada el 2026-09-02.  
 **Godot:** 4.7.x.  
 **Principio:** preferir soluciones pequeñas, explícitas y editables desde Godot antes que capas de abstracción innecesarias.
 
@@ -138,7 +138,7 @@ mapa
 ├── colisiones            StaticBody2D + shapes/polígonos
 ├── PNJ                   instancias de pnj.tscn
 ├── SpawnPlayer           obligatorio como entrada/fallback
-├── Frontal               Sprite2D transparente, opcional
+├── objetos visuales      StaticBody2D + 1 CollisionShape2D + Sprite2D(s), opcional
 ├── Preview               opcional
 └── CameraBounds          fallback para mapas sin Fondo
 ```
@@ -159,17 +159,58 @@ Si un mapa no tiene ni `Fondo` válido ni `CameraBounds`, no existe una fuente v
 
 `Fondo` se usa normalmente a escala `1:1` y con `centered = false`.
 
-### Frontal
+### Profundidad visual
 
-`Frontal` es una capa PNG transparente opcional:
+La profundidad entre actores y determinados objetos del escenario se resuelve mediante una regla simple basada en la posición vertical de sus colisiones de base. No se utiliza Y-sort general.
+
+El `Player` ocupa la profundidad visual intermedia. Los PNJ cambian automáticamente entre detrás y delante del Player comparando la posición global de sus `CollisionShape2D`, colocadas en los pies.
 
 ```text
-Fondo      z bajo
-Player/PNJ z medio
-Frontal    z alto
+PNJ con pies por encima del Player
+→ PNJ detrás
+
+PNJ con pies por debajo del Player
+→ PNJ delante
 ```
 
-No requiere lógica de entrada/salida ni recorte dinámico.
+La misma filosofía se aplica automáticamente a objetos estáticos del mapa.
+
+Convención:
+
+```text
+StaticBody2D
+├── CollisionShape2D
+└── Sprite2D
+```
+
+Un `StaticBody2D` participa en profundidad automática cuando contiene directamente:
+
+```text
+exactamente 1 CollisionShape2D
+1 o más Sprite2D
+```
+
+La `CollisionShape2D` representa la base visual del objeto. `Game` descubre estos objetos una sola vez al cargar el mapa y durante el juego compara esa referencia con la colisión de los pies del Player.
+
+No importan los nombres de los nodos y el diseñador no necesita asignar scripts, `NodePath` ni valores Z manuales.
+
+La separación visual general es:
+
+```text
+Fondo                  z bajo
+
+objetos/PNJ detrás
+Player
+objetos/PNJ delante
+
+frontales permanentes  z alto
+```
+
+Los `StaticBody2D` que sólo contienen colisiones y no tienen `Sprite2D` se ignoran. Los contenedores con varias `CollisionShape2D` tampoco cumplen la convención automática.
+
+Un elemento que deba permanecer siempre por encima de los actores puede seguir siendo un `Sprite2D` con Z fija y sin participar en profundidad automática.
+
+La colisión usada como referencia debe estar colocada donde el personaje u objeto toca visualmente el suelo. Si una colisión no representa correctamente esa base, ese objeto no debe utilizar esta convención automática.
 
 ## Player
 
