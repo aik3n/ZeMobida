@@ -2,7 +2,7 @@ extends CanvasLayer
 
 
 const CUSTOM_DIALOGUE_FOLDER := "user://custom_dialogues/"
-const SUBMISSION_EMAIL := "zemobida@gmail.com"
+const SUBMISSION_EMAIL := "zemobida@gmx.es"
 
 const ERROR_GUTTER_WIDTH := 34
 const ERROR_MARKER := "●"
@@ -557,10 +557,10 @@ func _on_send_pressed() -> void:
 	var subject: String = file_name.uri_encode()
 
 	var body: String = (
-		"Archivo: "
-		+ file_name
-		+ "\n\n"
-		+ code_edit.text
+		# "Archivo: " +
+		# file_name +
+		# "\n\n" +
+		code_edit.text
 	).uri_encode()
 
 	var mailto_uri: String = (
