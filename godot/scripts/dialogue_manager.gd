@@ -38,6 +38,7 @@ const DIALOGUE_TEMPLATE := (
 
 const SETTINGS_FILE := "user://settings.cfg"
 const MAP_INVENTORIES_SECTION := "map_inventories"
+const MAP_COMPLETED_ITEM := "__superado__"
 const DIALOGUE_MAP_LEVEL_MARKERS := [
 	"_a1",
 	"_a2",
@@ -556,10 +557,11 @@ func add_item(item: String) -> bool:
 		inventory
 	)
 
-	_mostrar_feedback_objeto(
-		"+ " + item.capitalize(),
-		true
-	)
+	if item != MAP_COMPLETED_ITEM:
+		_mostrar_feedback_objeto(
+			"+ " + item.capitalize(),
+			true
+		)
 
 	return true
 
@@ -572,10 +574,11 @@ func remove_item(item: String) -> bool:
 
 	inventory.erase(item)
 
-	_mostrar_feedback_objeto(
-		"- " + item.capitalize(),
-		false
-	)
+	if item != MAP_COMPLETED_ITEM:
+		_mostrar_feedback_objeto(
+			"- " + item.capitalize(),
+			false
+		)
 
 	return true
 

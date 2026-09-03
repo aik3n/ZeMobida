@@ -14,6 +14,8 @@ const DEFAULT_PREVIEW := preload(
 @onready var btn_siguiente: Button = $Contenedor/BtnSiguiente
 @onready var lbl_nombre: Label = $Contenedor/Centro/Nombre
 @onready var preview: TextureRect = $Contenedor/Centro/Preview
+@onready var sello: TextureRect = $Contenedor/Centro/Preview/Sello
+@onready var lbl_texto: Label = $Contenedor/Centro/Texto
 @onready var btn_jugar: Button = $Contenedor/Centro/Jugar
 @onready var indicadores: Label = $Contenedor/Centro/Indicadores
 
@@ -113,8 +115,10 @@ func _refresh() -> void:
 
 	if not hay_mapas:
 		lbl_nombre.text = "No hay mapas disponibles"
+		lbl_texto.text = ""
 		preview.texture = null
 		preview.visible = false
+		sello.visible = false
 		indicadores.text = ""
 		return
 
@@ -125,18 +129,34 @@ func _refresh() -> void:
 	lbl_nombre.text = nombre
 	indicadores.text = "%d / %d" % [indice_actual + 1, mapas.size()]
 
-	_load_preview(mapa_path)
+	_load_map_info(mapa_path)
 
 
-func _load_preview(mapa_path: String) -> void:
+func _load_map_info(mapa_path: String) -> void:
 	preview.texture = null
 	preview.visible = false
+	lbl_texto.text = ""
+	sello.visible = false
 
 	var packed_scene := ResourceLoader.load(mapa_path) as PackedScene
 	if packed_scene == null:
 		return
 
 	var instance := packed_scene.instantiate()
+	var completado := _is_map_completed(mapa_path)
+
+	var texto_node: Node = null
+
+	if completado:
+		texto_node = instance.get_node_or_null("final")
+	else:
+		texto_node = instance.get_node_or_null("descripcion")
+
+	if texto_node is Label:
+		lbl_texto.text = (texto_node as Label).text
+
+	sello.visible = completado
+
 	var preview_node := instance.get_node_or_null("Preview")
 
 	if preview_node is Sprite2D:
@@ -155,6 +175,34 @@ func _load_preview(mapa_path: String) -> void:
 
 	preview.visible = preview.texture != null
 	instance.free()
+
+
+func _is_map_completed(mapa_path: String) -> bool:
+	var map_id := mapa_path.get_file().get_basename().to_lower()
+
+	if map_id.is_empty():
+		return false
+
+	var config := ConfigFile.new()
+
+	if config.load(SETTINGS_FILE) != OK:
+		return false
+
+	var saved_inventory = config.get_value(
+		DialogueManager.MAP_INVENTORIES_SECTION,
+		map_id,
+		PackedStringArray()
+	)
+
+	if saved_inventory is Array or saved_inventory is PackedStringArray:
+		for item in saved_inventory:
+			if (
+				str(item).strip_edges().to_lower()
+				== DialogueManager.MAP_COMPLETED_ITEM
+			):
+				return true
+
+	return false
 
 
 func _previous() -> void:

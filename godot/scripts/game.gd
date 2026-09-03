@@ -512,9 +512,21 @@ func _actualizar_inventario() -> void:
 		DialogueManager.inventory
 	)
 
+	# La marca de aventura superada vive en el inventario persistente
+	# del mapa, pero no es un objeto visible para el jugador.
+	var inventario_visible: Array[String] = []
+
+	for item in inventario:
+		if item == DialogueManager.MAP_COMPLETED_ITEM:
+			continue
+
+		inventario_visible.append(item)
+
+	# Vaciar inventario sigue afectando también a la marca reservada.
+	# Así se reinicia todo el estado del mapa con el mecanismo existente.
 	boton_vaciar_inventario.disabled = inventario.is_empty()
 
-	if inventario.is_empty():
+	if inventario_visible.is_empty():
 
 		estado_inventario.text = (
 			"Inventario vacío"
@@ -524,7 +536,7 @@ func _actualizar_inventario() -> void:
 
 	var texto := ""
 
-	for item in inventario:
+	for item in inventario_visible:
 
 		if not texto.is_empty():
 

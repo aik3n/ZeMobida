@@ -150,6 +150,15 @@ Preview válido
 
 `Preview` permite usar una miniatura distinta de la ilustración jugable.
 
+El carrusel reutiliza la escena instanciada para leer también el texto humano del mapa:
+
+```text
+sin __superado__ → descripcion
+con __superado__ → final + sello
+```
+
+El sello usa `res://art/ui/seal.png`, se dibuja sobre el preview con rotación de `+35°` y no recibe transparencia adicional.
+
 ### Profundidad visual
 
 No existe Y-sort global.
@@ -290,7 +299,15 @@ menzo_a1=PackedStringArray("mapa")
 
 Los efectos `+objeto` y `-objeto` modifican únicamente el inventario del mapa activo y lo guardan inmediatamente cuando producen un cambio real.
 
-`Vaciar inventario` afecta únicamente al mapa activo.
+La marca reservada `__superado__` utiliza ese mismo mecanismo. Un guion cierra una aventura con:
+
+```text
+[+__superado__]
+```
+
+No existe una persistencia separada para mapas completados: el mapa se considera superado cuando su inventario contiene `__superado__`. La marca no se muestra en el panel Estado ni genera feedback junto al Player.
+
+`Vaciar inventario` afecta únicamente al mapa activo y elimina también `__superado__`, por lo que reinicia el estado de superado de esa aventura.
 
 No existe limpieza automática de datos pertenecientes a mapas eliminados o renombrados.
 

@@ -20,8 +20,9 @@ offset_left = -1985.0
 offset_top = -1530.0
 offset_right = -558.0
 offset_bottom = -1370.0
+pivot_offset = Vector2(527, 46)
 theme_override_font_sizes/font_size = 100
-text = "vaya aventura!"
+text = "hay que salir de aqui!!"
 
 [node name="final" type="Label" parent="." unique_id=618588786]
 offset_left = 286.0
@@ -29,9 +30,7 @@ offset_top = -2072.0
 offset_right = 1777.0
 offset_bottom = -1655.0
 theme_override_font_sizes/font_size = 100
-text = "vaya aventura! 
-esto si que no me lo esperaba, 
-que habra pasado?"
+text = "ahora empieza el exilio..."
 
 [node name="Fondo" type="Sprite2D" parent="." unique_id=1615628162]
 modulate = Color(0.5152081, 0.5152081, 0.5152081, 1)

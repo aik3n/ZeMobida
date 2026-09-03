@@ -93,7 +93,19 @@ Para quien escribe el guion, objetos y pistas usan la misma sintaxis sencilla.
 
 Cada mapa mantiene su propio inventario persistente. Al entrar en una aventura, las condiciones y efectos del guion trabajan únicamente con el inventario de ese mapa.
 
-Este alcance no cambia la sintaxis que utiliza quien escribe el guion.
+Para indicar que la aventura está resuelta se usa una marca reservada:
+
+```text
+[+__superado__]
+```
+
+`__superado__` no es un objeto narrativo para el jugador. Se guarda en el inventario persistente del mapa, pero no se muestra en Estado ni genera feedback visual.
+
+Mientras la marca no exista, el carrusel muestra `descripcion`. Cuando existe, muestra `final` y el sello de aventura superada.
+
+Vaciar el inventario del mapa elimina también esta marca y devuelve la aventura al estado no superado.
+
+Este alcance no cambia la sintaxis general que utiliza quien escribe el guion: la marca aprovecha el efecto `+objeto` ya existente.
 
 ## Diseño de una aventura
 

@@ -169,6 +169,22 @@ Efectos soportados:
 -objeto
 ```
 
+### Marca de aventura superada
+
+`__superado__` es un nombre reservado dentro del inventario del mapa.
+
+Para marcar que la aventura actual se ha resuelto:
+
+```text
+[+__superado__]
+```
+
+No existe un efecto nuevo específico para completar mapas: esta convención utiliza el mismo `+objeto` que cualquier otro efecto.
+
+El runtime guarda la marca con el inventario persistente del mapa, pero la oculta en el panel Estado y no muestra feedback de objeto. El carrusel interpreta su presencia como aventura superada y pasa de `descripcion` a `final`, mostrando además el sello correspondiente.
+
+Como la marca pertenece al inventario, `Vaciar inventario` la elimina también y la aventura vuelve a considerarse no superada.
+
 Ejemplos:
 
 ```text

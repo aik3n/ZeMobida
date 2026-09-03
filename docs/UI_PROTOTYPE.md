@@ -71,7 +71,10 @@ El highlight diferencia comentario, firma, nodo, opción, condición, salto y bl
 - todos los `.tscn` directos de `res://mapas/` son seleccionables;
 - actualización de guiones configurable;
 - último mapa jugado persistente;
-- `Preview` → `Fondo` → imagen por defecto.
+- `Preview` → `Fondo` → imagen por defecto;
+- mapa no superado → mostrar `descripcion`;
+- mapa superado → mostrar `final` y `res://art/ui/seal.png` sobre el preview;
+- el sello se muestra con rotación de `+35°` y sin transparencia añadida.
 
 ## Mapa ilustrado
 
@@ -145,4 +148,6 @@ vaciar inventario
 volver a mapas
 ```
 
-El panel muestra el inventario del mapa activo. Vaciar inventario afecta sólo al mapa activo.
+El panel muestra el inventario del mapa activo. La marca reservada `__superado__` no aparece en la lista ni genera feedback de inventario.
+
+Vaciar inventario afecta sólo al mapa activo y elimina también `__superado__`, por lo que ese mapa vuelve a considerarse no superado.
