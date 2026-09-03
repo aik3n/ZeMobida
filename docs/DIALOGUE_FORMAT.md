@@ -32,7 +32,7 @@ Cada línea se interpreta según su primer carácter.
 Si una línea **no empieza** por ninguno de estos caracteres:
 
 ```text
-# ? > ' = [
+# ? > ' = [ @
 ```
 
 se considera **texto del PNJ**.
@@ -54,6 +54,20 @@ Ejemplos:
 ```
 
 `'` es el único marcador de comentario del formato.
+
+---
+
+## 2.1. Firma pública
+
+Una línea que empieza por `@` define la firma pública opcional del guion.
+
+```text
+@ ana del pueblo
+```
+
+La línea se conserva completa, incluida la `@`, pero no forma parte de ningún nodo ni del texto narrativo. Durante el diálogo se muestra de forma discreta debajo del nombre del PNJ.
+
+Un guion sin firma funciona exactamente igual que antes. La firma no sustituye al comentario: `'` sigue siendo el único marcador de comentario del formato.
 
 ---
 
@@ -260,6 +274,7 @@ Ocultar o finalizar el diálogo oculta también el panel de opciones. El clic so
 ## 10. Ejemplo completo
 
 ```text
+@ ana del pueblo
 ' texto trivial que sirve de comentario
 # INICIO ' comentario de guionista
 
@@ -302,6 +317,7 @@ La sintaxis básica queda reducida a:
 
 ```text
 texto → texto del PNJ
+@     → firma pública
 #     → nodo
 ?     → condición
 >     → salto

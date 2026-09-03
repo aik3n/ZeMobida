@@ -3,6 +3,7 @@ extends SyntaxHighlighter
 
 const COLOR_DEFAULT := Color("#e6edf5")
 const COLOR_COMMENT := Color("#7bd88f")
+const COLOR_SIGNATURE := Color("#a6accd")
 const COLOR_NODE := Color("#c792ea")
 const COLOR_OPTION := Color("#82aaff")
 const COLOR_CONDITION := Color("#ffcb6b")
@@ -37,6 +38,8 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 		return result
 
 	match code_part[first_index]:
+		"@":
+			_set_color(result, first_index, COLOR_SIGNATURE)
 		"#":
 			_highlight_node_line(result, code_part, first_index)
 		"=":

@@ -27,6 +27,7 @@ const OPTIONS_PANEL_PADDING := 56.0
 @onready var panel_opciones: Panel = $PanelOpciones
 
 @onready var name_label: Label = $PanelTexto/NameLabel
+@onready var signature_label: Label = $PanelTexto/SignatureLabel
 @onready var edit_button: Button = $PanelTexto/EditButton
 @onready var dialogue_text: Label = $PanelTexto/ScrollTexto/DialogueText
 @onready var options_indicator: Label = $PanelTexto/OptionsIndicator
@@ -59,6 +60,7 @@ func _ready() -> void:
 	panel_texto.visible = false
 	panel_opciones.visible = false
 	options_indicator.visible = false
+	signature_label.visible = false
 
 
 func show_dialogue() -> void:
@@ -145,6 +147,7 @@ func hide_dialogue() -> void:
 	panel_texto.visible = false
 	panel_opciones.visible = false
 	options_indicator.visible = false
+	signature_label.visible = false
 	_has_options = false
 
 
@@ -157,6 +160,10 @@ func show_text(
 		"_",
 		" "
 	)
+
+	signature_label.text = DialogueManager.current_dialogue_signature
+	signature_label.visible = not signature_label.text.is_empty()
+
 	dialogue_text.text = text
 	call_deferred("_update_text_panel_height")
 

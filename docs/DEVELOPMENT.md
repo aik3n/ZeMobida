@@ -182,6 +182,7 @@ CERRAR
 
 ```text
 ' comentario → verde
+@ firma      → gris
 # nodo       → violeta
 = opción     → azul
 ? condición  → amarillo
@@ -210,6 +211,10 @@ no bloquea GUARDAR ni ENVIAR
 Reglas actuales:
 
 ```text
+@ firma
+→ requiere contenido después de `@`.
+→ se considera metadato público y no texto narrativo.
+
 # NODO
 → `#` sólo puede aparecer como declaración de nodo.
 → la etiqueta debe ser un único token.

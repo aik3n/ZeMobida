@@ -3,6 +3,7 @@ class_name DialogueParser
 extends RefCounted
 
 var errors: Array[String] = []
+var signature := ""
 
 
 func parse(text: String) -> Dictionary:
@@ -11,6 +12,7 @@ func parse(text: String) -> Dictionary:
 	var entry: Dictionary = {}
 
 	errors.clear()
+	signature = ""
 
 	for raw_line in text.split("\n"):
 		var line := _clean_line(raw_line)
@@ -19,6 +21,15 @@ func parse(text: String) -> Dictionary:
 			continue
 
 		var marker := line[0]
+
+		# Firma pública del archivo. Se conserva para la UI,
+		# pero no forma parte de ningún nodo del diálogo.
+		if marker == "@":
+			if line.substr(1).strip_edges().is_empty():
+				errors.append("Firma vacía.")
+			else:
+				signature = line
+			continue
 
 		if marker == "#":
 			if not label.is_empty():

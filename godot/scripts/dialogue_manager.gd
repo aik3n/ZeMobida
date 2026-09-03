@@ -9,6 +9,7 @@ var editor_active := false
 var current_dialogue_file := ""
 var current_dialogue_level := ""
 var current_speaker := ""
+var current_dialogue_signature := ""
 
 var dialogue_data: Dictionary = {}
 var inventory: Array[String] = []
@@ -271,6 +272,7 @@ func load_dialogue(file_path: String):
 	dialogue_data = _parser.parse(
 		file.get_as_text()
 	)
+	current_dialogue_signature = _parser.signature
 
 	if not _validator.validate(
 		dialogue_data,
@@ -314,6 +316,7 @@ func _load_error_dialogue() -> void:
 	dialogue_data = _parser.parse(
 		file.get_as_text()
 	)
+	current_dialogue_signature = _parser.signature
 
 	if not _validator.validate(
 		dialogue_data,
@@ -624,6 +627,7 @@ func end_dialogue():
 	current_dialogue_file = ""
 	current_dialogue_level = ""
 	current_speaker = ""
+	current_dialogue_signature = ""
 
 	dialogue_data.clear()
 

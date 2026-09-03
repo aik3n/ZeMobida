@@ -114,6 +114,10 @@ func _is_line_locally_valid(
 	if _has_repeated_leading_marker(line):
 		return false
 
+	# La firma pública es una línea independiente.
+	if line.begins_with("@"):
+		return not line.substr(1).strip_edges().is_empty()
+
 	# '#' sólo puede existir en una declaración de nodo.
 	# El comentario ya se retiró antes de llegar aquí.
 	if line.contains("#") and not line.begins_with("#"):
