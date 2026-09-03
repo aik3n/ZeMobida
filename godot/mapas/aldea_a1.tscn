@@ -1,0 +1,96 @@
+[gd_scene format=3 uid="uid://c4kp2s7k8fxen"]
+
+[ext_resource type="Texture2D" uid="uid://bms6oms14c8ui" path="res://art/mapas/aldea.PNG" id="1_v35j7"]
+[ext_resource type="Texture2D" uid="uid://di4y2fkshmt31" path="res://art/preview/aldea.PNG" id="2_7odjh"]
+[ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="3_wpqw0"]
+[ext_resource type="Texture2D" uid="uid://d288q5sfejdxr" path="res://art/personajes/salce/secretaria.png" id="4_odx7e"]
+[ext_resource type="Texture2D" uid="uid://dce4bpgo04sn0" path="res://art/personajes/aldea/chef.png" id="5_r5o35"]
+[ext_resource type="Texture2D" uid="uid://di7iyu2fbpj4d" path="res://art/personajes/aldea/ejecutivo.png" id="6_iocnx"]
+[ext_resource type="Texture2D" uid="uid://dhavs312oheyk" path="res://art/personajes/aldea/limpiador.png" id="7_uralc"]
+[ext_resource type="Texture2D" uid="uid://bf1slfiushdtc" path="res://art/personajes/aldea/medico.png" id="8_tppgq"]
+[ext_resource type="Texture2D" uid="uid://l6rlkvcbeieg" path="res://art/personajes/aldea/obrero_madera.png" id="9_smdbe"]
+[ext_resource type="Texture2D" uid="uid://dpyw518c5ss7y" path="res://art/mapas/frontal_prueba.png" id="10_ss0iu"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_4kxuq"]
+radius = 15.25
+height = 178.0
+
+[node name="Node2D" type="Node2D" unique_id=2099304404]
+
+[node name="descripcion" type="Label" parent="." unique_id=222034557]
+offset_left = 317.0
+offset_top = -457.0
+offset_right = 1744.0
+offset_bottom = -297.0
+theme_override_font_sizes/font_size = 100
+text = "Aventura en la aldea"
+metadata/_edit_use_anchors_ = true
+
+[node name="final" type="Label" parent="." unique_id=534582791]
+offset_left = 2588.0
+offset_top = -999.0
+offset_right = 4079.0
+offset_bottom = -582.0
+theme_override_font_sizes/font_size = 100
+text = "vaya aventura! 
+esto si que no me lo esperaba, 
+que habra pasado?"
+metadata/_edit_use_anchors_ = true
+
+[node name="Fondo" type="Sprite2D" parent="." unique_id=1994534858]
+z_index = -10
+texture = ExtResource("1_v35j7")
+centered = false
+
+[node name="Preview" type="Sprite2D" parent="." unique_id=121927157]
+visible = false
+texture = ExtResource("2_7odjh")
+
+[node name="SpawnPlayer" type="Marker2D" parent="." unique_id=954633118]
+position = Vector2(1667, 1134)
+
+[node name="secretaria" parent="." unique_id=1491293733 instance=ExtResource("3_wpqw0")]
+position = Vector2(1471, 1524)
+sprite = ExtResource("4_odx7e")
+tipo_seguimiento = 1
+
+[node name="chef" parent="." unique_id=262533144 instance=ExtResource("3_wpqw0")]
+position = Vector2(1207, 1200)
+sprite = ExtResource("5_r5o35")
+tipo_seguimiento = 1
+
+[node name="ejecutivo" parent="." unique_id=737952288 instance=ExtResource("3_wpqw0")]
+position = Vector2(1532, 789)
+sprite = ExtResource("6_iocnx")
+
+[node name="limpiador" parent="." unique_id=1894456918 instance=ExtResource("3_wpqw0")]
+position = Vector2(2312, 1117)
+sprite = ExtResource("7_uralc")
+tipo_seguimiento = 0
+
+[node name="medico" parent="." unique_id=797516331 instance=ExtResource("3_wpqw0")]
+position = Vector2(2077, 808)
+sprite = ExtResource("8_tppgq")
+
+[node name="obrero_madera" parent="." unique_id=1391637430 instance=ExtResource("3_wpqw0")]
+position = Vector2(2136, 1466)
+sprite = ExtResource("9_smdbe")
+tipo_seguimiento = 0
+
+[node name="lago" type="StaticBody2D" parent="." unique_id=1095827833]
+
+[node name="colision" type="CollisionPolygon2D" parent="lago" unique_id=781125826]
+polygon = PackedVector2Array(909, 880, 796, 1040, 505, 1050, 256, 1640, 1091, 1617, 978, 1091, 1060, 870)
+
+[node name="casa1" type="StaticBody2D" parent="." unique_id=416608013]
+
+[node name="colision" type="CollisionShape2D" parent="casa1" unique_id=1829991509]
+position = Vector2(1882, 1266)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_4kxuq")
+
+[node name="srite_casa" type="Sprite2D" parent="casa1" unique_id=374299223]
+position = Vector2(1769, 1141)
+scale = Vector2(0.6987954, 0.92391306)
+texture = ExtResource("10_ss0iu")
+centered = false

@@ -3,10 +3,25 @@
 [ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="1_5v2x2"]
 [ext_resource type="Texture2D" uid="uid://ddxmxgyyfy8mn" path="res://icon.svg" id="2_biny4"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_xw7ts"]
-size = Vector2(1510, 2223)
-
 [node name="pueblo" type="Node2D" unique_id=493802413]
+
+[node name="descripcion" type="Label" parent="." unique_id=287580256]
+offset_left = -1985.0
+offset_top = -1530.0
+offset_right = -558.0
+offset_bottom = -1370.0
+theme_override_font_sizes/font_size = 100
+text = "vaya aventura!"
+
+[node name="final" type="Label" parent="." unique_id=725900682]
+offset_left = 286.0
+offset_top = -2072.0
+offset_right = 1777.0
+offset_bottom = -1655.0
+theme_override_font_sizes/font_size = 100
+text = "vaya aventura! 
+esto si que no me lo esperaba, 
+que habra pasado?"
 
 [node name="Preview" type="Sprite2D" parent="." unique_id=300975964]
 visible = false
@@ -20,12 +35,3 @@ tipo_seguimiento = 1
 [node name="samu" parent="." unique_id=1247965314 instance=ExtResource("1_5v2x2")]
 position = Vector2(102, 331)
 sprite = ExtResource("2_biny4")
-
-[node name="SpawnPlayer" type="Marker2D" parent="." unique_id=957641453]
-position = Vector2(567, 301)
-
-[node name="CameraBounds" type="Area2D" parent="." unique_id=319864449]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="CameraBounds" unique_id=1758029404]
-position = Vector2(672, 1047.5)
-shape = SubResource("RectangleShape2D_xw7ts")

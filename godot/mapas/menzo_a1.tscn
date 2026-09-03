@@ -14,8 +14,24 @@ radius = 227.0
 height = 454.0
 
 [node name="mapa" type="Node2D" unique_id=493802413]
-metadata/descripcion = "vaya aventura! esto si que no me lo esperaba, que habra pasado?"
-metadata/final = "muy bien chico"
+
+[node name="descripcion" type="Label" parent="." unique_id=1784612940]
+offset_left = -1985.0
+offset_top = -1530.0
+offset_right = -558.0
+offset_bottom = -1370.0
+theme_override_font_sizes/font_size = 100
+text = "vaya aventura!"
+
+[node name="final" type="Label" parent="." unique_id=618588786]
+offset_left = 286.0
+offset_top = -2072.0
+offset_right = 1777.0
+offset_bottom = -1655.0
+theme_override_font_sizes/font_size = 100
+text = "vaya aventura! 
+esto si que no me lo esperaba, 
+que habra pasado?"
 
 [node name="Fondo" type="Sprite2D" parent="." unique_id=1615628162]
 modulate = Color(0.5152081, 0.5152081, 0.5152081, 1)
@@ -57,21 +73,3 @@ position = Vector2(367, 216.00006)
 scale = Vector2(0.6987954, 0.92391306)
 texture = ExtResource("8_ykjac")
 centered = false
-
-[node name="descripcion" type="Label" parent="." unique_id=1784612940]
-offset_left = -1985.0
-offset_top = -1530.0
-offset_right = -558.0
-offset_bottom = -1370.0
-theme_override_font_sizes/font_size = 100
-text = "vaya aventura!"
-
-[node name="final" type="Label" parent="." unique_id=618588786]
-offset_left = 286.0
-offset_top = -2072.0
-offset_right = 1777.0
-offset_bottom = -1655.0
-theme_override_font_sizes/font_size = 100
-text = "vaya aventura! 
-esto si que no me lo esperaba, 
-que habra pasado?"
