@@ -14,6 +14,7 @@ var current_dialogue_signature := ""
 
 var dialogue_data: Dictionary = {}
 var inventory: Array[String] = []
+var inventory_map_id := ""
 
 var _parser := DialogueParser.new()
 var _validator := DialogueValidator.new()
@@ -36,8 +37,7 @@ const DIALOGUE_TEMPLATE := (
 )
 
 const SETTINGS_FILE := "user://settings.cfg"
-const PLAYER_SECTION := "player"
-const PLAYER_KEY_INVENTORY := "inventory"
+const MAP_INVENTORIES_SECTION := "map_inventories"
 const DIALOGUE_MAP_LEVEL_MARKERS := [
 	"_a1",
 	"_a2",
@@ -50,7 +50,7 @@ const MAX_AUTOMATIC_TRANSITIONS := 100
 
 
 func _ready() -> void:
-	load_inventory()
+	pass
 
 
 func register_ui(ui):
@@ -606,24 +606,28 @@ func end_dialogue():
 		dialogue_ui.hide_dialogue()
 
 
-func load_inventory() -> void:
+func load_map_inventory(map_id: String) -> void:
+	inventory.clear()
+	inventory_map_id = map_id.strip_edges().to_lower()
+
+	if inventory_map_id.is_empty():
+		return
+
 	var config := ConfigFile.new()
 	var error := config.load(SETTINGS_FILE)
-
-	inventory.clear()
 
 	if error == ERR_FILE_NOT_FOUND:
 		return
 
 	if error != OK:
 		print(
-			"No se pudo cargar el inventario."
+			"No se pudo cargar el inventario del mapa."
 		)
 		return
 
 	var saved_inventory = config.get_value(
-		PLAYER_SECTION,
-		PLAYER_KEY_INVENTORY,
+		MAP_INVENTORIES_SECTION,
+		inventory_map_id,
 		PackedStringArray()
 	)
 
@@ -638,12 +642,20 @@ func load_inventory() -> void:
 				inventory.append(clean_item)
 
 	print(
-		"Inventario cargado:",
+		"Inventario cargado para ",
+		inventory_map_id,
+		":",
 		inventory
 	)
 
 
 func _save_inventory() -> void:
+	if inventory_map_id.is_empty():
+		print(
+			"No hay mapa activo para guardar el inventario."
+		)
+		return
+
 	var config := ConfigFile.new()
 	var load_error := config.load(SETTINGS_FILE)
 
@@ -654,8 +666,8 @@ func _save_inventory() -> void:
 		return
 
 	config.set_value(
-		PLAYER_SECTION,
-		PLAYER_KEY_INVENTORY,
+		MAP_INVENTORIES_SECTION,
+		inventory_map_id,
 		PackedStringArray(inventory)
 	)
 
@@ -668,6 +680,8 @@ func _save_inventory() -> void:
 		return
 
 	print(
-		"Inventario guardado:",
+		"Inventario guardado para ",
+		inventory_map_id,
+		":",
 		inventory
 	)

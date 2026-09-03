@@ -91,7 +91,9 @@ El formato permite usar el inventario también como estado narrativo:
 
 Para quien escribe el guion, objetos y pistas usan la misma sintaxis sencilla.
 
-El alcance de persistencia del inventario puede evolucionar sin cambiar el formato del guion. Actualmente el inventario runtime sigue siendo global.
+Cada mapa mantiene su propio inventario persistente. Al entrar en una aventura, las condiciones y efectos del guion trabajan únicamente con el inventario de ese mapa.
+
+Este alcance no cambia la sintaxis que utiliza quien escribe el guion.
 
 ## Diseño de una aventura
 

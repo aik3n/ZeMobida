@@ -106,7 +106,7 @@ Varias líneas se acumulan como texto del nodo actual.
 
 ## Condiciones
 
-`?` comprueba objetos del inventario.
+`?` comprueba objetos del inventario persistente del mapa activo.
 
 Varias condiciones en la misma línea usan AND:
 

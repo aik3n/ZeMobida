@@ -128,6 +128,9 @@ func cargar_escena(
 	mapa_actual = null
 	objetos_profundidad.clear()
 
+	# Fuera de un mapa no existe inventario activo.
+	DialogueManager.load_map_inventory("")
+
 	ui.visible = scene_path != BIENVENIDA_SCENE
 
 	var scene: PackedScene = load(
@@ -148,6 +151,12 @@ func cargar_escena(
 	if scene_path != BIENVENIDA_SCENE:
 
 		mapa_actual = instance
+
+		# El inventario pertenece a la aventura concreta, usando el
+		# mismo ID completo que la persistencia de posición.
+		DialogueManager.load_map_inventory(
+			scene_path.get_file().get_basename().to_lower()
+		)
 
 	scene_container.add_child(
 		instance

@@ -408,7 +408,7 @@ func _download_file(file: Dictionary) -> void:
 func _on_file_downloaded(
 	result: int,
 	response_code: int,
-	headers: PackedStringArray,
+	_headers: PackedStringArray,
 	body: PackedByteArray,
 	http: HTTPRequest,
 	file_name: String

@@ -145,4 +145,4 @@ vaciar inventario
 volver a mapas
 ```
 
-El inventario sigue siendo global en esta etapa del proyecto.
+El panel muestra el inventario del mapa activo. Vaciar inventario afecta sólo al mapa activo.

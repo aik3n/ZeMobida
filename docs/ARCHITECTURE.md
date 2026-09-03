@@ -256,7 +256,14 @@ Las cadenas de condiciones/saltos automáticos tienen un límite runtime de 100 
 
 ## Inventario y persistencia
 
-El inventario sigue siendo global en el estado actual del proyecto.
+Cada aventura tiene su propio inventario persistente, identificado por el ID completo de su escena.
+
+```text
+aldea_a1.tscn → aldea_a1
+menzo_a1.tscn → menzo_a1
+```
+
+Cada vez que se carga un mapa se carga también el inventario asociado a ese mismo ID. No existe un segundo mecanismo para "recuperar" inventario al volver: cargar el mapa siempre carga su inventario persistente.
 
 Archivo común:
 
@@ -267,15 +274,25 @@ user://settings.cfg
 Secciones relevantes:
 
 ```text
-[dialogues]       preferencia de sincronización
-[maps]            último mapa seleccionado
-[player]          inventario
-[map_positions]   última posición por mapa
+[dialogues]         preferencia de sincronización
+[maps]              último mapa seleccionado
+[map_positions]     última posición por mapa
+[map_inventories]   inventario por mapa
 ```
 
-Los efectos `+objeto` y `-objeto` guardan el inventario inmediatamente cuando producen un cambio real.
+Ejemplo conceptual:
 
-La futura separación del inventario por mapa es una decisión distinta y no forma parte de este contrato actual.
+```ini
+[map_inventories]
+aldea_a1=PackedStringArray("llave", "pista_del_pozo")
+menzo_a1=PackedStringArray("mapa")
+```
+
+Los efectos `+objeto` y `-objeto` modifican únicamente el inventario del mapa activo y lo guardan inmediatamente cuando producen un cambio real.
+
+`Vaciar inventario` afecta únicamente al mapa activo.
+
+No existe limpieza automática de datos pertenecientes a mapas eliminados o renombrados.
 
 ## Sincronización de guiones
 

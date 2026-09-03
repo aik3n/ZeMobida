@@ -146,15 +146,19 @@ user://settings.cfg
 Estado actual:
 
 ```text
-[dialogues]       preferencia del updater
-[maps]            último mapa
-[player]          inventario global
-[map_positions]   posición por mapa
+[dialogues]         preferencia del updater
+[maps]              último mapa
+[map_positions]     posición por mapa
+[map_inventories]   inventario por mapa
 ```
 
-El inventario se guarda cuando un efecto produce un cambio real.
+Al cargar una escena de mapa se carga el inventario del mapa que se acaba de cargar, usando su ID completo, por ejemplo `aldea_a1`.
 
-La posición del Player se guarda por el ID completo de escena, por ejemplo `aldea_a1`.
+El inventario se guarda cuando un efecto produce un cambio real. Vaciarlo afecta sólo al mapa activo.
+
+La posición del Player usa el mismo ID completo de escena, pero posición e inventario se almacenan en secciones distintas.
+
+No se migran ni se eliminan automáticamente entradas antiguas o pertenecientes a mapas que ya no existan.
 
 ## Output y errores
 
