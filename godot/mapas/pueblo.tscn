@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://dr8npeucorwqx" path="res://escenas/pnj.tscn" id="1_5v2x2"]
 [ext_resource type="Texture2D" uid="uid://ddxmxgyyfy8mn" path="res://icon.svg" id="2_biny4"]
 
-[node name="pueblo" type="Node2D" unique_id=493802413]
+[node name="mapa" type="Node2D" unique_id=493802413]
 
 [node name="descripcion" type="Label" parent="." unique_id=287580256]
 offset_left = -1985.0

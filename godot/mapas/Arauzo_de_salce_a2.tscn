@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://cy06ljirshfyt" path="res://art/personajes/salce/cientifico.png" id="7_ig85k"]
 [ext_resource type="Texture2D" uid="uid://kktngs3lvr8p" path="res://art/personajes/repartidor.png" id="8_gvgf4"]
 
-[node name="salce" type="Node2D" unique_id=493802413]
+[node name="mapa" type="Node2D" unique_id=493802413]
 
 [node name="descripcion" type="Label" parent="." unique_id=1578333860]
 offset_left = -1985.0

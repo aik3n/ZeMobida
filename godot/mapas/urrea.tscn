@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bvcjaae4y8myn" path="res://art/preview/urrea.PNG" id="1_hbwb5"]
 [ext_resource type="Texture2D" uid="uid://ddxmxgyyfy8mn" path="res://icon.svg" id="2_hbwb5"]
 
-[node name="urrea" type="Node2D" unique_id=493802413]
+[node name="mapa" type="Node2D" unique_id=493802413]
 
 [node name="descripcion" type="Label" parent="." unique_id=1081207436]
 offset_left = -1985.0
