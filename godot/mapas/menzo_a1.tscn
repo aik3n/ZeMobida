@@ -14,7 +14,7 @@ radius = 227.0
 height = 454.0
 
 [node name="mapa" type="Node2D" unique_id=493802413]
-metadata/descripcion = "vaya aventura!"
+metadata/descripcion = "vaya aventura! esto si que no me lo esperaba, que habra pasado?"
 metadata/final = "muy bien chico"
 
 [node name="Fondo" type="Sprite2D" parent="." unique_id=1615628162]
@@ -67,9 +67,11 @@ theme_override_font_sizes/font_size = 100
 text = "vaya aventura!"
 
 [node name="final" type="Label" parent="." unique_id=618588786]
-offset_left = -469.0
-offset_top = -1539.0
-offset_right = 958.0
-offset_bottom = -1379.0
+offset_left = 286.0
+offset_top = -2072.0
+offset_right = 1777.0
+offset_bottom = -1655.0
 theme_override_font_sizes/font_size = 100
-text = "conseguido"
+text = "vaya aventura! 
+esto si que no me lo esperaba, 
+que habra pasado?"
