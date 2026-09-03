@@ -263,7 +263,7 @@ func _configurar_player() -> void:
 
 	if spawn == null:
 
-		push_warning(
+		print(
 			"No se encontró SpawnPlayer en el mapa."
 		)
 
@@ -326,7 +326,7 @@ func _guardar_posicion_mapa_actual() -> void:
 	)
 
 	if error != OK and error != ERR_FILE_NOT_FOUND:
-		push_warning(
+		print(
 			"No se pudo leer settings.cfg para guardar la posición."
 		)
 		return
@@ -342,7 +342,7 @@ func _guardar_posicion_mapa_actual() -> void:
 	)
 
 	if error != OK:
-		push_warning(
+		print(
 			"No se pudo guardar la posición del mapa."
 		)
 
@@ -389,7 +389,7 @@ func _configurar_camera() -> void:
 
 	if camera == null:
 
-		push_warning(
+		print(
 			"No se encontró Camera2D en el Player."
 		)
 
@@ -407,7 +407,7 @@ func _configurar_camera() -> void:
 
 	if camera_bounds == null:
 
-		push_warning(
+		print(
 			"No se encontró CameraBounds en el mapa."
 		)
 
@@ -421,7 +421,7 @@ func _configurar_camera() -> void:
 
 	if collision_shape == null:
 
-		push_warning(
+		print(
 			"No se encontró CollisionShape2D dentro de CameraBounds."
 		)
 
@@ -429,7 +429,7 @@ func _configurar_camera() -> void:
 
 	if collision_shape.shape == null:
 
-		push_warning(
+		print(
 			"CameraBounds no tiene un Shape definido."
 		)
 
@@ -437,7 +437,7 @@ func _configurar_camera() -> void:
 
 	if not collision_shape.shape is RectangleShape2D:
 
-		push_warning(
+		print(
 			"CameraBounds debe utilizar RectangleShape2D."
 		)
 

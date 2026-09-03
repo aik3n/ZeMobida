@@ -92,7 +92,7 @@ func _save_settings() -> void:
 	var error := config.load(SETTINGS_FILE)
 
 	if error != OK and error != ERR_FILE_NOT_FOUND:
-		push_warning("No se pudieron cargar las preferencias de guiones.")
+		print("No se pudieron cargar las preferencias de guiones.")
 
 	config.set_value(
 		SETTINGS_SECTION,
@@ -103,7 +103,7 @@ func _save_settings() -> void:
 	error = config.save(SETTINGS_FILE)
 
 	if error != OK:
-		push_warning("No se pudieron guardar las preferencias de guiones.")
+		print("No se pudieron guardar las preferencias de guiones.")
 
 
 func _create_local_folder() -> void:
@@ -179,7 +179,7 @@ func _download_from_github() -> void:
 
 	if error != OK:
 		sync_failed = true
-		push_warning(
+		print(
 			"No se pudo iniciar la conexión con GitHub. "
 			+ "Se mantendrán los guiones locales."
 		)
@@ -236,7 +236,7 @@ func _on_sync_timeout() -> void:
 		return
 
 	sync_failed = true
-	push_warning(
+	print(
 		"Tiempo de sincronización agotado. "
 		+ "Se mantendrán los guiones locales."
 	)
@@ -272,7 +272,7 @@ func _on_github_list_received(
 
 	if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
 		sync_failed = true
-		push_warning(
+		print(
 			"GitHub no disponible. "
 			+ "Se mantendrán los guiones locales."
 		)
@@ -284,7 +284,7 @@ func _on_github_list_received(
 
 	if data == null or not data is Array:
 		sync_failed = true
-		push_warning(
+		print(
 			"Respuesta incorrecta de GitHub. "
 			+ "Se mantendrán los guiones locales."
 		)
@@ -311,7 +311,7 @@ func _on_github_list_received(
 
 	if github_files.is_empty():
 		sync_failed = true
-		push_warning(
+		print(
 			"GitHub no contiene archivos .txt. "
 			+ "Se mantendrán los guiones locales."
 		)
@@ -395,7 +395,7 @@ func _download_file(file: Dictionary) -> void:
 			http.queue_free()
 		sync_failed = true
 		pending_downloads -= 1
-		push_warning(
+		print(
 			"No se pudo iniciar la descarga de: "
 			+ file["name"]
 		)
@@ -432,13 +432,13 @@ func _on_file_downloaded(
 			print("Descargado temporalmente: ", file_name)
 		else:
 			sync_failed = true
-			push_warning(
+			print(
 				"No se pudo guardar temporalmente: "
 				+ file_name
 			)
 	else:
 		sync_failed = true
-		push_warning("Error descargando: " + file_name)
+		print("Error descargando: " + file_name)
 
 	pending_downloads -= 1
 
@@ -461,7 +461,7 @@ func _finish_synchronization(failed: bool) -> void:
 
 	if failed or sync_failed:
 		if sync_failed:
-			push_warning(
+			print(
 				"Sincronización incompleta. "
 				+ "Se conserva la carpeta local."
 			)
@@ -477,7 +477,7 @@ func _finish_synchronization(failed: bool) -> void:
 		# No interpreta ni valida la sintaxis de los guiones.
 		if not _temp_file_set_matches_remote():
 			sync_failed = true
-			push_warning(
+			print(
 				"El conjunto descargado está incompleto. "
 				+ "Se conserva la carpeta local."
 			)
@@ -488,7 +488,7 @@ func _finish_synchronization(failed: bool) -> void:
 
 		if not _replace_local_folder():
 			sync_failed = true
-			push_warning(
+			print(
 				"No se pudo actualizar la carpeta local. "
 				+ "Se conserva el estado anterior."
 			)
@@ -614,7 +614,7 @@ func _replace_local_folder() -> bool:
 	_delete_folder(backup_path)
 
 	if not _save_manifest():
-		push_warning("No se pudo guardar el manifest de guiones.")
+		print("No se pudo guardar el manifest de guiones.")
 
 	return true
 

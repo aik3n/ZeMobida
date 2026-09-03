@@ -145,7 +145,7 @@ func _abrir_enlace(
 	)
 
 	if error != OK:
-		push_warning(
+		print(
 			"No se pudo abrir el enlace: "
 			+ url
 		)

@@ -509,7 +509,7 @@ func _save_current_text() -> bool:
 		return false
 
 	if not _ensure_custom_folder():
-		push_warning(
+		print(
 			"No se pudo crear la carpeta de guiones locales."
 		)
 		return false
@@ -520,7 +520,7 @@ func _save_current_text() -> bool:
 	)
 
 	if file == null:
-		push_warning(
+		print(
 			"No se pudo guardar el guion local: "
 			+ file_name
 		)
@@ -531,7 +531,7 @@ func _save_current_text() -> bool:
 	file.close()
 
 	if write_error != OK:
-		push_warning(
+		print(
 			"No se pudo completar el guardado del guion local: "
 			+ file_name
 		)
@@ -581,7 +581,7 @@ func _on_send_pressed() -> void:
 	)
 
 	if error != OK:
-		push_warning(
+		print(
 			"El guion se guardó, pero no se pudo abrir la aplicación de correo."
 		)
 

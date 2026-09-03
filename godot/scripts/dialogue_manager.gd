@@ -158,7 +158,7 @@ func open_current_dialogue_editor() -> void:
 	var game = get_tree().current_scene
 
 	if game == null:
-		push_warning(
+		print(
 			"No se encontró Game para abrir el editor."
 		)
 		return
@@ -166,7 +166,7 @@ func open_current_dialogue_editor() -> void:
 	var mapa_actual = game.get("mapa_actual")
 
 	if mapa_actual == null:
-		push_warning(
+		print(
 			"No se encontró el mapa actual para editar."
 		)
 		return
@@ -177,7 +177,7 @@ func open_current_dialogue_editor() -> void:
 		player = game.get_node_or_null("Player")
 
 	if player == null:
-		push_warning(
+		print(
 			"No se encontró el Player para editar."
 		)
 		return
@@ -301,7 +301,7 @@ func load_dialogue(file_path: String):
 	)
 
 	if file == null:
-		push_warning(
+		print(
 			"No se pudo abrir el diálogo: " + file_path
 		)
 
@@ -317,13 +317,13 @@ func load_dialogue(file_path: String):
 		dialogue_data,
 		_parser.errors
 	):
-		push_warning(
+		print(
 			"El guion contiene errores: "
 			+ file_path
 		)
 
 		for error in _validator.errors:
-			push_warning(
+			print(
 				"  " + error
 			)
 
@@ -342,7 +342,7 @@ func _load_error_dialogue() -> void:
 	)
 
 	if file == null:
-		push_warning(
+		print(
 			"No existe el archivo: "
 			+ DIALOGUE_ERROR_FILE
 		)
@@ -361,12 +361,12 @@ func _load_error_dialogue() -> void:
 		dialogue_data,
 		_parser.errors
 	):
-		push_warning(
+		print(
 			"fallo.txt también contiene errores."
 		)
 
 		for error in _validator.errors:
-			push_warning(
+			print(
 				"  " + error
 			)
 
@@ -384,7 +384,7 @@ func show_node(node_name: String):
 
 	while true:
 		if not dialogue_data.has(next_node):
-			push_warning(
+			print(
 				"Nodo inexistente: " + next_node
 			)
 
@@ -434,7 +434,7 @@ func show_node(node_name: String):
 				automatic_next = _get_random_node()
 
 				if automatic_next.is_empty():
-					push_warning(
+					print(
 						"No hay nodos disponibles para RANDOM."
 					)
 
@@ -547,7 +547,7 @@ func _apply_effects(effects: Array):
 				var game = get_tree().current_scene
 
 				if game == null:
-					push_warning(
+					print(
 						"No se encontró Game para aplicar XP."
 					)
 
@@ -556,7 +556,7 @@ func _apply_effects(effects: Array):
 				var player = game.get("player_actual")
 
 				if player == null:
-					push_warning(
+					print(
 						"No se encontró el Player para aplicar XP."
 					)
 
@@ -686,7 +686,7 @@ func load_player_status() -> void:
 		return
 
 	if error != OK:
-		push_warning(
+		print(
 			"No se pudo cargar el estado del jugador."
 		)
 		return
@@ -694,7 +694,7 @@ func load_player_status() -> void:
 	var game = get_tree().current_scene
 
 	if game == null:
-		push_warning(
+		print(
 			"No se encontró Game para cargar el estado."
 		)
 		return
@@ -702,7 +702,7 @@ func load_player_status() -> void:
 	var player = game.get("player_actual")
 
 	if player == null:
-		push_warning(
+		print(
 			"No se encontró el Player para cargar el estado."
 		)
 		return
@@ -755,7 +755,7 @@ func _save_player_status() -> void:
 	var game = get_tree().current_scene
 
 	if game == null:
-		push_warning(
+		print(
 			"No se encontró Game para guardar el estado."
 		)
 		return
@@ -763,7 +763,7 @@ func _save_player_status() -> void:
 	var player = game.get("player_actual")
 
 	if player == null:
-		push_warning(
+		print(
 			"No se encontró el Player para guardar el estado."
 		)
 		return

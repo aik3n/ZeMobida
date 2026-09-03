@@ -201,4 +201,4 @@ func _save_last_map(mapa_path: String) -> void:
 
 	var error := config.save(SETTINGS_FILE)
 	if error != OK:
-		push_warning("No se pudo guardar el último mapa seleccionado.")
+		print("No se pudo guardar el último mapa seleccionado.")

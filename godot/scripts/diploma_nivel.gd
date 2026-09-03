@@ -92,7 +92,7 @@ func _show_level(level: String) -> void:
 	)
 
 	if not ResourceLoader.exists(image_path):
-		push_warning(
+		print(
 			"No existe el diploma de nivel: "
 			+ image_path
 		)
@@ -101,7 +101,7 @@ func _show_level(level: String) -> void:
 	var texture := load(image_path) as Texture2D
 
 	if texture == null:
-		push_warning(
+		print(
 			"No se pudo cargar el diploma de nivel: "
 			+ image_path
 		)
