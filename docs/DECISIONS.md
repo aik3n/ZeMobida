@@ -1,5 +1,10 @@
 # ZeMobida — Architecture Decision Records
 
+> **Nota de vigencia (2026-09-03):** este documento conserva contexto histórico.  
+> Para el comportamiento actual consultar `ARCHITECTURE.md`, `DEVELOPMENT.md`, `GUIONES.md` y `DIALOGUE_FORMAT.md`.  
+> Las decisiones antiguas sobre progresión del Player, variantes de guion por nivel y límites alternativos de cámara quedaron supersedidas.
+
+
 Estados: Proposed, Accepted, Deprecated, Superseded, Rejected.
 
 ## ADR-001 — Persistent Player owned by Game

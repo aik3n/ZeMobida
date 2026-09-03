@@ -40,11 +40,10 @@ const DISTANCIA_LLEGADA := 5.0
 const PROFUNDIDAD_Z_DETRAS_PLAYER := 1
 const PROFUNDIDAD_Z_DELANTE_PLAYER := 3
 
-# Estado editorial del guion disponible para el nivel actual.
+# Estado editorial del guion asignado al PNJ.
 const NAME_COLOR_NONE := Color("#D0D0D0")
-const NAME_COLOR_OFFICIAL_EXACT := Color("#45E07B")
-const NAME_COLOR_LOCAL_EXACT := Color("#4AA8FF")
-const NAME_COLOR_OFFICIAL_GENERIC := Color("#FFD166")
+const NAME_COLOR_OFFICIAL := Color("#45E07B")
+const NAME_COLOR_LOCAL := Color("#4AA8FF")
 
 
 func _actualizar_sprite_visual() -> void:
@@ -62,7 +61,7 @@ func _actualizar_estado_nombre_dialogo() -> void:
 	if Engine.is_editor_hint():
 		return
 
-	if name_label == null or player == null:
+	if name_label == null:
 		return
 
 	name_label.text = str(name).replace("_", " ").capitalize()
@@ -75,17 +74,14 @@ func _actualizar_estado_nombre_dialogo() -> void:
 
 	var state := DialogueManager.get_dialogue_assignment_state(
 		map_name,
-		get_nombre_tecnico(),
-		str(player.nivel)
+		get_nombre_tecnico()
 	)
 
 	match state:
-		"local_exact":
-			name_label.modulate = NAME_COLOR_LOCAL_EXACT
-		"official_exact":
-			name_label.modulate = NAME_COLOR_OFFICIAL_EXACT
-		"official_generic":
-			name_label.modulate = NAME_COLOR_OFFICIAL_GENERIC
+		"local":
+			name_label.modulate = NAME_COLOR_LOCAL
+		"official":
+			name_label.modulate = NAME_COLOR_OFFICIAL
 		_:
 			name_label.modulate = NAME_COLOR_NONE
 
@@ -107,11 +103,6 @@ func _ready() -> void:
 			player_depth_collision = (
 				player.get_node_or_null("CollisionShape2D") as CollisionShape2D
 			)
-
-			if player.has_signal("xp_changed"):
-				player.xp_changed.connect(
-					_actualizar_estado_nombre_dialogo
-				)
 
 	DialogueManager.dialogue_sources_changed.connect(
 		_actualizar_estado_nombre_dialogo
@@ -263,8 +254,9 @@ func get_map_name() -> String:
 		return ""
 
 	var scene_path: String = mapa_actual.scene_file_path
+	var map_id := scene_path.get_file().get_basename().to_lower()
 
-	return scene_path.get_file().get_basename().to_lower()
+	return DialogueManager.get_dialogue_map_name(map_id)
 
 
 func get_dialogue_path() -> String:
@@ -272,37 +264,13 @@ func get_dialogue_path() -> String:
 	var map_name := get_map_name()
 
 	if map_name.is_empty():
-
-		return ""
-
-	var game := get_tree().current_scene
-
-	if game == null:
-
-		push_error(
-			"No se encontró Game."
-		)
-
-		return ""
-
-	var player_node: Node = game.get_node_or_null(
-		"Player"
-	)
-
-	if player_node == null:
-
-		push_error(
-			"No se encontró el Player."
-		)
-
 		return ""
 
 	var nombre_tecnico := get_nombre_tecnico()
 
 	var dialogue_path: String = str(DialogueManager.resolve_dialogue_path(
 		map_name,
-		nombre_tecnico,
-		str(player_node.nivel)
+		nombre_tecnico
 	))
 
 	if dialogue_path.is_empty():

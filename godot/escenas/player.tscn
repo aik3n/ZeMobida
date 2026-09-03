@@ -31,7 +31,7 @@ theme_override_colors/font_color = Color(0.36, 1, 0.475, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.92)
 theme_override_constants/outline_size = 12
 theme_override_font_sizes/font_size = 64
-text = "+30 XP"
+text = "+ Objeto"
 horizontal_alignment = 1
 vertical_alignment = 1
 

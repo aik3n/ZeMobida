@@ -5,19 +5,6 @@
 [ext_resource type="PackedScene" uid="uid://20u5n35rocug" path="res://escenas/dialogo.tscn" id="3_ah5is"]
 [ext_resource type="Texture2D" path="res://art/ui/estado.png" id="4_estado"]
 [ext_resource type="Texture2D" path="res://art/ui/papelera.png" id="5_papelera"]
-[ext_resource type="PackedScene" path="res://escenas/diploma_nivel.tscn" id="6_diploma"]
-
-[sub_resource type="StyleBoxFlat" id="StyleHud"]
-bg_color = Color(0.035, 0.05, 0.075, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.2, 0.48, 0.62, 0.7)
-corner_radius_top_left = 22
-corner_radius_top_right = 22
-corner_radius_bottom_right = 22
-corner_radius_bottom_left = 22
 
 [sub_resource type="StyleBoxFlat" id="StyleState"]
 bg_color = Color(0.035, 0.05, 0.075, 0.985)
@@ -54,64 +41,6 @@ position = Vector2(429, 252)
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=178145642]
 layer = 5
-
-[node name="HUD" type="Control" parent="UI" unique_id=1657564333]
-layout_mode = 3
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 175.0
-grow_horizontal = 2
-
-[node name="Fondo" type="Panel" parent="UI/HUD"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.025
-anchor_top = 0.12
-anchor_right = 0.73
-anchor_bottom = 0.9
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleHud")
-
-[node name="lbl_Nivel" type="Label" parent="UI/HUD" unique_id=1002340127]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.055
-anchor_top = 0.2
-anchor_right = 0.18
-anchor_bottom = 0.52
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.82, 0.94, 1, 1)
-theme_override_font_sizes/font_size = 38
-text = "A1"
-vertical_alignment = 1
-
-[node name="lbl_Progreso" type="Label" parent="UI/HUD" unique_id=1593995117]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.21
-anchor_top = 0.57
-anchor_right = 0.67
-anchor_bottom = 0.84
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.64, 0.75, 0.82, 1)
-theme_override_font_sizes/font_size = 25
-text = "XP: 0 / 70"
-vertical_alignment = 1
-
-[node name="bar_Progreso" type="ProgressBar" parent="UI/HUD" unique_id=571745694]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.21
-anchor_top = 0.24
-anchor_right = 0.67
-anchor_bottom = 0.5
-grow_horizontal = 2
-grow_vertical = 2
-show_percentage = false
 
 [node name="BotonEstado" type="Button" parent="UI" unique_id=2034402367]
 layout_mode = 1
@@ -191,45 +120,6 @@ theme_override_styles/normal = SubResource("StyleButton")
 theme_override_styles/hover = SubResource("StyleButton")
 theme_override_styles/pressed = SubResource("StyleButton")
 text = "×"
-
-[node name="Nivel" type="Label" parent="EstadoUI/Estado/Panel" unique_id=790334932]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.06
-anchor_top = 0.105
-anchor_right = 0.23
-anchor_bottom = 0.16
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.85, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 38
-text = "A1"
-vertical_alignment = 1
-
-[node name="BarraXP" type="ProgressBar" parent="EstadoUI/Estado/Panel" unique_id=893934345]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.25
-anchor_top = 0.115
-anchor_right = 0.82
-anchor_bottom = 0.15
-grow_horizontal = 2
-grow_vertical = 2
-show_percentage = false
-
-[node name="Progreso" type="Label" parent="EstadoUI/Estado/Panel" unique_id=1817732566]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.25
-anchor_top = 0.16
-anchor_right = 0.82
-anchor_bottom = 0.205
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.62, 0.74, 0.82, 1)
-theme_override_font_sizes/font_size = 27
-text = "XP: 0 / 70"
-vertical_alignment = 1
 
 [node name="InventarioTitulo" type="Label" parent="EstadoUI/Estado/Panel"]
 layout_mode = 1
@@ -375,4 +265,3 @@ text = "cancel"
 
 [node name="Dialogo" parent="." unique_id=2027231516 instance=ExtResource("3_ah5is")]
 
-[node name="DiplomaNivel" parent="." instance=ExtResource("6_diploma")]

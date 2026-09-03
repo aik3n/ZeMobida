@@ -180,32 +180,7 @@ func _parse_effects(text: String) -> Array:
 			errors.append("Efecto vacío.")
 			continue
 
-		if effect.to_lower().begins_with("xp"):
-			var value_text := effect.substr(2).strip_edges()
-
-			if value_text.is_empty():
-				errors.append("XP sin valor: %s" % effect)
-				continue
-
-			if not (
-				value_text.begins_with("+")
-				or value_text.begins_with("-")
-			):
-				errors.append("XP necesita + o -: %s" % effect)
-				continue
-
-			var number_text := value_text.substr(1)
-
-			if number_text.is_empty() or not number_text.is_valid_int():
-				errors.append("Cantidad de XP inválida: %s" % effect)
-				continue
-
-			result.append({
-				"type": "xp",
-				"value": int(value_text)
-			})
-
-		elif effect.begins_with("+"):
+		if effect.begins_with("+"):
 			var item := effect.substr(1).strip_edges()
 
 			if item.is_empty():

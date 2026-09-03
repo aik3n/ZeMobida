@@ -447,8 +447,6 @@ func _are_effects_locally_valid(
 	if effects.is_empty():
 		return false
 
-	var xp_count := 0
-
 	for raw_effect in effects:
 		var effect := str(
 			raw_effect
@@ -456,37 +454,6 @@ func _are_effects_locally_valid(
 
 		if effect.is_empty():
 			return false
-
-		var lower_effect := effect.to_lower()
-
-		if lower_effect.begins_with("xp"):
-			xp_count += 1
-
-			if xp_count > 1:
-				return false
-
-			var value_text := effect.substr(
-				2
-			).strip_edges()
-
-			if value_text.length() < 2:
-				return false
-
-			if not (
-				value_text.begins_with("+")
-				or value_text.begins_with("-")
-			):
-				return false
-
-			var number_text := value_text.substr(1)
-
-			if (
-				number_text.is_empty()
-				or not number_text.is_valid_int()
-			):
-				return false
-
-			continue
 
 		if (
 			effect.begins_with("+")

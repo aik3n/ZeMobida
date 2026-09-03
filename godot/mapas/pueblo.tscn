@@ -28,10 +28,10 @@ visible = false
 texture = ExtResource("2_biny4")
 
 [node name="javi" parent="." unique_id=1491293733 instance=ExtResource("1_5v2x2")]
-position = Vector2(171, 116)
+position = Vector2(1072, 204)
 sprite = ExtResource("2_biny4")
 tipo_seguimiento = 1
 
 [node name="samu" parent="." unique_id=1247965314 instance=ExtResource("1_5v2x2")]
-position = Vector2(102, 331)
+position = Vector2(-863, 1387)
 sprite = ExtResource("2_biny4")

@@ -9,10 +9,6 @@ const MAP_POSITIONS_SECTION := "map_positions"
 const PROFUNDIDAD_Z_DETRAS_PLAYER := 1
 const PROFUNDIDAD_Z_DELANTE_PLAYER := 3
 
-const NIVELES_DATA := preload(
-	"res://scripts/niveles.gd"
-)
-
 
 @onready var scene_container: Node = $SceneContainer
 @onready var player_actual: Node = $Player
@@ -21,11 +17,6 @@ const NIVELES_DATA := preload(
 )
 
 @onready var ui: CanvasLayer = $UI
-
-# HUD general
-@onready var hud_nivel: Label = $UI/HUD/lbl_Nivel
-@onready var hud_progreso: Label = $UI/HUD/lbl_Progreso
-@onready var hud_barra_xp: ProgressBar = $UI/HUD/bar_Progreso
 
 # Navegación y estado
 @onready var boton_mapas: Button = $EstadoUI/Estado/Panel/VolverMapas
@@ -48,9 +39,6 @@ const NIVELES_DATA := preload(
 )
 
 @onready var estado_titulo: Label = $EstadoUI/Estado/Panel/Titulo
-@onready var estado_nivel: Label = $EstadoUI/Estado/Panel/Nivel
-@onready var estado_progreso: Label = $EstadoUI/Estado/Panel/Progreso
-@onready var estado_barra_xp: ProgressBar = $EstadoUI/Estado/Panel/BarraXP
 @onready var estado_inventario: Label = $EstadoUI/Estado/Panel/Scroll/Inventario
 
 
@@ -89,12 +77,6 @@ func _ready() -> void:
 	confirmar_vaciar_cancel.pressed.connect(
 		_cancelar_vaciado_inventario
 	)
-
-	if player_actual.has_signal("xp_changed"):
-
-		player_actual.xp_changed.connect(
-			_actualizar_hud
-		)
 
 	cargar_escena(
 		BIENVENIDA_SCENE
@@ -176,8 +158,6 @@ func cargar_escena(
 		_configurar_player()
 		_registrar_objetos_profundidad(mapa_actual)
 		_actualizar_profundidad_visual()
-
-		DialogueManager.load_player_status()
 
 	if instance.has_signal("jugar"):
 
@@ -281,8 +261,6 @@ func _configurar_player() -> void:
 	player_actual.set_process_unhandled_input(true)
 
 	_configurar_camera()
-
-	_actualizar_hud()
 
 
 
@@ -388,79 +366,20 @@ func _configurar_camera() -> void:
 
 		return
 
-	# Los mapas ilustrados pueden definir sus límites directamente con
+	# Los mapas ilustrados definen sus límites directamente con
 	# un Sprite2D llamado Fondo. Su textura se usa a escala 1:1.
 	if _configurar_limites_desde_fondo(camera):
 		camera.enabled = true
 		return
 
-	var camera_bounds: Area2D = mapa_actual.get_node_or_null(
-		"CameraBounds"
-	)
-
-	if camera_bounds == null:
-
-		print(
-			"No se encontró CameraBounds en el mapa."
-		)
-
-		return
-
-	var collision_shape: CollisionShape2D = (
-		camera_bounds.get_node_or_null(
-			"CollisionShape2D"
-		)
-	)
-
-	if collision_shape == null:
-
-		print(
-			"No se encontró CollisionShape2D dentro de CameraBounds."
-		)
-
-		return
-
-	if collision_shape.shape == null:
-
-		print(
-			"CameraBounds no tiene un Shape definido."
-		)
-
-		return
-
-	if not collision_shape.shape is RectangleShape2D:
-
-		print(
-			"CameraBounds debe utilizar RectangleShape2D."
-		)
-
-		return
-
-	var rectangle: RectangleShape2D = (
-		collision_shape.shape as RectangleShape2D
-	)
-
-	var size: Vector2 = rectangle.size
-	var center: Vector2 = collision_shape.global_position
-
-	camera.limit_left = int(
-		center.x - size.x / 2.0
-	)
-
-	camera.limit_right = int(
-		center.x + size.x / 2.0
-	)
-
-	camera.limit_top = int(
-		center.y - size.y / 2.0
-	)
-
-	camera.limit_bottom = int(
-		center.y + size.y / 2.0
-	)
-
+	# Sin Fondo el mapa se considera un prototipo. Se usan límites
+	# conservadores alrededor del origen para que siga siendo jugable.
+	camera.limit_left = -1000
+	camera.limit_right = 1000
+	camera.limit_top = -1000
+	camera.limit_bottom = 1000
+	camera.position = Vector2.ZERO
 	camera.enabled = true
-
 
 
 func _configurar_limites_desde_fondo(camera: Camera2D) -> bool:
@@ -532,90 +451,6 @@ func _volver_a_mapas() -> void:
 
 
 
-func _actualizar_hud() -> void:
-
-	if player_actual == null:
-		return
-
-	if not player_actual.visible:
-		return
-
-	var nivel: String = str(
-		player_actual.nivel
-	).to_lower()
-
-	var xp: int = int(
-		player_actual.xp
-	)
-
-	hud_nivel.text = nivel.to_upper()
-
-	if not NIVELES_DATA.tiene_nivel(nivel):
-
-		hud_progreso.text = "XP: %d" % xp
-
-		hud_barra_xp.min_value = 0
-		hud_barra_xp.max_value = 1
-		hud_barra_xp.value = 0
-
-		return
-
-	var limite_superior := (
-		NIVELES_DATA.xp_limite_superior(
-			nivel
-		)
-	)
-
-	var limite_inferior := (
-		NIVELES_DATA.xp_limite_inferior(
-			nivel
-		)
-	)
-
-	var rango := (
-		limite_superior
-		- limite_inferior
-	)
-
-	if rango <= 0:
-
-		hud_progreso.text = (
-			"XP: %d / %d"
-			% [xp, limite_superior]
-		)
-
-		hud_barra_xp.min_value = 0
-		hud_barra_xp.max_value = 1
-		hud_barra_xp.value = 1
-
-		return
-
-	var progreso := (
-		xp - limite_inferior
-	)
-
-	progreso = clamp(
-		progreso,
-		0,
-		rango
-	)
-
-	hud_progreso.text = (
-		"XP: %d / %d"
-		% [xp, limite_superior]
-	)
-
-	hud_barra_xp.min_value = 0
-	hud_barra_xp.max_value = rango
-	hud_barra_xp.value = progreso
-
-	hud_barra_xp.tooltip_text = (
-		"%d / %d XP"
-		% [progreso, rango]
-	)
-
-
-
 func _abrir_estado() -> void:
 
 	confirmar_vaciar_inventario.visible = false
@@ -658,108 +493,7 @@ func _actualizar_estado() -> void:
 	if mapa_actual == null:
 		return
 
-	if player_actual == null:
-		return
-
-	_actualizar_nivel(
-		player_actual
-	)
-
-	_actualizar_experiencia(
-		player_actual
-	)
-
 	_actualizar_inventario()
-
-
-
-func _actualizar_nivel(
-	player: Node
-) -> void:
-
-	var nivel: String = str(
-		player.nivel
-	).to_lower()
-
-	estado_nivel.text = nivel.to_upper()
-
-
-
-func _actualizar_experiencia(
-	player: Node
-) -> void:
-
-	var nivel: String = str(
-		player.nivel
-	).to_lower()
-
-	var xp: int = int(
-		player.xp
-	)
-
-	if not NIVELES_DATA.tiene_nivel(nivel):
-
-		estado_progreso.text = "XP: %d" % xp
-
-		estado_barra_xp.min_value = 0
-		estado_barra_xp.max_value = 1
-		estado_barra_xp.value = 0
-
-		return
-
-	var limite_superior := (
-		NIVELES_DATA.xp_limite_superior(
-			nivel
-		)
-	)
-
-	var limite_inferior := (
-		NIVELES_DATA.xp_limite_inferior(
-			nivel
-		)
-	)
-
-	var rango := (
-		limite_superior
-		- limite_inferior
-	)
-
-	if rango <= 0:
-
-		estado_progreso.text = (
-			"XP: %d / %d"
-			% [xp, limite_superior]
-		)
-
-		estado_barra_xp.min_value = 0
-		estado_barra_xp.max_value = 1
-		estado_barra_xp.value = 1
-
-		return
-
-	var progreso := (
-		xp - limite_inferior
-	)
-
-	progreso = clamp(
-		progreso,
-		0,
-		rango
-	)
-
-	estado_progreso.text = (
-		"XP: %d / %d"
-		% [xp, limite_superior]
-	)
-
-	estado_barra_xp.min_value = 0
-	estado_barra_xp.max_value = rango
-	estado_barra_xp.value = progreso
-
-	estado_barra_xp.tooltip_text = (
-		"%d / %d XP"
-		% [progreso, rango]
-	)
 
 
 

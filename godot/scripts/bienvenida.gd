@@ -2,26 +2,13 @@ extends Control
 
 signal jugar(mapa_path: String)
 
-const NIVELES_DATA := preload(
-	"res://scripts/niveles.gd"
-)
-
 @onready var panel_carga_escenas: Panel = $PanelCargaEscenas
 @onready var chk_actualizar: Button = $PanelCargaEscenas/chk_ActualizarGuiones
 @onready var lbl_estado_guiones: Label = $PanelCargaEscenas/lbl_EstadoGuiones
 @onready var boton_creditos: Button = $BotonCreditos
 @onready var creditos: Control = $Creditos
 
-# DEV TEMPORAL: editor de XP en bienvenida.
-# Retirar antes de una versión de distribución.
-@onready var dev_xp: SpinBox = $PanelCargaEscenas/DevXP
-
-
 func _ready() -> void:
-
-	# DEV TEMPORAL: cargar la XP guardada antes de mostrar el control.
-	DialogueManager.load_player_status()
-	_configurar_dev_xp()
 
 	panel_carga_escenas.process_mode = Node.PROCESS_MODE_DISABLED
 
@@ -49,49 +36,6 @@ func _ready() -> void:
 	)
 
 	_actualizar_estado_inicial()
-
-
-func _configurar_dev_xp() -> void:
-	dev_xp.min_value = 0
-	dev_xp.max_value = NIVELES_DATA.xp_maximo()
-	dev_xp.step = 1
-
-	var player := _get_player()
-
-	if player != null:
-		dev_xp.set_value_no_signal(
-			float(player.xp)
-		)
-
-	dev_xp.value_changed.connect(
-		_on_dev_xp_changed
-	)
-
-
-func _get_player() -> Node:
-	var game := get_tree().current_scene
-
-	if game == null:
-		return null
-
-	return game.get("player_actual")
-
-
-# DEV TEMPORAL: cambio directo de XP desde bienvenida.
-func _on_dev_xp_changed(value: float) -> void:
-	var player := _get_player()
-
-	if player == null:
-		return
-
-	if not player.has_method("set_xp_dev"):
-		return
-
-	player.set_xp_dev(
-		int(value)
-	)
-
-	DialogueManager._save_player_status()
 
 
 func _actualizar_estado_inicial() -> void:

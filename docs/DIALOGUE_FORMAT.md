@@ -2,19 +2,14 @@
 
 ## Estado
 
-**Especificación implementada y validada en runtime.**
+**Especificación implementada en parser, validador, runtime y editor.**
 
-Esta versión sustituye la sintaxis anterior de opciones numeradas y está implementada en parser, validador, runtime e interfaz.
+Los guiones son archivos UTF-8 `.txt`.
 
-Los archivos de guion son UTF-8 `.txt`.
-
-## Ubicación
-
-Contenido versionado:
+Contenido oficial:
 
 ```text
-GitHub: aik3n/ZeMobida_guiones
-raíz del repositorio: *.txt
+aik3n/ZeMobida_guiones
 ```
 
 Caché runtime:
@@ -23,213 +18,190 @@ Caché runtime:
 user://dialogues/
 ```
 
----
-
-## 1. Regla general
-
-Cada línea se interpreta según su primer carácter.
-
-Si una línea **no empieza** por ninguno de estos caracteres:
+Ediciones locales:
 
 ```text
-# ? > ' = [ @
+user://custom_dialogues/
 ```
 
-se considera **texto del PNJ**.
+## Nombre del archivo
 
-Por tanto, el texto normal no necesita ningún marcador.
-
----
-
-## 2. Comentarios
-
-El carácter `'` inicia un comentario. Todo lo que aparece desde `'` hasta el final de esa línea se ignora.
-
-Ejemplos:
+Cada PNJ de un mapa tiene un único archivo específico:
 
 ```text
-' comentario de guionista
-# INICIO ' comentario de guionista
-= Comprar tren > TREN [+tren, xp+5] ' comentario
+<mapa_logico>_<pnj>.txt
 ```
 
-`'` es el único marcador de comentario del formato.
-
----
-
-## 2.1. Firma pública
-
-Una línea que empieza por `@` define la firma pública opcional del guion.
+Ejemplo:
 
 ```text
-@ ana del pueblo
+aldea_a1.tscn + Chef
+→ aldea_chef.txt
 ```
 
-La línea se conserva completa, incluida la `@`, pero no forma parte de ningún nodo ni del texto narrativo. Durante el diálogo se muestra de forma discreta debajo del nombre del PNJ.
+El nivel lingüístico pertenece al mapa y no crea variantes distintas del guion.
 
-Un guion sin firma funciona exactamente igual que antes. La firma no sustituye al comentario: `'` sigue siendo el único marcador de comentario del formato.
+## Regla general
 
----
+Cada línea se interpreta por su primer carácter.
 
-## 3. Nodos
+Si una línea no empieza por un marcador reservado, es texto del PNJ.
 
-El carácter `#` indica que comienza un nodo nuevo.
+Marcadores:
+
+```text
+@  firma pública
+#  nodo
+?  condición
+>  salto
+=  opción
+[ ] efectos
+'  comentario
+```
+
+## Comentarios
+
+`'` inicia un comentario hasta final de línea:
+
+```text
+' comentario
+# INICIO ' comentario
+= Salir > FINAL ' comentario
+```
+
+## Firma pública
+
+Una línea que empieza por `@` define la firma opcional:
+
+```text
+@ Nombre del autor
+```
+
+La firma se presenta en la UI pero no forma parte del texto hablado ni de los nodos.
+
+La última firma válida encontrada es la utilizada. Una firma vacía es inválida.
+
+## Nodos
+
+`#` inicia un nodo:
 
 ```text
 # INICIO
-Hola, aventurero.
+Hola.
 ```
 
-El texto posterior a `#` es la etiqueta del nodo.
+Las etiquetas se normalizan a minúsculas; no distinguen mayúsculas/minúsculas.
 
-Las etiquetas de nodo se comparan **sin distinguir mayúsculas y minúsculas**. Por ejemplo, `TODO`, `ToDo` y `toDO` hacen referencia al mismo nodo.
+## Texto del PNJ
 
----
-
-## 4. Texto del PNJ
-
-Cualquier línea que no empiece por un marcador reservado es texto del PNJ.
+Texto normal:
 
 ```text
 # INICIO
-
 Hola, aventurero.
 Soy Charo.
-¿Quieres comprar algo?
 ```
 
-El texto pertenece al nodo actual y se presenta siguiendo el flujo normal del diálogo.
+Varias líneas se acumulan como texto del nodo actual.
 
----
+## Condiciones
 
-## 5. Condiciones
+`?` comprueba objetos del inventario.
 
-El carácter `?` introduce una condición.
-
-Pueden aparecer varias condiciones seguidas en una misma línea y se combinan mediante **AND**.
+Varias condiciones en la misma línea usan AND:
 
 ```text
-?avion ?tren > TODO
+?llave ?mapa > SALIDA
 ```
 
-El salto se realiza a `TODO` únicamente si se cumplen `avion` **y** `tren`.
+Sólo se salta si están presentes ambos objetos.
 
-Si una línea de condiciones no tiene una etiqueta de salto después de las condiciones, se ignora:
+Una condición sin destino se ignora.
+
+## Saltos
+
+Salto directo:
 
 ```text
-?avion ?tren
+> FINAL
 ```
 
----
-
-## 6. Saltos
-
-El carácter `>` indica un salto a otro nodo.
-
-### Salto incondicional
+Salto condicionado:
 
 ```text
-> AGUR
+?llave > PUERTA
 ```
 
-Salta directamente al nodo `AGUR`.
-
-### Salto condicionado
-
-Las condiciones aparecen antes del salto:
-
-```text
-?avion ?tren > TODO
-```
-
-### RANDOM
+Aleatorio:
 
 ```text
 > RANDOM
 ```
 
-Selecciona aleatoriamente un nodo distinto del nodo actual.
+`RANDOM` selecciona un nodo distinto del actual.
 
-`RANDOM` es una palabra reservada del formato.
+## Opciones
 
----
-
-## 7. Opciones del jugador
-
-El carácter `=` introduce una opción que se presenta al jugador.
+`=` crea una opción:
 
 ```text
-= Comprar avion > AVION
+= Abrir la puerta > PUERTA
 ```
 
-El texto posterior a `=` es el texto que verá el jugador.
-
-### Opción sin salto
+Una opción puede no tener destino:
 
 ```text
-= No, gracias
+= No hacer nada
 ```
 
-Si no hay un salto después de la opción, su destino es `null` y seleccionar la opción no cambia de nodo.
+En ese caso seleccionar la opción no cambia de nodo.
 
-### Opción con salto
+Las opciones se mezclan antes de mostrarse; su orden físico en el archivo no define el orden visual.
+
+## Efectos
+
+Los efectos se escriben entre `[` y `]`.
+
+Efectos soportados:
 
 ```text
-= Comprar avion > AVION
++objeto
+-objeto
 ```
 
-Al seleccionar la opción se salta al nodo `AVION`.
-
-El orden de las opciones en el archivo no tiene significado para su presentación al jugador: **las opciones se muestran en orden aleatorio** cada vez que se presentan.
-
----
-
-## 8. Efectos
-
-Los efectos se escriben entre `[` y `]` y modifican el estado del inventario y/o la experiencia.
+Ejemplos:
 
 ```text
-= Comprar avion > AVION [+AvioN, xp+1]
+= Coger la llave > PUERTA [+llave]
+= Dar la llave > FINAL [-llave]
 ```
 
-Pueden combinarse varios efectos separados por comas:
+Pueden combinarse:
 
 ```text
-= Comprar objeto > TIENDA [+objeto, -moneda, xp+5]
+= Cambiar moneda por llave > FINAL [-moneda, +llave]
 ```
 
-Los efectos pueden asociarse a una opción o al texto mostrado por un nodo.
-
-Los efectos definidos actualmente son:
-
-- `+item`
-- `-item`
-- `xp+N`
-- `xp-N`
-
----
-
-### Efectos en texto del PNJ
-
-Los efectos pueden escribirse al final de una línea de texto:
+También pueden aplicarse al texto de un nodo:
 
 ```text
-Has elegido bien [xp+30]
-Gracias por ayudarme [+llave, xp+5]
+Aquí tienes la llave. [+llave]
 ```
 
-El bloque `[ ]` no forma parte del texto mostrado. Sus efectos se ejecutan cuando el nodo llega realmente a mostrarse. Si una condición o un salto automático desvía el flujo antes de mostrar el nodo, esos efectos no se ejecutan.
+El bloque de efectos no se muestra como texto.
 
-## 9. Flujo entre nodos
+Los efectos de un nodo se ejecutan sólo cuando ese nodo llega realmente a mostrarse. Si una condición o salto automático desvía el flujo antes, no se aplican.
 
-La posición física de un nodo dentro del archivo **no provoca avance automático**.
+## Flujo
 
-Un nodo permanece activo hasta que una regla cambia explícitamente el destino. El nodo actual sólo cambia mediante:
+La posición física de los nodos en el archivo no produce avance automático.
 
-- una condición cumplida con destino: `?item > DESTINO`;
-- un salto: `> DESTINO`;
-- `> RANDOM`;
-- una opción elegida que tenga destino: `= texto > DESTINO`.
+El nodo cambia únicamente mediante:
+
+- condición cumplida con destino;
+- salto;
+- `RANDOM`;
+- opción elegida con destino.
 
 Ejemplo:
 
@@ -241,130 +213,70 @@ Texto A.
 Texto B.
 ```
 
-Entrar en `A` muestra `Texto A.` y permanece en `A`. El motor no avanza automáticamente a `B`.
+Entrar en `A` no avanza automáticamente a `B`.
 
-Una opción sin destino tampoco cambia de nodo:
+Pulsar el panel de texto del PNJ sólo muestra/oculta las opciones; no cambia de nodo.
 
-```text
-= No hacer nada
-```
-
-Pulsar el panel de texto del PNJ **no cambia de nodo**. Sólo muestra u oculta el panel de opciones.
-
-
-## 9.1. Panel de opciones
-
-El panel de opciones empieza oculto al iniciar un diálogo.
-
-Cuando el nodo actual contiene opciones:
-
-- aparece el indicador `▼` en el panel de texto del PNJ;
-- pulsar el panel de texto muestra u oculta el panel de opciones;
-- si el jugador cambia a otro nodo que también tiene opciones, se conserva el estado abierto/cerrado del panel.
-
-Cuando el nodo nuevo no contiene opciones:
-
-- el indicador `▼` se oculta;
-- el panel de opciones se oculta.
-
-Ocultar o finalizar el diálogo oculta también el panel de opciones. El clic sobre el panel del PNJ nunca cambia de nodo.
-
-
-
-## 10. Ejemplo completo
+## Ejemplo completo
 
 ```text
-@ ana del pueblo
-' texto trivial que sirve de comentario
-# INICIO ' comentario de guionista
+@ Ana
+' aventura sencilla
 
-Hola, aventurero, soy Charo.
-Quieres comprar algo.
+# INICIO
+He perdido la llave.
 
-?avion ?tren > ToDo ' condiciones inventario, salta automáticamente a TODO
+?llave > CON_LLAVE
 
-= Comprar avion > AVION [+AvioN, xp+1]
-= Comprar tren > TREN [+TrEn, xp+5] ' otro comentario de guion
+= ¿Dónde la viste por última vez? > PISTA
+= Me voy > FINAL
 
-# AVION
-Aquí tienes tu bolsa.
+# PISTA
+Creo que la dejé junto al pozo.
 
-= agur > AGUR
-= comprar mas > INICIO
+= He encontrado una llave > ENCONTRADA [+llave]
+= Seguir buscando > INICIO
 
-# TREN
-Aquí tienes tu GUANTE.
+# ENCONTRADA
+¡Esa es!
 
-= agur > AGUR
-= comprar mas > INICIO
+= Devolvértela > FINAL [-llave]
 
-# toDO
-¡Ya tienes todo!
+# CON_LLAVE
+Ya tienes la llave.
 
-= Salir > AGUR
+= Devolvértela > FINAL [-llave]
 
-# AGUR
-Agur.
+# FINAL
+Gracias.
 ```
 
-En este ejemplo, `ToDo`, `TODO` y `toDO` representan el mismo nodo.
+## Validación
 
----
+`DialogueParser` interpreta el texto y `DialogueValidator` comprueba la estructura resultante.
 
-## 11. Reglas de simplicidad
+Entre otros casos, se detectan:
 
-La sintaxis básica queda reducida a:
-
-```text
-texto → texto del PNJ
-@     → firma pública
-#     → nodo
-?     → condición
->     → salto
-=     → opción
-[ ]   → efectos
-'     → comentario
-```
-
-No se añaden mecanismos adicionales al formato mientras puedan resolverse con estas reglas.
-
----
-
-## 12. Validación
-
-La sintaxis anterior define el comportamiento del formato, pero no pretende resolver todavía todos los errores semánticos.
-
-La validación de casos como los siguientes se tratará en el validador:
-
-- opciones duplicadas;
+- etiquetas vacías o duplicadas;
 - destinos inexistentes;
-- etiquetas inválidas o vacías;
-- efectos inválidos;
-- otras inconsistencias semánticas.
+- saltos sin destino;
+- opciones sin texto;
+- efectos desconocidos o vacíos.
 
-El formato no incorpora identificadores numéricos para las opciones.
+El editor añade además un diagnóstico local por línea mediante un gutter rojo. Ese diagnóstico es informativo: no bloquea `GUARDAR` ni `ENVIAR`.
 
----
+## Contingencia runtime
 
-## 13. Sincronización
+Una cadena de condiciones y saltos automáticos admite como máximo 100 transiciones consecutivas.
 
-GitHub proporciona un SHA por archivo. El updater compara esos SHA con el manifest local y descarga únicamente archivos nuevos o modificados.
+Si se supera el límite, el runtime detiene la cadena para evitar un bucle que no devuelve el control.
 
-Los cambios se descargan temporalmente. Antes de sustituir la caché, `DialogueUpdater` comprueba que el temporal contiene exactamente el conjunto de archivos `.txt` publicado por GitHub y que la transferencia no ha fallado.
+## Sincronización
 
-`DialogueUpdater` no parsea ni valida el contenido de los guiones. La validación sintáctica y semántica se realiza en `DialogueManager` cuando se inicia cada diálogo; si falla, se usa `fallo.txt` como fallback.
+`DialogueUpdater` sincroniza los `.txt` oficiales hacia `user://dialogues/`.
 
+El updater no parsea ni valida el contenido. La validación ocurre cuando `DialogueManager` inicia el diálogo.
 
-## 14. Implementación
+## Regla de simplicidad
 
-La sintaxis descrita en este documento está implementada en:
-
-- `godot/scripts/dialogue_parser.gd`
-- `godot/scripts/dialogue_validator.gd`
-- `godot/scripts/dialogue_manager.gd`
-- `godot/scripts/dialogue_ui.gd`
-
-Los guiones se mantienen en el repositorio independiente `aik3n/ZeMobida_guiones`, en la raíz del repositorio.
-
-Las etiquetas de nodo se normalizan para que sean case-insensitive y las opciones se mezclan antes de mostrarse al jugador.
-
+El formato se mantiene deliberadamente pequeño. No se añade nueva sintaxis mientras una necesidad real pueda resolverse con las reglas existentes.

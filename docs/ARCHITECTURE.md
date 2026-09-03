@@ -1,6 +1,6 @@
 # ZeMobida — Architecture
 
-**Estado:** arquitectura funcional revisada el 2026-09-02.  
+**Estado:** arquitectura funcional revisada el 2026-09-03.  
 **Godot:** 4.7.x.  
 **Principio:** preferir soluciones pequeñas, explícitas y editables desde Godot antes que capas de abstracción innecesarias.
 
@@ -16,15 +16,12 @@ Game
 │   ├── Camera2D
 │   └── FeedbackLayer          CanvasLayer 15
 ├── UI                         CanvasLayer 5
-│   ├── HUD
 │   └── BotonEstado
 ├── EstadoUI                   CanvasLayer 20
 │   └── Estado/Panel
-│       ├── datos de Player
 │       ├── inventario
 │       └── VolverMapas
-├── Dialogo                    CanvasLayer 10
-└── DiplomaNivel               CanvasLayer 40
+└── Dialogo                    CanvasLayer 10
 
 DialogueManager (autoload)
 ├── runtime de diálogo
@@ -33,299 +30,173 @@ DialogueManager (autoload)
 ├── resolución oficial/local
 ├── editor local
 ├── inventario
-└── persistencia de XP/inventario
+└── persistencia de inventario
 
 DialogueUpdater (autoload)
 └── GitHub → user://dialogues/
 ```
 
-`Game` permanece vivo durante toda la sesión. No se cambia la escena raíz al entrar o salir de un mapa: sólo se sustituye el contenido de `SceneContainer`.
+`Game` permanece vivo durante toda la sesión. Los mapas se cargan y descargan dentro de `SceneContainer`; el `Player` pertenece a `Game` y persiste entre mapas.
 
-## Selección y carga de mapas
+El Player no tiene progresión lingüística propia. El nivel lingüístico pertenece al mapa y se expresa en el nombre de su escena.
 
-La bienvenida contiene `carrusel_mapas.tscn`. El carrusel descubre automáticamente escenas `.tscn` directamente dentro de:
+## Mapas
+
+El carrusel descubre automáticamente escenas `.tscn` directamente en:
 
 ```text
 res://mapas/
 ```
 
-Todos los mapas descubiertos son seleccionables. `Preview` es opcional y puede ser `Sprite2D` o `TextureRect`.
+Para crear un mapa nuevo se parte de una escena válida existente y se duplica. No existe registro de mapas, base de datos ni recurso auxiliar obligatorio.
 
-La imagen del carrusel se resuelve por prioridad:
-
-```text
-1. textura de Preview, si existe y es válida
-2. textura de Fondo, si Preview no aporta imagen
-3. res://art/ui/preview_default.png
-```
-
-`Preview` sigue siendo la opción preferida cuando se quiere una miniatura específica. Omitirlo no deja el mapa sin imagen mientras exista `Fondo` o el fallback global.
-
-Al pulsar `JUGAR`, el carrusel comunica la ruta a `Game`, que carga la escena dentro de `SceneContainer`.
-
-El último mapa seleccionado se conserva en `user://settings.cfg`, sección `[maps]`.
-
-### Volver al selector
-
-Durante el juego, el panel global `ESTADO` contiene:
+Estructura esperada para mapas nuevos:
 
 ```text
-VOLVER A MAPAS
+mapa
+├── descripcion       Label
+├── final             Label
+├── Fondo             Sprite2D, opcional técnicamente
+├── Preview           opcional
+├── SpawnPlayer       opcional
+├── PNJ...
+├── colisiones...
+└── objetos...
 ```
 
-La navegación pertenece a `Game`, no a cada mapa. Por ello cualquier mapa actual o futuro dispone del mismo mecanismo sin implementar código propio.
+`descripcion` y `final` son texto humano del mapa. Sus nombres forman parte del contrato de contenido. No se utiliza metadata para esos textos ni un script en la raíz del mapa.
 
-Al volver:
+El nombre de la raíz no se utiliza como identidad técnica en runtime; las escenas nuevas usan `mapa` por uniformidad.
 
-1. si el editor de guiones está abierto, la salida se bloquea;
-2. si hay un diálogo activo, se finaliza mediante `DialogueManager.end_dialogue()`;
-3. se cierra el panel de estado;
-4. `Game` carga `bienvenida.tscn` dentro de `SceneContainer`;
-5. Player y cámara quedan ocultos/inactivos mientras no haya mapa.
+### Identidad, nivel y nombre lógico
 
-## Posición persistente por mapa
-
-`SpawnPlayer` es opcional. La entrada del Player sigue esta prioridad: posición guardada → `SpawnPlayer` si existe → `Vector2.ZERO` (`0,0`). No se busca automáticamente una posición libre ni se aplica lógica especial de colisiones.
-
-Regla:
+El ID técnico del mapa es el basename de la escena normalizado a minúsculas:
 
 ```text
-primera entrada / sin posición guardada
-→ SpawnPlayer
-
-entradas posteriores
-→ última posición guardada del Player
+aldea_a1.tscn → aldea_a1
 ```
 
-Antes de abandonar un mapa, `Game` guarda `player_actual.global_position`.
+Ese ID completo se utiliza para persistencia de posición.
 
-También intenta guardar la posición cuando:
+El nivel lingüístico se obtiene buscando en el nombre uno de estos marcadores:
 
-- la aplicación recibe un cierre normal de ventana;
-- la aplicación pasa a segundo plano/pausa.
+```text
+_a1  _a2  _b1  _b2  _c1  _c2
+```
 
-El botón **Stop** del editor de Godot puede terminar el proceso externamente y no se considera un cierre normal garantizado.
+Si no aparece ninguno, el nivel del mapa es `?`.
 
-Las posiciones se almacenan en:
+Para los guiones se usa el nombre lógico anterior al marcador:
+
+```text
+aldea_a1.tscn
+→ ID técnico: aldea_a1
+→ nivel: A1
+→ mapa lógico de guion: aldea
+```
+
+Un mapa sin marcador conserva como nombre lógico su basename completo.
+
+### Entrada y posición persistente
+
+La posición inicial del Player sigue esta prioridad:
+
+```text
+posición guardada
+→ SpawnPlayer si existe
+→ Vector2.ZERO
+```
+
+Antes de abandonar un mapa, y también ante cierre/pausa normal de la aplicación, `Game` guarda la última posición en:
 
 ```ini
 [map_positions]
 <id_mapa>=Vector2(...)
 ```
 
-dentro de `user://settings.cfg`.
-
-El identificador técnico usado actualmente es el nombre base del archivo de escena normalizado a minúsculas:
-
-```text
-Arauzo_de_salce.tscn → arauzo_de_salce
-aldea.tscn           → aldea
-```
-
-La normalización se realiza en runtime; no requiere renombrar físicamente la escena. Renombrar el archivo sí cambia deliberadamente la identidad técnica del mapa.
-
-No existe migración automática de claves antiguas que conservaran mayúsculas antes de `bb3f058`.
-
-Tras restaurar una posición, `Game` sincroniza también `player_actual.destino` para impedir que el Player intente volver a un destino anterior.
-
-## Contrato actual de mapa
-
-Un mapa puede contener:
-
-```text
-mapa
-├── Fondo                 Sprite2D, preferido en mapas ilustrados
-├── colisiones            StaticBody2D + shapes/polígonos
-├── PNJ                   instancias de pnj.tscn
-├── SpawnPlayer           obligatorio como entrada/fallback
-├── objetos visuales      StaticBody2D + 1 CollisionShape2D + Sprite2D(s), opcional
-├── Preview               opcional
-└── CameraBounds          fallback para mapas sin Fondo
-```
+No se busca automáticamente una posición libre ni se corrigen colisiones de spawn.
 
 ### Fondo y cámara
 
-Cuando existe `Fondo` con textura, `Game` obtiene de su rectángulo transformado los límites de `Camera2D`.
+Un mapa ilustrado terminado debe incluir `Fondo` con textura. Cuando existe, `Game` calcula los límites de `Camera2D` desde su rectángulo transformado.
 
-Los mapas sin `Fondo` pueden usar:
+Convención habitual:
 
 ```text
-CameraBounds
-└── CollisionShape2D
-    └── RectangleShape2D
+Fondo
+→ Sprite2D
+→ escala 1:1
+→ centered = false
 ```
 
-Si un mapa no tiene ni `Fondo` válido ni `CameraBounds`, no existe una fuente válida para limitar la cámara.
+Un mapa sin `Fondo` se considera prototipo y sigue siendo jugable. En ese caso la cámara usa límites provisionales fijos alrededor del origen:
 
-`Fondo` se usa normalmente a escala `1:1` y con `centered = false`.
+```text
+X: -1000 .. +1000
+Y: -1000 .. +1000
+```
+
+No existe un segundo nodo de límites para prototipos.
+
+### Preview
+
+La imagen del carrusel se resuelve por prioridad:
+
+```text
+Preview válido
+→ Fondo válido
+→ res://art/ui/preview_default.png
+```
+
+`Preview` permite usar una miniatura distinta de la ilustración jugable.
 
 ### Profundidad visual
 
-La profundidad entre actores y determinados objetos del escenario se resuelve mediante una regla simple basada en la posición vertical de sus colisiones de base. No se utiliza Y-sort general.
+No existe Y-sort global.
 
-El `Player` ocupa la profundidad visual intermedia. Los PNJ cambian automáticamente entre detrás y delante del Player comparando la posición global de sus `CollisionShape2D`, colocadas en los pies.
+Player, PNJ y determinados objetos cambian de profundidad usando la posición Y de una colisión colocada en los pies/base.
 
-```text
-PNJ con pies por encima del Player
-→ PNJ detrás
-
-PNJ con pies por debajo del Player
-→ PNJ delante
-```
-
-La misma filosofía se aplica automáticamente a objetos estáticos del mapa.
-
-Convención:
+Para objetos estáticos, `Game` registra automáticamente al cargar el mapa los nodos que cumplen:
 
 ```text
 StaticBody2D
-├── CollisionShape2D
-└── Sprite2D
+├── exactamente 1 CollisionShape2D directa
+└── 1 o más Sprite2D directos
 ```
 
-Un `StaticBody2D` participa en profundidad automática cuando contiene directamente:
-
-```text
-exactamente 1 CollisionShape2D
-1 o más Sprite2D
-```
-
-La `CollisionShape2D` representa la base visual del objeto. `Game` descubre estos objetos una sola vez al cargar el mapa y durante el juego compara esa referencia con la colisión de los pies del Player.
-
-No importan los nombres de los nodos y el diseñador no necesita asignar scripts, `NodePath` ni valores Z manuales.
-
-La separación visual general es:
-
-```text
-Fondo                  z bajo
-
-objetos/PNJ detrás
-Player
-objetos/PNJ delante
-
-frontales permanentes  z alto
-```
-
-Los `StaticBody2D` que sólo contienen colisiones y no tienen `Sprite2D` se ignoran. Los contenedores con varias `CollisionShape2D` tampoco cumplen la convención automática.
-
-Un elemento que deba permanecer siempre por encima de los actores puede seguir siendo un `Sprite2D` con Z fija y sin participar en profundidad automática.
-
-La colisión usada como referencia debe estar colocada donde el personaje u objeto toca visualmente el suelo. Si una colisión no representa correctamente esa base, ese objeto no debe utilizar esta convención automática.
+La `CollisionShape2D` representa la base visual del objeto. Los contenedores con varias colisiones o sin sprites se ignoran.
 
 ## Player
 
-Existe una única instancia persistente de `Player` propiedad de `Game`.
+Existe una sola instancia persistente de `Player`.
 
-El nivel no es un estado independiente: se deriva de XP mediante la tabla central:
-
-```text
-res://scripts/niveles.gd
-```
-
-Niveles actuales:
-
-| Nivel | límite superior inclusivo |
-| --- | ---: |
-| a1 | 70 |
-| a2 | 120 |
-| b1 | 340 |
-| b2 | 410 |
-| c1 | 740 |
-| c2 | 2000 |
-
-La tabla central es la única fuente de verdad para cálculo de nivel y progreso del HUD.
-
-### Colisión actual
-
-`player.tscn` utiliza `CapsuleShape2D`:
+Responsabilidades actuales:
 
 ```text
-radio  = 21
-altura = 150
+movimiento
+orientación horizontal
+cámara
+tap / arrastre / pinch / rueda
+feedback visual de cambios de inventario
 ```
 
-Los valores son parte del ajuste visual/jugable actual y pueden revisarse si cambia el arte.
+El movimiento conserva aceleración y deceleración. La orientación horizontal usa `Sprite2D.flip_h`; el movimiento vertical mantiene la orientación previa.
 
-### Orientación visual
-
-La orientación horizontal del personaje se gestiona automáticamente desde el movimiento.
-
-Regla:
-
-```text
-movimiento hacia la derecha
-→ sprite con orientación base
-
-movimiento hacia la izquierda
-→ sprite invertido horizontalmente
-```
-
-El arte sólo necesita proporcionar una orientación base del personaje. El runtime aplica el ajuste visual cuando cambia la dirección.
-
-El movimiento vertical o la ausencia de movimiento horizontal mantiene la última orientación horizontal.
-
-La orientación visual no afecta a la colisión, cámara ni navegación del Player.
+La cámara permite exploración manual y vuelve al Player con recentrado suave. Los límites activos siempre pertenecen al mapa actual.
 
 ## PNJ
 
-### Identidad
-
-El nombre del nodo de la instancia, normalizado a minúsculas, es la identidad técnica del PNJ.
-
-Ejemplo:
+La identidad técnica de un PNJ es el nombre de su nodo normalizado a minúsculas:
 
 ```text
 Pedro_Luis → pedro_luis
 ```
 
-- identidad técnica: `pedro_luis`;
-- nombre visible: `pedro luis`;
-- diálogo: se construye usando mapa + identidad + nivel.
+Renombrar el nodo cambia deliberadamente su identidad de diálogo.
 
-No existe una propiedad exportada adicional para el nombre. Renombrar el nodo cambia deliberadamente la identidad técnica.
+La textura se configura mediante la propiedad exportada `sprite: Texture2D`. `pnj.gd` usa `@tool` sólo para reflejar esa textura en el editor; la lógica de gameplay no se ejecuta en modo editor.
 
-Los nombres se construyen; no se intenta analizar el nombre de un archivo para reconstruir mapa/PNJ/nivel.
-
-### Sprite
-
-La textura visual se configura desde la instancia del PNJ en el Inspector mediante:
-
-```gdscript
-@export var sprite: Texture2D
-```
-
-El creador del mapa elige manualmente la textura. El juego no deduce qué imagen corresponde al PNJ.
-
-`pnj.gd` usa `@tool` únicamente para reflejar el valor de la propiedad exportada sobre el `Sprite2D` interno mientras se edita la escena. La lógica de gameplay no se ejecuta en el editor (`Engine.is_editor_hint()`).
-
-Esto evita usar `Editable Children` como flujo normal y mantiene encapsuladas las colisiones/áreas internas.
-
-### Colisiones actuales
-
-`pnj.tscn`:
-
-```text
-cuerpo
-CapsuleShape2D
-radio  = 20
-altura = 152
-
-interacción
-CapsuleShape2D
-radio  = 22
-altura = 160
-```
-
-Los nodos internos se llaman actualmente:
-
-```text
-Collision
-InteractionArea/Collision_Interaccion
-```
-
-### Seguimiento
-
-Modos actuales:
+Modos de seguimiento:
 
 ```text
 NUNCA_SEGUIR
@@ -333,7 +204,19 @@ SEGUIR_Y_QUEDARSE
 SEGUIR_Y_VOLVER
 ```
 
-El seguimiento utiliza movimiento directo con `move_and_slide()`. No existe navegación/pathfinding; sólo debe introducirse si los mapas reales demuestran que es necesario.
+El seguimiento usa movimiento directo con `move_and_slide()`. No existe pathfinding mientras los mapas reales no lo necesiten.
+
+### Estado visual del guion
+
+El color del nombre indica la procedencia del guion específico:
+
+```text
+gris  → no existe guion específico
+verde → guion oficial
+azul  → guion local
+```
+
+`generico.txt` es fallback técnico y no activa color de guion específico.
 
 ## Diálogos
 
@@ -344,76 +227,36 @@ oficial → user://dialogues/
 local   → user://custom_dialogues/
 ```
 
-Prioridad para un PNJ/nivel:
+Un PNJ usa un único archivo específico:
 
 ```text
-1. local    <mapa>_<pnj>_<nivel>.txt
-2. oficial  <mapa>_<pnj>_<nivel>.txt
-3. oficial  <mapa>_<pnj>.txt
-4. oficial  generico.txt
+<mapa_logico>_<pnj>.txt
 ```
 
-Los componentes técnicos `<mapa>` y `<pnj>` se normalizan a minúsculas antes de resolver el nombre del archivo.
-
-Los guiones oficiales se versionan exclusivamente en:
+Ejemplo:
 
 ```text
-aik3n/ZeMobida_guiones
+aldea_a1.tscn + Chef
+→ aldea_chef.txt
 ```
 
-`DialogueUpdater` transporta/sincroniza archivos oficiales; no interpreta la sintaxis.
-
-El editor local usa `CodeEdit`, resaltado visual y un gutter rojo informativo. Los avisos no bloquean ninguna acción.
-
-Acciones actuales del editor:
+Prioridad runtime:
 
 ```text
-GUARDAR → guarda en user://custom_dialogues/ y cierra el editor
-ENVIAR  → guarda primero; si el guardado funciona, abre el correo y mantiene el editor abierto
-CERRAR  → cierra sin guardar cambios posteriores
+1. local    <mapa_logico>_<pnj>.txt
+2. oficial  <mapa_logico>_<pnj>.txt
+3. oficial  generico.txt
 ```
 
-`GUARDAR` y `ENVIAR` reutilizan la misma lógica de escritura. `ENVIAR` nunca intenta enviar una versión que no se haya guardado correctamente antes.
+El editor trabaja con ese mismo archivo específico. No existe una variante distinta según estado del Player.
 
-El envío no utiliza SMTP, credenciales de Gmail, OAuth ni backend. Tras guardar, el juego abre una URI `mailto:` mediante `OS.shell_open()` con:
+`DialogueParser` interpreta el formato y `DialogueValidator` comprueba coherencia estructural al iniciar el diálogo. Si el archivo no puede cargarse o validar, se intenta `fallo.txt`.
 
-```text
-Para:    zemobida@gmail.com
-Asunto:  ZeMobida - <nombre_archivo>
-Cuerpo:  nombre del archivo + contenido exacto guardado
-```
+Las cadenas de condiciones/saltos automáticos tienen un límite runtime de 100 transiciones consecutivas para impedir ciclos que no devuelvan el control.
 
-El `.txt` no se adjunta automáticamente: el contenido se incluye en el cuerpo del correo. La aplicación de correo del jugador es la que muestra y confirma el envío. Cancelar ese correo no deshace el guardado local realizado previamente.
+## Inventario y persistencia
 
-### Nivel objetivo del editor
-
-Al iniciar una conversación, `DialogueManager.start_dialogue()` captura el nivel actual del Player en `current_dialogue_level`.
-
-Ese valor representa el contexto del diálogo abierto y permanece estable hasta que la conversación termina. Si un efecto cambia XP y con ello el nivel del Player antes de pulsar `EDITAR`, el archivo objetivo continúa siendo:
-
-```text
-<mapa>_<pnj>_<nivel_al_inicio>.txt
-```
-
-No se recalcula con el nivel posterior al efecto.
-
-El runtime continúa usando `DialogueParser` y `DialogueValidator` al iniciar un diálogo. La responsabilidad conceptual del parser es interpretar el formato; el validator actual comprueba la coherencia estructural del diccionario resultante.
-
-### Contingencia de saltos automáticos
-
-`DialogueManager.show_node()` recorre iterativamente las condiciones y saltos automáticos. Una cadena puede realizar como máximo:
-
-```text
-100 transiciones automáticas consecutivas
-```
-
-El conteo termina cuando el diálogo llega a un nodo que devuelve el control al jugador. Una opción seleccionada por el jugador inicia una nueva cadena.
-
-Si se intenta superar el límite, el runtime detiene la cadena sin aplicar efectos ni continuar saltando, escribe el diagnóstico como mensaje normal en Output y mantiene el diálogo activo con el panel visible, sin opciones y con `EDITAR` disponible.
-
-Esta protección no declara inválidos los ciclos interactivos ni intenta analizar el grafo completo del guion. Es una contingencia runtime contra guiones accidentales o maliciosos que no devuelven el control.
-
-## Persistencia
+El inventario sigue siendo global en el estado actual del proyecto.
 
 Archivo común:
 
@@ -421,168 +264,37 @@ Archivo común:
 user://settings.cfg
 ```
 
-Secciones actuales:
+Secciones relevantes:
 
 ```text
-[dialogues]       preferencia de sincronización de guiones
+[dialogues]       preferencia de sincronización
 [maps]            último mapa seleccionado
-[player]          XP e inventario
-[map_positions]   última posición del Player por mapa
+[player]          inventario
+[map_positions]   última posición por mapa
 ```
 
-Los efectos de diálogo que producen una variación real de XP o inventario guardan inmediatamente la sección `[player]`. El guardado no depende de que el diálogo llegue posteriormente a `end_dialogue()`.
+Los efectos `+objeto` y `-objeto` guardan el inventario inmediatamente cuando producen un cambio real.
 
-Un efecto que no cambia el estado final —por ejemplo añadir un objeto ya presente, retirar uno ausente o intentar superar un límite de XP sin variación— no provoca una escritura adicional.
+La futura separación del inventario por mapa es una decisión distinta y no forma parte de este contrato actual.
 
-El manifest de sincronización de guiones permanece separado porque describe el estado de la caché remota, no la partida.
+## Sincronización de guiones
 
-## Cámara y control táctil
-
-Controles actuales:
+Los guiones oficiales se versionan exclusivamente en:
 
 ```text
-tap y soltar       → fijar nuevo destino del Player
-arrastrar          → explorar desplazando cámara sin cancelar el destino
-pinch              → zoom móvil sin cancelar el destino
-rueda ratón        → zoom escritorio
-teclado/mando      → recentrar inmediatamente
+aik3n/ZeMobida_guiones
 ```
 
-Umbral de arrastre: `28 px`.
+`DialogueUpdater` sincroniza hacia `user://dialogues/` usando una actualización temporal y atómica. Una actualización fallida conserva la caché oficial anterior.
 
-Zoom temporal:
+El updater transporta archivos; no interpreta ni valida su contenido.
+
+## Criterio de arquitectura
+
+La regla de trabajo es deliberadamente pragmática:
 
 ```text
-0.7 … 1.4
+cuando duela lo curamos
 ```
 
-Después de explorar, un nuevo tap calcula primero el destino en coordenadas de mundo y después restaura cámara y zoom con Tween cúbico `EASE_OUT` de `0.8 s`.
-
-### Destino y exploración durante movimiento
-
-Un tap válido muestra durante `0.7 s` una marca visual breve en el punto del mundo elegido como nuevo destino. Es feedback de entrada: no modifica navegación, velocidad ni colisiones.
-
-Apoyar el dedo para iniciar un gesto ya no cancela el movimiento en curso. Si el gesto termina siendo arrastre o pinch, el Player conserva su destino y continúa caminando.
-
-Durante la exploración manual, la cámara mantiene el centro del mundo que está observando aunque el Player siga desplazándose por debajo. Al soltar el arrastre, la cámara permanece en esa zona y el Player continúa hacia su destino.
-
-Un nuevo tap desde la vista explorada sustituye el destino anterior, muestra el feedback de destino y activa el recentrado existente.
-
-### Suavizado de seguimiento
-
-El movimiento físico del Player sigue siendo directo: no se añade aceleración ni frenado artificial. La suavidad visual pertenece exclusivamente a `Camera2D`.
-
-Durante el seguimiento normal del Player se utiliza `position_smoothing` para amortiguar los cambios bruscos al empezar y terminar un desplazamiento.
-
-La separación de responsabilidades es:
-
-```text
-seguimiento normal del Player
-→ smoothing de Camera2D activo
-
-arrastre / pinch / exploración manual
-→ smoothing desactivado
-
-recentrado tras explorar
-→ smoothing desactivado; se usa el Tween existente
-
-recentrado terminado
-→ smoothing activo otra vez
-```
-
-Al pasar de seguimiento suavizado a control manual se conserva primero el centro visual actual de la cámara para evitar un salto. Teclado y mando mantienen su recentrado inmediato y después continúan con seguimiento suavizado.
-
-El valor inicial de `position_smoothing_speed` es `6.0`; es un ajuste visual, no un contrato de gameplay.
-
-## Feedback de XP, inventario y nivel
-
-Los cambios reales muestran mensajes flotantes:
-
-```text
-ganancia → verde, sube
-pérdida  → rojo, baja
-```
-
-Se utilizan canales positivo/negativo independientes con separación aproximada de `0.25 s` por canal. Cada mensaje dura aproximadamente `1.2 s`.
-
-Cuando `Player.add_xp()` provoca también un cambio de nivel, se encola un segundo feedback destacado con la transición completa, por ejemplo:
-
-```text
-A1 → A2
-B1 → A2
-```
-
-El cambio puede ser ascendente o descendente y puede saltar varios niveles. La carga de estado persistido no genera estos feedbacks.
-
-### Diploma al terminar un diálogo
-
-`DialogueManager.current_dialogue_level` conserva el nivel con el que comenzó la conversación. Al cerrarse el diálogo se compara ese nivel inicial con el nivel final del Player.
-
-Regla:
-
-```text
-nivel final == nivel inicial
-→ no mostrar diploma
-
-nivel final != nivel inicial
-→ mostrar un único diploma del nivel final
-```
-
-Sólo importa el resultado final del diálogo. Si durante una misma conversación el Player atraviesa varios niveles, no se encadenan diplomas; y si termina otra vez en el nivel inicial, no se muestra ninguno. Subidas y bajadas se consideran igualmente relevantes.
-
-El diálogo desaparece antes de presentar el diploma. Los recursos se resuelven por nivel desde:
-
-```text
-res://art/diplomas/<nivel>.png
-```
-
-El diploma aparece como overlay modal por encima de la UI. Su entrada parte de una escala casi nula y `35°` de rotación y termina a escala normal y `0°` mediante Tween. Mientras dura la entrada no puede cerrarse; después, cualquier toque o clic en la pantalla lo descarta.
-
-La ausencia del PNG correspondiente no bloquea el juego. Los cierres usados para abrir el editor de diálogos o abandonar el mapa no deben presentar el diploma.
-
-## Exportación
-
-`godot/export_presets.cfg` contiene actualmente presets para:
-
-```text
-Windows Desktop
-Android
-Web
-```
-
-Android mantiene permiso de Internet para la sincronización de guiones y su flujo básico fue validado en dispositivo.
-
-Windows utiliza actualmente PCK embebido en el ejecutable.
-
-El preset Web forma parte de la configuración del proyecto, pero todavía no existe en esta documentación una validación funcional equivalente de ejecución en navegador. Su presencia no debe interpretarse por sí sola como soporte Web cerrado para release.
-
-## Mapas externos: experimento cerrado
-
-La arquitectura actual utiliza exclusivamente mapas integrados en:
-
-```text
-res://mapas/
-```
-
-Se probó la carga de proyectos de mapas independientes mediante paquetes
-PCK/ZIP. El experimento se descartó para el prototipo porque todos los
-resource packs comparten `res://` y dos autores independientes pueden
-exportar rutas de recursos iguales, provocando colisiones.
-
-No existe soporte runtime para mapas externos y esta posibilidad no debe
-condicionar la arquitectura actual.
-
-El resultado del experimento se conserva en
-[`MAP_PACKS_FUTURE.md`](MAP_PACKS_FUTURE.md).
-
-## Límites y deuda deliberada
-
-No se pretende resolver de forma anticipada problemas que aún no se han manifestado. Permanecen deliberadamente simples:
-
-- descubrimiento de mapas sólo en la carpeta directa `res://mapas/`;
-- preview obtenida mediante carga/instanciación temporal del mapa;
-- seguimiento PNJ sin navegación;
-- contratos de SceneTree por nombres;
-- contenido visual provisional en varios mapas.
-
-Los riesgos técnicos activos y su prioridad están registrados en [`AUDIT.md`](AUDIT.md).
+No se añaden abstracciones, identificadores estables, bases de datos, pathfinding, sistemas de quests o frameworks de mapas hasta que una necesidad real los justifique.

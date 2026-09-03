@@ -61,7 +61,7 @@ func _get_line_syntax_highlighting(line: int) -> Dictionary:
 
 func _highlight_node_line(
 	result: Dictionary,
-	line_text: String,
+	_line_text: String,
 	start: int
 ) -> void:
 	_set_color(result, start, COLOR_NODE)
@@ -95,7 +95,7 @@ func _highlight_condition_line(
 
 func _highlight_jump_line(
 	result: Dictionary,
-	line_text: String,
+	_line_text: String,
 	start: int
 ) -> void:
 	_set_color(result, start, COLOR_JUMP)

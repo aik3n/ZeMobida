@@ -1,5 +1,10 @@
 # ZeMobida — Technical Audit
 
+> **Nota de vigencia (2026-09-03):** este documento conserva contexto histórico.  
+> Para el comportamiento actual consultar `ARCHITECTURE.md`, `DEVELOPMENT.md`, `GUIONES.md` y `DIALOGUE_FORMAT.md`.  
+> Las decisiones antiguas sobre progresión del Player, variantes de guion por nivel y límites alternativos de cámara quedaron supersedidas.
+
+
 **Revisión:** 2026-09-01  
 **Base GitHub revisada:** `bb3f058e68a24140375e8b28fb9fb282bef50a4c` (`mejoras y bug fix`).  
 **Estado:** prototipo funcional; deuda localizada. No se recomienda una reescritura general.

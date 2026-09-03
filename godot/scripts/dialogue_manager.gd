@@ -9,7 +9,6 @@ var dialogue_ui = null
 var dialogue_editor = null
 var editor_active := false
 var current_dialogue_file := ""
-var current_dialogue_level := ""
 var current_speaker := ""
 var current_dialogue_signature := ""
 
@@ -38,13 +37,20 @@ const DIALOGUE_TEMPLATE := (
 
 const SETTINGS_FILE := "user://settings.cfg"
 const PLAYER_SECTION := "player"
-const PLAYER_KEY_XP := "xp"
 const PLAYER_KEY_INVENTORY := "inventory"
+const DIALOGUE_MAP_LEVEL_MARKERS := [
+	"_a1",
+	"_a2",
+	"_b1",
+	"_b2",
+	"_c1",
+	"_c2"
+]
 const MAX_AUTOMATIC_TRANSITIONS := 100
 
 
 func _ready() -> void:
-	pass
+	load_inventory()
 
 
 func register_ui(ui):
@@ -55,48 +61,46 @@ func get_dialogue_path(file_name: String) -> String:
 	return DIALOGUE_FOLDER + file_name
 
 
-func get_level_dialogue_file_name(
+func get_dialogue_map_name(map_id: String) -> String:
+	var normalized := map_id.to_lower()
+
+	for marker in DIALOGUE_MAP_LEVEL_MARKERS:
+		var marker_index := normalized.find(marker)
+
+		if marker_index >= 0:
+			return normalized.substr(0, marker_index)
+
+	return normalized
+
+
+func get_dialogue_file_name(
 	map_name: String,
-	speaker_name: String,
-	level: String
+	speaker_name: String
 ) -> String:
-	return "%s_%s_%s.txt" % [
+	return "%s_%s.txt" % [
 		map_name,
-		speaker_name,
-		level
+		speaker_name
 	]
 
 
 func get_dialogue_assignment_state(
 	map_name: String,
-	speaker_name: String,
-	level: String
+	speaker_name: String
 ) -> String:
-	var level_file := get_level_dialogue_file_name(
+	var file_name := get_dialogue_file_name(
 		map_name,
-		speaker_name,
-		level
+		speaker_name
 	)
 
 	if FileAccess.file_exists(
-		CUSTOM_DIALOGUE_FOLDER + level_file
+		CUSTOM_DIALOGUE_FOLDER + file_name
 	):
-		return "local_exact"
+		return "local"
 
 	if FileAccess.file_exists(
-		DIALOGUE_FOLDER + level_file
+		DIALOGUE_FOLDER + file_name
 	):
-		return "official_exact"
-
-	var generic_file := "%s_%s.txt" % [
-		map_name,
-		speaker_name
-	]
-
-	if FileAccess.file_exists(
-		DIALOGUE_FOLDER + generic_file
-	):
-		return "official_generic"
+		return "official"
 
 	# generico.txt es fallback técnico y no se considera
 	# un guion asignado específicamente a este PNJ.
@@ -105,43 +109,28 @@ func get_dialogue_assignment_state(
 
 func resolve_dialogue_path(
 	map_name: String,
-	speaker_name: String,
-	level: String
+	speaker_name: String
 ) -> String:
-	var level_file := get_level_dialogue_file_name(
-		map_name,
-		speaker_name,
-		level
-	)
-
-	var local_level_path := (
-		CUSTOM_DIALOGUE_FOLDER
-		+ level_file
-	)
-
-	if FileAccess.file_exists(local_level_path):
-		return local_level_path
-
-	var official_level_path := (
-		DIALOGUE_FOLDER
-		+ level_file
-	)
-
-	if FileAccess.file_exists(official_level_path):
-		return official_level_path
-
-	var generic_file := "%s_%s.txt" % [
+	var file_name := get_dialogue_file_name(
 		map_name,
 		speaker_name
-	]
-
-	var official_generic_path := (
-		DIALOGUE_FOLDER
-		+ generic_file
 	)
 
-	if FileAccess.file_exists(official_generic_path):
-		return official_generic_path
+	var local_path := (
+		CUSTOM_DIALOGUE_FOLDER
+		+ file_name
+	)
+
+	if FileAccess.file_exists(local_path):
+		return local_path
+
+	var official_path := (
+		DIALOGUE_FOLDER
+		+ file_name
+	)
+
+	if FileAccess.file_exists(official_path):
+		return official_path
 
 	if FileAccess.file_exists(
 		DIALOGUE_FOLDER + "generico.txt"
@@ -171,33 +160,17 @@ func open_current_dialogue_editor() -> void:
 		)
 		return
 
-	var player = game.get("player_actual")
-
-	if player == null:
-		player = game.get_node_or_null("Player")
-
-	if player == null:
-		print(
-			"No se encontró el Player para editar."
-		)
-		return
-
 	var scene_path: String = mapa_actual.scene_file_path
-	var map_name := scene_path.get_file().get_basename().to_lower()
-
+	var map_id := scene_path.get_file().get_basename().to_lower()
+	var map_name := get_dialogue_map_name(map_id)
 	var speaker_name := current_speaker
 
-	if (
-		map_name.is_empty()
-		or speaker_name.is_empty()
-		or current_dialogue_level.is_empty()
-	):
+	if map_name.is_empty() or speaker_name.is_empty():
 		return
 
-	var file_name := get_level_dialogue_file_name(
+	var file_name := get_dialogue_file_name(
 		map_name,
-		speaker_name,
-		current_dialogue_level
+		speaker_name
 	)
 
 	var initial_text := _get_editable_dialogue_source(
@@ -277,19 +250,7 @@ func start_dialogue(
 
 	dialogue_active = true
 	current_dialogue_file = file_path
-	current_dialogue_level = ""
 	current_speaker = speaker_name
-
-	var game = get_tree().current_scene
-
-	if game != null:
-		var player = game.get("player_actual")
-
-		if player == null:
-			player = game.get_node_or_null("Player")
-
-		if player != null:
-			current_dialogue_level = str(player.nivel)
 
 	load_dialogue(file_path)
 
@@ -543,36 +504,8 @@ func _apply_effects(effects: Array):
 				):
 					state_changed = true
 
-			"xp":
-				var game = get_tree().current_scene
-
-				if game == null:
-					print(
-						"No se encontró Game para aplicar XP."
-					)
-
-					continue
-
-				var player = game.get("player_actual")
-
-				if player == null:
-					print(
-						"No se encontró el Player para aplicar XP."
-					)
-
-					continue
-
-				var xp_anterior: int = player.xp
-
-				player.add_xp(
-					int(effect["value"])
-				)
-
-				if player.xp != xp_anterior:
-					state_changed = true
-
 	if state_changed:
-		_save_player_status()
+		_save_inventory()
 
 
 func _mostrar_feedback_objeto(
@@ -652,7 +585,7 @@ func clear_inventory() -> bool:
 		return false
 
 	inventory.clear()
-	_save_player_status()
+	_save_inventory()
 
 	return true
 
@@ -664,7 +597,6 @@ func end_dialogue():
 	dialogue_active = false
 	current_node = ""
 	current_dialogue_file = ""
-	current_dialogue_level = ""
 	current_speaker = ""
 	current_dialogue_signature = ""
 
@@ -674,58 +606,20 @@ func end_dialogue():
 		dialogue_ui.hide_dialogue()
 
 
-func load_player_status() -> void:
+func load_inventory() -> void:
 	var config := ConfigFile.new()
 	var error := config.load(SETTINGS_FILE)
 
+	inventory.clear()
+
 	if error == ERR_FILE_NOT_FOUND:
-		print(
-			"No existe estado guardado. "
-			+ "Se utilizarán los valores iniciales."
-		)
 		return
 
 	if error != OK:
 		print(
-			"No se pudo cargar el estado del jugador."
+			"No se pudo cargar el inventario."
 		)
 		return
-
-	var game = get_tree().current_scene
-
-	if game == null:
-		print(
-			"No se encontró Game para cargar el estado."
-		)
-		return
-
-	var player = game.get("player_actual")
-
-	if player == null:
-		print(
-			"No se encontró el Player para cargar el estado."
-		)
-		return
-
-	if config.has_section_key(PLAYER_SECTION, PLAYER_KEY_XP):
-		var saved_xp: int = int(
-			config.get_value(
-				PLAYER_SECTION,
-				PLAYER_KEY_XP,
-				0
-			)
-		)
-
-		player.xp = clamp(
-			saved_xp,
-			0,
-			player._xp_maximo()
-		)
-
-		player._actualizar_nivel()
-		player.xp_changed.emit()
-
-	inventory.clear()
 
 	var saved_inventory = config.get_value(
 		PLAYER_SECTION,
@@ -744,44 +638,20 @@ func load_player_status() -> void:
 				inventory.append(clean_item)
 
 	print(
-		"Estado cargado. XP:",
-		player.xp,
-		" Inventario:",
+		"Inventario cargado:",
 		inventory
 	)
 
 
-func _save_player_status() -> void:
-	var game = get_tree().current_scene
-
-	if game == null:
-		print(
-			"No se encontró Game para guardar el estado."
-		)
-		return
-
-	var player = game.get("player_actual")
-
-	if player == null:
-		print(
-			"No se encontró el Player para guardar el estado."
-		)
-		return
-
+func _save_inventory() -> void:
 	var config := ConfigFile.new()
 	var load_error := config.load(SETTINGS_FILE)
 
 	if load_error != OK and load_error != ERR_FILE_NOT_FOUND:
-		push_error(
-			"No se pudo cargar la configuración para guardar el estado."
+		print(
+			"No se pudo cargar la configuración para guardar el inventario."
 		)
 		return
-
-	config.set_value(
-		PLAYER_SECTION,
-		PLAYER_KEY_XP,
-		player.xp
-	)
 
 	config.set_value(
 		PLAYER_SECTION,
@@ -792,14 +662,12 @@ func _save_player_status() -> void:
 	var error := config.save(SETTINGS_FILE)
 
 	if error != OK:
-		push_error(
-			"No se pudo guardar el estado del jugador."
+		print(
+			"No se pudo guardar el inventario."
 		)
 		return
 
 	print(
-		"Estado guardado. XP:",
-		player.xp,
-		" Inventario:",
+		"Inventario guardado:",
 		inventory
 	)

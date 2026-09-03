@@ -2,16 +2,6 @@
 
 extends CharacterBody2D
 
-signal xp_changed
-
-const NIVELES_DATA := preload(
-	"res://scripts/niveles.gd"
-)
-
-var nivel: String = NIVELES_DATA.nivel_inicial()
-
-@export var xp: int = 0
-
 var vel := 400.0
 var destino: Vector2
 
@@ -85,8 +75,6 @@ var _negative_feedback_launcher_busy := false
 
 
 func _ready():
-	xp = clamp(xp, 0, _xp_maximo())
-	_actualizar_nivel()
 	destino = global_position
 
 	camera.position_smoothing_speed = CAMERA_FOLLOW_SMOOTHING_SPEED
@@ -850,74 +838,3 @@ func _actualizar_orientacion_sprite() -> void:
 		return
 
 	sprite.flip_h = velocity.x < 0.0
-
-
-func add_xp(amount: int) -> void:
-	var xp_anterior := xp
-	var nivel_anterior := nivel
-
-	var nueva_xp: int = clamp(
-		xp + amount,
-		0,
-		_xp_maximo()
-	)
-
-	if nueva_xp == xp:
-		return
-
-	xp = nueva_xp
-	_actualizar_nivel()
-	xp_changed.emit()
-
-	var cambio_real := xp - xp_anterior
-	var prefijo := "+" if cambio_real > 0 else ""
-
-	mostrar_feedback(
-		"%s%d XP" % [prefijo, cambio_real],
-		cambio_real > 0
-	)
-
-	if nivel != nivel_anterior:
-		mostrar_feedback(
-			"%s → %s" % [
-				nivel_anterior.to_upper(),
-				nivel.to_upper()
-			],
-			cambio_real > 0,
-			true
-		)
-
-
-# DEV TEMPORAL: usado sólo por el control de XP de bienvenida.
-# Fija XP sin mostrar feedback de gameplay.
-func set_xp_dev(value: int) -> void:
-	var nueva_xp := clampi(
-		value,
-		0,
-		_xp_maximo()
-	)
-
-	if nueva_xp == xp:
-		return
-
-	xp = nueva_xp
-	_actualizar_nivel()
-	xp_changed.emit()
-
-
-func _actualizar_nivel() -> void:
-	var nuevo_nivel := NIVELES_DATA.nivel_para_xp(
-		xp
-	)
-
-	if nuevo_nivel != nivel:
-		print(
-			"Nivel cambiado: %s → %s"
-			% [nivel, nuevo_nivel]
-		)
-
-		nivel = nuevo_nivel
-
-
-func _xp_maximo() -> int:
-	return NIVELES_DATA.xp_maximo()

@@ -258,7 +258,7 @@ func _cancel_active_requests() -> void:
 func _on_github_list_received(
 	result: int,
 	response_code: int,
-	headers: PackedStringArray,
+	_headers: PackedStringArray,
 	body: PackedByteArray,
 	http: HTTPRequest
 ) -> void:

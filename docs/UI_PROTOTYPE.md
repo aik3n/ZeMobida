@@ -1,194 +1,148 @@
 # Prototipo de UI, mapas, control táctil y creador de guiones
 
-**Estado:** maquetación funcional, flujo del mapa piloto, persistencia por mapa y creador local de guiones revisados hasta el 2026-09-01.
+**Estado:** referencia funcional revisada el 2026-09-03.
 
-La sincronización de guiones y el descubrimiento de mapas exportados ya fueron validados previamente en dispositivo Android. El fondo ilustrado y el control tap/arrastre deben mantenerse dentro de la regresión Android antes de una release. Existe además un preset Web, todavía sin una validación funcional equivalente documentada.
-
-## Resolución de diseño
-
-- viewport lógico: `1080 × 1920`;
-- ventana de prueba de escritorio: `500 × 1000`;
-- orientación: vertical;
-- stretch: `canvas_items`;
-- aspect: `expand`.
-
-El viewport no define el tamaño del mapa. Las localizaciones pueden utilizar ilustraciones de dimensiones y proporciones diferentes.
-
-## Orden de UI
-
-El orden visual global es estático:
+## Resolución
 
 ```text
-HUD / UI normal → CanvasLayer 5
+viewport lógico: 1080 × 1920
+orientación: vertical
+stretch: canvas_items
+aspect: expand
+```
+
+El viewport no define el tamaño del mapa.
+
+## Capas de UI
+
+```text
+UI normal       → CanvasLayer 5
 Diálogo         → CanvasLayer 10
 Feedback Player → CanvasLayer 15
 Estado          → CanvasLayer 20
 Editor guiones  → CanvasLayer 30
 ```
 
-Por ello, abrir Estado durante un diálogo deja la ventana de Estado por encima sin modificar capas dinámicamente.
-
 ## Diálogo
 
-- panel del PNJ en la parte superior;
-- área de texto con `ScrollContainer`;
-- espacio aproximado para cinco líneas antes de desplazar;
-- panel de opciones en la parte inferior;
-- opciones con scroll propio;
-- zona central libre para mantener visible el mapa.
+- panel del PNJ arriba;
+- texto con scroll propio;
+- opciones abajo con scroll propio;
+- el panel de opciones empieza oculto;
+- pulsar el panel de texto muestra/oculta opciones;
+- el clic sobre texto no cambia de nodo;
+- la rueda sobre los scrolls del diálogo no hace zoom del mapa.
 
-
-## Edición de guiones durante el diálogo
-
-El panel superior del diálogo incorpora `EDITAR` junto al nombre del PNJ.
+El nombre del PNJ indica procedencia del guion:
 
 ```text
-IBON                         [EDITAR]
-Hola, aventurero...
+gris  → sin específico
+verde → oficial
+azul  → local
 ```
 
-El botón representa el archivo específico del contexto con el que comenzó la conversación:
+## Editor de guiones
+
+`EDITAR` abre el archivo específico:
 
 ```text
-<mapa>_<pnj>_<nivel_al_inicio>.txt
+<mapa_logico>_<pnj>.txt
 ```
 
-El nivel se captura al iniciar el diálogo. Si un efecto cambia XP/nivel antes de pulsar `EDITAR`, el archivo objetivo no cambia durante esa conversación.
-
-Al pulsarlo, el diálogo se cierra y se abre `DialogueEditor` por encima del resto de UI.
-
-### Editor
-
-El editor ocupa prácticamente toda la pantalla y utiliza `CodeEdit`.
+Ejemplo:
 
 ```text
-aldea_ibon_a1.txt
+aldea_chef.txt
+```
 
-┌──────────────────────────────┐
-│   # INICIO                   │
-│ ● Hola [xp+20, xp+10]        │
-│                              │
-│   = Salir > FINAL            │
-└──────────────────────────────┘
+El editor usa `CodeEdit`, resaltado sintáctico y un gutter rojo informativo.
 
+```text
 [ GUARDAR ]   [ ENVIAR ]   [ CERRAR ]
 ```
 
-El `CodeEdit` no hace wrap. Una línea larga permanece como una sola línea visual y se consulta mediante scroll horizontal.
+Las marcas rojas no bloquean ninguna acción.
 
-El gutter izquierdo muestra `●` rojo sólo como aviso local. No existen mensajes emergentes ni un panel de errores.
-
-No existen botones de validar, probar o insertar sintaxis.
-
-El highlight actual diferencia:
-
-```text
-' comentario → verde
-# nodo       → violeta
-= opción     → azul
-? condición  → amarillo
-> salto      → cyan
-[efectos]    → naranja
-```
-
-`GUARDAR` escribe el guion local y cierra. `CERRAR` sale sin guardar cambios pendientes. Si la escritura falla, `GUARDAR` no cierra.
-
-`ENVIAR` guarda primero mediante la misma ruta de escritura. Sólo si el guardado funciona prepara un `mailto:` a `zemobida@gmail.com` con el nombre y contenido exacto del archivo; el editor permanece abierto. Cancelar o no poder abrir el cliente de correo no elimina la copia local ya guardada.
-
-Las marcas `●` nunca deshabilitan ni modifican `GUARDAR` o `ENVIAR`; un guion puede dejarse a medias y conservarse para continuar después.
-
-El diagnóstico sólo evalúa la forma de cada línea. No juzga coherencia, destinos, ciclos ni si el diálogo tiene final.
+El highlight diferencia comentario, firma, nodo, opción, condición, salto y bloque de efectos.
 
 ## Pantalla inicial
 
-- selector de mapas adaptado a formato vertical;
-- botones táctiles grandes;
-- botón toggle escalable `☐ / ☑` para actualizar guiones;
-- estado de disponibilidad de guiones;
-- selección persistente del último mapa jugado.
+- carrusel dinámico de mapas;
+- todos los `.tscn` directos de `res://mapas/` son seleccionables;
+- actualización de guiones configurable;
+- último mapa jugado persistente;
+- `Preview` → `Fondo` → imagen por defecto.
 
-## Mapa piloto top-down
+## Mapa ilustrado
 
-La dirección aprobada es:
-
-```text
-imagen de fondo + colisiones + elementos dinámicos encima
-```
-
-`aldea` es el primer mapa piloto.
-
-Su fondo jugable es:
+Dirección visual:
 
 ```text
-res://art/mapas/aldea.PNG
+imagen de Fondo
++ colisiones
++ actores/objetos dinámicos
++ frontal opcional
 ```
 
-Se utiliza mediante un `Sprite2D` llamado `Fondo`, a escala `1:1` y con `centered = false`.
+`Fondo` usa normalmente escala `1:1` y `centered = false`.
 
-La imagen de presentación del carrusel sigue siendo independiente del fondo jugable.
+Con `Fondo`, sus dimensiones definen los límites de cámara.
 
-Los límites de cámara se calculan automáticamente desde `Fondo`. Los mapas sin fondo ilustrado pueden seguir usando `CameraBounds`; `aldea` ya no necesita ese nodo.
-
-Las colisiones se construyen en Godot mediante cuerpos estáticos y shapes/polígonos.
-
-La capa `Frontal` se resuelve con un PNG transparente opcional alineado con `Fondo`, dibujado por encima de Player/PNJ. Se descartó el recorte dinámico mediante `Polygon2D` por complejidad innecesaria.
-
-## Control táctil
+Sin `Fondo`, el mapa se considera prototipo pero no se rompe:
 
 ```text
-tocar y soltar       → mover Player
-arrastrar            → explorar mapa
-pinch                → zoom en móvil
-rueda                 → zoom en escritorio
-soltar exploración   → conservar posición y zoom
-nuevo tap            → mover + restaurar cámara
+X: -1000 .. +1000
+Y: -1000 .. +1000
 ```
 
-Parámetros actuales:
+## Control
+
+```text
+tap                  → mover Player
+arrastre             → explorar mapa
+pinch                → zoom táctil
+rueda                 → zoom escritorio
+soltar exploración   → conservar vista
+nuevo tap            → mover y recentrar cámara
+```
+
+Parámetros actuales del Player:
 
 ```text
 umbral de arrastre: 28 px
-zoom:                0.7 … 1.4
+zoom:                0.5 … 1.8
 zoom normal:         1.0
 recentrado:          0.8 s
-Tween:               cubic / ease out, paralelo
 ```
 
-El destino del nuevo tap se calcula antes del recentrado, por lo que sigue siendo correcto aunque la cámara esté desplazada y con zoom distinto de `1.0`.
+La posición inicial sigue:
 
-Al volver al Player se restauran conjuntamente `camera.position = Vector2.ZERO` y `camera.zoom = Vector2.ONE`.
-
-Un nuevo gesto puede cancelar el recentrado en curso.
-
-El Player persistente recupera la última posición guardada para el mapa. Si no existe una posición previa, usa `SpawnPlayer` cuando está presente y, si falta, `Vector2.ZERO` (`0,0`). Al colocarlo se sincroniza `destino` con la posición elegida, evitando que camine hacia un destino perteneciente al mapa anterior.
-
-El ID técnico de mapa utilizado por esa persistencia es el basename de la escena normalizado a minúsculas.
-
-El ratón reproduce tap/arrastre con botón izquierdo y zoom con rueda para pruebas de escritorio.
+```text
+posición guardada
+→ SpawnPlayer
+→ (0,0)
+```
 
 ## Feedback del Player
 
-XP e inventario tienen feedback visual inmediato junto al personaje.
+Los cambios reales de inventario generan feedback junto al personaje:
 
 ```text
-positivo → verde → sube
-negativo → rojo  → baja
++objeto → positivo
+-objeto → negativo
 ```
 
-Los negativos comienzan algo más abajo que los positivos. Ambos tipos pueden animarse simultáneamente porque utilizan colas independientes.
+Añadir un objeto que ya existe o retirar uno ausente no genera cambio ni escritura adicional.
 
-Parámetros actuales:
+El feedback vive en `CanvasLayer 15`, por lo que permanece visible durante un diálogo y no cambia de tamaño con el zoom de cámara.
+
+## Estado
+
+El panel global de Estado muestra el inventario y permite:
 
 ```text
-duración de cada mensaje: 1.2 s
-intervalo por cola:       0.25 s
-separación inicial:       60 px entre positivo y negativo
+vaciar inventario
+volver a mapas
 ```
 
-Cada mensaje mantiene su propia animación, por lo que varios textos pueden coexistir en pantalla.
-
-La regla funcional es estricta: si XP o inventario no cambian realmente, no aparece ningún mensaje. La misma comprobación decide la persistencia: cuando un efecto sí cambia realmente XP o inventario, el nuevo estado se guarda inmediatamente en `user://settings.cfg`.
-
-La restauración de una partida no genera feedback.
-
-El `CanvasLayer 15` permite que el mensaje sea visible durante un diálogo y conserve un tamaño estable aunque la cámara use zoom.
+El inventario sigue siendo global en esta etapa del proyecto.
