@@ -15,6 +15,11 @@ var nivel: String = NIVELES_DATA.nivel_inicial()
 var vel := 400.0
 var destino: Vector2
 
+const MOVEMENT_ACCELERATION := 1800.0
+const MOVEMENT_DECELERATION := 1200.0
+const ARRIVAL_DISTANCE := 5.0
+
+@onready var sprite: Sprite2D = $Sprite2D
 @onready var camera: Camera2D = $Camera2D
 @onready var feedback_layer: CanvasLayer = $FeedbackLayer
 @onready var feedback_label: Label = $FeedbackLayer/FeedbackLabel
@@ -778,7 +783,7 @@ func _crear_feedback(
 	)
 
 
-func _physics_process(_delta):
+func _physics_process(delta: float) -> void:
 	var input_direction := Input.get_vector(
 		"ui_left",
 		"ui_right",
@@ -794,16 +799,57 @@ func _physics_process(_delta):
 		camera.zoom = Vector2.ONE
 		_enable_camera_follow_smoothing()
 		velocity = input_direction * vel
+		_actualizar_orientacion_sprite()
 		move_and_slide()
 		return
 
-	if global_position.distance_to(destino) > 5.0:
-		velocity = global_position.direction_to(destino) * vel
-	else:
-		velocity = Vector2.ZERO
+	var distance_to_target := global_position.distance_to(destino)
 
+	if distance_to_target <= ARRIVAL_DISTANCE:
+		velocity = Vector2.ZERO
+	else:
+		# La velocidad máxima permitida baja al acercarse al destino.
+		# Así el Player puede frenar con MOVEMENT_DECELERATION sin
+		# necesitar un radio de frenado independiente.
+		var braking_distance := maxf(
+			distance_to_target - ARRIVAL_DISTANCE,
+			0.0
+		)
+
+		var target_speed := minf(
+			vel,
+			sqrt(
+				2.0
+				* MOVEMENT_DECELERATION
+				* braking_distance
+			)
+		)
+
+		var target_velocity := (
+			global_position.direction_to(destino)
+			* target_speed
+		)
+
+		var change_rate := MOVEMENT_ACCELERATION
+
+		if target_speed < velocity.length():
+			change_rate = MOVEMENT_DECELERATION
+
+		velocity = velocity.move_toward(
+			target_velocity,
+			change_rate * delta
+		)
+
+	_actualizar_orientacion_sprite()
 	move_and_slide()
 	_update_camera_manual_position()
+
+
+func _actualizar_orientacion_sprite() -> void:
+	if absf(velocity.x) < 1.0:
+		return
+
+	sprite.flip_h = velocity.x < 0.0
 
 
 func add_xp(amount: int) -> void:

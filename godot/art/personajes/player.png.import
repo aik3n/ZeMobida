@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bh4ceyphgna5d"
-path="res://.godot/imported/charo.png-42d7377a6b60d94df158192fa88aa97e.ctex"
+uid="uid://1vqyygomto32"
+path="res://.godot/imported/player.png-7d84032a1fe38e4caac9368aa15ed2b4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/personajes/aldea/charo.png"
-dest_files=["res://.godot/imported/charo.png-42d7377a6b60d94df158192fa88aa97e.ctex"]
+source_file="res://art/personajes/player.png"
+dest_files=["res://.godot/imported/player.png-7d84032a1fe38e4caac9368aa15ed2b4.ctex"]
 
 [params]
 

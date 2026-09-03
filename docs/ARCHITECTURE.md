@@ -246,6 +246,26 @@ altura = 150
 
 Los valores son parte del ajuste visual/jugable actual y pueden revisarse si cambia el arte.
 
+### Orientación visual
+
+La orientación horizontal del personaje se gestiona automáticamente desde el movimiento.
+
+Regla:
+
+```text
+movimiento hacia la derecha
+→ sprite con orientación base
+
+movimiento hacia la izquierda
+→ sprite invertido horizontalmente
+```
+
+El arte sólo necesita proporcionar una orientación base del personaje. El runtime aplica el ajuste visual cuando cambia la dirección.
+
+El movimiento vertical o la ausencia de movimiento horizontal mantiene la última orientación horizontal.
+
+La orientación visual no afecta a la colisión, cámara ni navegación del Player.
+
 ## PNJ
 
 ### Identidad

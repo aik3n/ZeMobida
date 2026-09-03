@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://2wm1dpb4cadp"]
 
 [ext_resource type="Script" uid="uid://drgmoxoncth27" path="res://scripts/player.gd" id="1_kkt6c"]
-[ext_resource type="Texture2D" uid="uid://bh4ceyphgna5d" path="res://art/personajes/aldea/charo.png" id="2_kkt6c"]
+[ext_resource type="Texture2D" uid="uid://1vqyygomto32" path="res://art/personajes/player.png" id="2_kkt6c"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_qwqyf"]
 radius = 17.0
@@ -10,9 +10,6 @@ height = 60.0
 [node name="player" type="CharacterBody2D" unique_id=750046266]
 z_index = 2
 script = ExtResource("1_kkt6c")
-
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1661301542]
-texture = ExtResource("2_kkt6c")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=627423854]
 position = Vector2(0, 56)
@@ -43,3 +40,7 @@ one_shot = true
 
 [node name="NegativeFeedbackTimer" type="Timer" parent="." unique_id=1526722845]
 one_shot = true
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=749613644]
+scale = Vector2(-1, 1)
+texture = ExtResource("2_kkt6c")
