@@ -458,6 +458,77 @@ Esos estados no pueden conocerse de forma fiable con la arquitectura actual.
 
 La prioridad, alternancia, eliminación, posible acción `VOLVER A OFICIAL` y criterio de equivalencia entre archivos quedan expresamente fuera de este cambio y deberán cerrarse en una decisión posterior.
 
+### A-23 — Un archivo remoto inválido puede bloquear toda la sincronización
+**Prioridad:** Media  \
+**Estado:** PENDIENTE DE DISEÑO
+
+Se ha comprobado un caso real en `ZeMobida_guiones`: un archivo `.txt` con un nombre no utilizable en todas las plataformas puede impedir que se active una actualización que contiene otros guiones correctos.
+
+Ejemplo observado:
+
+```text
+fwd: aldea_limpiador_a2.txt
+```
+
+El carácter `:` no es válido en nombres de archivo de Windows.
+
+El comportamiento actual del updater es deliberadamente atómico:
+
+```text
+listar .txt remotos
+→ preparar carpeta temporal
+→ copiar/descargar todos
+→ comprobar que el conjunto temporal coincide con el remoto
+→ sólo entonces sustituir la caché activa
+```
+
+Si uno de los `.txt` no puede guardarse en la carpeta temporal:
+
+```text
+un archivo falla
+→ sync_failed
+→ se descarta el temporal completo
+→ se conserva user://dialogues/ anterior
+```
+
+Esta política protege contra una caché parcialmente actualizada, pero actualmente cualquier archivo remoto terminado en `.txt` se considera parte obligatoria de la colección. Como consecuencia, un archivo con nombre accidental, incompatible con la plataforma o ajeno al convenio de guiones puede bloquear la actualización de todos los demás.
+
+El problema a debatir no es si mantener la actualización atómica; esa propiedad sigue siendo valiosa. La decisión pendiente es **qué archivos del repositorio deben considerarse guiones oficiales sincronizables**.
+
+Opciones a valorar:
+
+1. filtrar antes de sincronizar y aceptar sólo nombres compatibles con el convenio técnico de guiones;
+2. ignorar nombres no admitidos y emitir un warning;
+3. considerar cualquier nombre inválido un error editorial del repositorio y mantener el bloqueo global;
+4. introducir otra regla explícita de publicación si aparece una necesidad real.
+
+Una posible convención mínima sería admitir únicamente nombres formados por caracteres portables, por ejemplo:
+
+```text
+a-z
+0-9
+_
+.txt
+```
+
+pero **esta regla no está aceptada todavía** y no debe implementarse hasta cerrar el debate.
+
+La validación del nombre y la validación del contenido son responsabilidades distintas. Aunque se adopte un filtro de nombres, `DialogueUpdater` no debería empezar a interpretar la sintaxis narrativa; Parser/Validator seguirían siendo responsables del contenido cuando el guion se utiliza.
+
+Caso que originó el punto:
+
+```text
+casco_viejo_juan_a1.txt
+→ archivo correcto y descargable
+
+fwd: aldea_limpiador_a2.txt
+→ nombre no portable
+
+resultado actual
+→ la colección temporal no puede completarse
+→ Juan tampoco llega a activarse en la caché local
+```
+
 ## Observaciones adicionales
 
 ### Seguimiento PNJ
