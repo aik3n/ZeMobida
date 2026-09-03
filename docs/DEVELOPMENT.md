@@ -406,7 +406,7 @@ La persistencia de jugador comparte ese mismo archivo. XP e inventario se guarda
 
 Cuando un efecto de diálogo produce un cambio real de XP o inventario, `[player]` se guarda inmediatamente. El guardado de la recompensa no espera a que termine la conversación.
 
-La última posición de Player se guarda por ID técnico de mapa en `[map_positions]` y se restaura al volver a entrar. `SpawnPlayer` sólo actúa como entrada/fallback cuando no existe una posición previa.
+La última posición de Player se guarda por ID técnico de mapa en `[map_positions]` y se restaura al volver a entrar. Si no existe una posición previa, `SpawnPlayer` es opcional: si existe se usa su posición; si no existe se usa `Vector2.ZERO` (`0,0`). No se busca automáticamente una posición libre ni se aplica lógica especial de colisiones.
 
 Al iniciar el carrusel se intenta recuperar la última ruta seleccionada. Si el archivo ya no existe, se selecciona el primer mapa disponible.
 

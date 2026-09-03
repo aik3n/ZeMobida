@@ -85,7 +85,7 @@ Al volver:
 
 ## Posición persistente por mapa
 
-`SpawnPlayer` sigue siendo parte del contrato del mapa, pero ya no significa “aparecer siempre aquí”.
+`SpawnPlayer` es opcional. La entrada del Player sigue esta prioridad: posición guardada → `SpawnPlayer` si existe → `Vector2.ZERO` (`0,0`). No se busca automáticamente una posición libre ni se aplica lógica especial de colisiones.
 
 Regla:
 

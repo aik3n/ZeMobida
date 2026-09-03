@@ -160,7 +160,7 @@ Al volver al Player se restauran conjuntamente `camera.position = Vector2.ZERO` 
 
 Un nuevo gesto puede cancelar el recentrado en curso.
 
-El Player persistente usa `SpawnPlayer` sólo cuando no existe una posición guardada para el mapa. En entradas posteriores recupera la última posición y sincroniza `destino` con la posición restaurada, evitando que camine hacia un destino perteneciente al mapa anterior.
+El Player persistente recupera la última posición guardada para el mapa. Si no existe una posición previa, usa `SpawnPlayer` cuando está presente y, si falta, `Vector2.ZERO` (`0,0`). Al colocarlo se sincroniza `destino` con la posición elegida, evitando que camine hacia un destino perteneciente al mapa anterior.
 
 El ID técnico de mapa utilizado por esa persistencia es el basename de la escena normalizado a minúsculas.
 

@@ -259,22 +259,15 @@ func _configurar_player() -> void:
 
 	var spawn := mapa_actual.get_node_or_null(
 		"SpawnPlayer"
-	)
+	) as Node2D
 
-	if spawn == null:
+	var posicion_fallback := Vector2.ZERO
 
-		print(
-			"No se encontró SpawnPlayer en el mapa."
-		)
-
-		player_actual.visible = false
-		player_actual.set_physics_process(false)
-		player_actual.set_process_unhandled_input(false)
-
-		return
+	if spawn != null:
+		posicion_fallback = spawn.global_position
 
 	var posicion_inicial: Vector2 = _obtener_posicion_mapa(
-		spawn.global_position
+		posicion_fallback
 	)
 
 	player_actual.global_position = posicion_inicial
