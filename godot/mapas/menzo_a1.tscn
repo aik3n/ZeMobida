@@ -14,6 +14,8 @@ radius = 227.0
 height = 454.0
 
 [node name="mapa" type="Node2D" unique_id=493802413]
+metadata/descripcion = "vaya aventura!"
+metadata/final = "muy bien chico"
 
 [node name="Fondo" type="Sprite2D" parent="." unique_id=1615628162]
 modulate = Color(0.5152081, 0.5152081, 0.5152081, 1)
