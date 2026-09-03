@@ -144,6 +144,23 @@ user://dialogues/aldea_ibon_a1.txt
 
 No sustituye a otros niveles ni modifica el archivo oficial.
 
+### Estado visual del guion en el PNJ
+
+El nombre del PNJ permanece visible en el mapa y su color indica qué tipo de guion tiene disponible para el nivel actual del Player:
+
+```text
+gris     → no hay guion específico asignado
+verde    → oficial exacto <mapa>_<pnj>_<nivel>.txt
+azul     → local exacto <mapa>_<pnj>_<nivel>.txt
+amarillo → oficial PNJ <mapa>_<pnj>.txt
+```
+
+`generico.txt` es un fallback técnico y no se considera un guion asignado al PNJ, por lo que no activa un color de contenido.
+
+La prioridad visual sigue la misma procedencia que runtime: un local exacto prevalece sobre un oficial exacto. El color se recalcula cuando cambia el nivel del Player y al cerrar el editor de guiones, porque ambas situaciones pueden cambiar el archivo aplicable.
+
+El color del nombre comunica disponibilidad/procedencia antes de conversar. No sustituye al halo del diálogo ni a la firma `@`, que mantienen significados distintos.
+
 ### Flujo de edición
 
 El botón `EDITAR` aparece junto al nombre del PNJ durante el diálogo.

@@ -1,6 +1,8 @@
 extends Node
 
 
+signal dialogue_sources_changed
+
 var current_node := ""
 var dialogue_active := false
 var dialogue_ui = null
@@ -63,6 +65,42 @@ func get_level_dialogue_file_name(
 		speaker_name,
 		level
 	]
+
+
+func get_dialogue_assignment_state(
+	map_name: String,
+	speaker_name: String,
+	level: String
+) -> String:
+	var level_file := get_level_dialogue_file_name(
+		map_name,
+		speaker_name,
+		level
+	)
+
+	if FileAccess.file_exists(
+		CUSTOM_DIALOGUE_FOLDER + level_file
+	):
+		return "local_exact"
+
+	if FileAccess.file_exists(
+		DIALOGUE_FOLDER + level_file
+	):
+		return "official_exact"
+
+	var generic_file := "%s_%s.txt" % [
+		map_name,
+		speaker_name
+	]
+
+	if FileAccess.file_exists(
+		DIALOGUE_FOLDER + generic_file
+	):
+		return "official_generic"
+
+	# generico.txt es fallback técnico y no se considera
+	# un guion asignado específicamente a este PNJ.
+	return "none"
 
 
 func resolve_dialogue_path(
@@ -227,6 +265,7 @@ func _read_dialogue_text(file_path: String) -> String:
 func _on_dialogue_editor_closed() -> void:
 	editor_active = false
 	dialogue_editor = null
+	dialogue_sources_changed.emit()
 
 
 func start_dialogue(
