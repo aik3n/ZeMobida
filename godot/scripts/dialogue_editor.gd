@@ -118,11 +118,6 @@ func _is_line_locally_valid(
 	if line.begins_with("@"):
 		return not line.substr(1).strip_edges().is_empty()
 
-	# '#' sólo puede existir en una declaración de nodo.
-	# El comentario ya se retiró antes de llegar aquí.
-	if line.contains("#") and not line.begins_with("#"):
-		return false
-
 	match line[0]:
 		"#":
 			return _is_node_line_valid(
@@ -174,10 +169,11 @@ func _is_node_line_valid(
 	if label.is_empty():
 		return false
 
-	# La etiqueta limpia es un único token.
+	# La etiqueta limpia es un único token y RANDOM está reservado.
 	return (
 		not label.contains(" ")
 		and not label.contains("\t")
+		and label.to_lower() != "random"
 	)
 
 
@@ -206,7 +202,10 @@ func _is_clean_target(
 		if target.contains(marker):
 			return false
 
-	return true
+	return (
+		not target.contains(" ")
+		and not target.contains("\t")
+	)
 
 
 func _has_invalid_brackets(line: String) -> bool:
@@ -400,10 +399,6 @@ func _is_condition_line_valid(
 func _is_text_line_valid(
 	line: String
 ) -> bool:
-	# '>' está reservado al salto estructural.
-	if line.contains(">"):
-		return false
-
 	var bracket := line.rfind("[")
 
 	if bracket < 0:
@@ -459,9 +454,23 @@ func _are_effects_locally_valid(
 			effect.begins_with("+")
 			or effect.begins_with("-")
 		):
-			if effect.substr(
+			var item := effect.substr(
 				1
-			).strip_edges().is_empty():
+			).strip_edges()
+
+			if item.is_empty():
+				return false
+
+			if (
+				item.contains(" ")
+				or item.contains("\t")
+			):
+				return false
+
+			if (
+				effect.begins_with("-")
+				and item.to_lower() == "_eoa_"
+			):
 				return false
 
 			continue

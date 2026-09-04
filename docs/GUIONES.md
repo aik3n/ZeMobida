@@ -96,10 +96,10 @@ Cada mapa mantiene su propio inventario persistente. Al entrar en una aventura, 
 Para indicar que la aventura está resuelta se usa una marca reservada:
 
 ```text
-[+__superado__]
+[+_EOA_]
 ```
 
-`__superado__` no es un objeto narrativo para el jugador. Se guarda en el inventario persistente del mapa, pero no se muestra en Estado ni genera feedback visual.
+`_EOA_` no es un objeto narrativo para el jugador. Se guarda en el inventario persistente del mapa, pero no se muestra en Estado ni genera feedback visual.
 
 Mientras la marca no exista, el carrusel muestra `descripcion`. Cuando existe, muestra `final` y el sello de aventura superada.
 

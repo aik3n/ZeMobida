@@ -2,7 +2,8 @@
 
 ## Estado
 
-**Especificación implementada en parser, validador, runtime y editor.**
+**Especificación implementada en parser, validador, runtime y editor.**  
+**Formato v1 cerrado.**
 
 Los guiones son archivos UTF-8 `.txt`.
 
@@ -92,6 +93,16 @@ Hola.
 
 Las etiquetas se normalizan a minúsculas; no distinguen mayúsculas/minúsculas.
 
+El nombre de un nodo es un identificador de un solo token: no admite espacios ni tabuladores. Se recomienda `_` para separar palabras:
+
+```text
+# CASA_ABIERTA
+```
+
+`RANDOM` está reservado y no puede usarse como nombre de nodo.
+
+El primer nodo del archivo es el punto de entrada del diálogo.
+
 ## Texto del PNJ
 
 Texto normal:
@@ -116,7 +127,7 @@ Varias condiciones en la misma línea usan AND:
 
 Sólo se salta si están presentes ambos objetos.
 
-Una condición sin destino se ignora.
+Una condición sin destino es inválida.
 
 ## Saltos
 
@@ -139,6 +150,8 @@ Aleatorio:
 ```
 
 `RANDOM` selecciona un nodo distinto del actual.
+
+Cada nodo admite como máximo un salto directo `>`. `RANDOM` sólo es válido como destino de ese salto directo; no se usa como destino de condición u opción.
 
 ## Opciones
 
@@ -169,17 +182,19 @@ Efectos soportados:
 -objeto
 ```
 
-### Marca de aventura superada
+### Marca de fin de aventura
 
-`__superado__` es un nombre reservado dentro del inventario del mapa.
+`_EOA_` es un nombre reservado dentro del inventario del mapa. `EOA` significa **End Of Adventure**.
 
 Para marcar que la aventura actual se ha resuelto:
 
 ```text
-[+__superado__]
+[+_EOA_]
 ```
 
 No existe un efecto nuevo específico para completar mapas: esta convención utiliza el mismo `+objeto` que cualquier otro efecto.
+
+`_EOA_` sólo puede añadirse con `+`; `-_EOA_` es inválido. El reinicio de una aventura se realiza mediante `Vaciar inventario`.
 
 El runtime guarda la marca con el inventario persistente del mapa, pero la oculta en el panel Estado y no muestra feedback de objeto. El carrusel interpreta su presencia como aventura superada y pasa de `descripcion` a `final`, mostrando además el sello correspondiente.
 
@@ -196,6 +211,13 @@ Pueden combinarse:
 
 ```text
 = Cambiar moneda por llave > FINAL [-moneda, +llave]
+```
+
+Los nombres de objetos y flags son también identificadores de un solo token, sin espacios ni tabuladores:
+
+```text
+perro_encontrado
+pista_del_pozo
 ```
 
 También pueden aplicarse al texto de un nodo:
@@ -264,7 +286,7 @@ Ya tienes la llave.
 = Devolvértela > FINAL [-llave]
 
 # FINAL
-Gracias.
+Gracias. [+_EOA_]
 ```
 
 ## Validación
@@ -274,10 +296,15 @@ Gracias.
 Entre otros casos, se detectan:
 
 - etiquetas vacías o duplicadas;
-- destinos inexistentes;
+- etiquetas con espacios o uso de `RANDOM` como nodo;
+- destinos inexistentes o con espacios;
+- condiciones sin destino;
+- más de un salto directo en el mismo nodo;
 - saltos sin destino;
 - opciones sin texto;
-- efectos desconocidos o vacíos.
+- objetos/flags con espacios;
+- efectos desconocidos o vacíos;
+- intento de retirar `_EOA_`.
 
 El editor añade además un diagnóstico local por línea mediante un gutter rojo. Ese diagnóstico es informativo: no bloquea `GUARDAR` ni `ENVIAR`.
 

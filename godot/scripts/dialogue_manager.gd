@@ -38,7 +38,7 @@ const DIALOGUE_TEMPLATE := (
 
 const SETTINGS_FILE := "user://settings.cfg"
 const MAP_INVENTORIES_SECTION := "map_inventories"
-const MAP_COMPLETED_ITEM := "__superado__"
+const MAP_COMPLETED_ITEM := "_eoa_"
 const DIALOGUE_MAP_LEVEL_MARKERS := [
 	"_a1",
 	"_a2",

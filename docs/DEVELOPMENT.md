@@ -116,10 +116,10 @@ Efectos soportados:
 Para marcar que una aventura ha sido resuelta se usa la marca reservada:
 
 ```text
-[+__superado__]
+[+_EOA_]
 ```
 
-No es sintaxis nueva: `__superado__` es un item reservado que aprovecha el mismo efecto `+objeto`. No se muestra en Estado ni genera feedback visual de inventario.
+No es sintaxis nueva: `_EOA_` es un item reservado que aprovecha el mismo efecto `+objeto`. No se muestra en Estado ni genera feedback visual de inventario.
 
 No hay progresión numérica del Player dentro del lenguaje de guiones.
 
@@ -164,7 +164,7 @@ Al cargar una escena de mapa se carga el inventario del mapa que se acaba de car
 
 El inventario se guarda cuando un efecto produce un cambio real. Vaciarlo afecta sólo al mapa activo.
 
-El estado de aventura superada no tiene una sección propia: se deriva de la presencia de `__superado__` en el inventario persistente del mapa. Vaciar el inventario elimina también esa marca.
+El estado de aventura superada no tiene una sección propia: se deriva de la presencia de `_EOA_` en el inventario persistente del mapa. Vaciar el inventario elimina también esa marca.
 
 La posición del Player usa el mismo ID completo de escena, pero posición e inventario se almacenan en secciones distintas.
 
@@ -202,7 +202,7 @@ Después de cambios en mapas/diálogo comprobar:
 - `EDITAR` sobre el archivo correcto;
 - guardar local y volver a interactuar;
 - inventario `+objeto` / `-objeto`;
-- `[+__superado__]`, persistencia y reinicio al vaciar inventario;
+- `[+_EOA_]`, persistencia y reinicio al vaciar inventario;
 - carrusel: `descripcion` antes de superar y `final` + sello después;
 - volver a mapas con diálogo abierto;
 - rueda sobre paneles de diálogo sin zoom del mapa;

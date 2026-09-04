@@ -148,6 +148,6 @@ vaciar inventario
 volver a mapas
 ```
 
-El panel muestra el inventario del mapa activo. La marca reservada `__superado__` no aparece en la lista ni genera feedback de inventario.
+El panel muestra el inventario del mapa activo. La marca reservada `_EOA_` no aparece en la lista ni genera feedback de inventario.
 
-Vaciar inventario afecta sólo al mapa activo y elimina también `__superado__`, por lo que ese mapa vuelve a considerarse no superado.
+Vaciar inventario afecta sólo al mapa activo y elimina también `_EOA_`, por lo que ese mapa vuelve a considerarse no superado.
