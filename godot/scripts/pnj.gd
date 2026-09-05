@@ -35,6 +35,12 @@ var _idle_tween: Tween
 var _idle_base_position := Vector2.ZERO
 var _idle_base_scale := Vector2.ONE
 
+# Pista blanda: condiciones de diálogo que dependen del inventario.
+# No se guarda ningún estado nuevo; sólo detectamos false -> true.
+var _conditional_item_sets: Array = []
+var _conditional_available := false
+var _conditional_hint_pending := false
+
 
 const VELOCIDAD_SEGUIR := 100.0
 const DISTANCIA_REANUDAR := 120.0
@@ -48,6 +54,15 @@ const IDLE_MOVE_TIME := 0.6
 const IDLE_INITIAL_DELAY_MAX := 1.5
 const IDLE_REST_MIN := 1.0
 const IDLE_REST_MAX := 2.5
+
+# Pista condicional breve. No es un marcador permanente:
+# dos pulsos dorados y desaparece.
+const HINT_AURA_COLOR := Color(1.0, 0.84, 0.25, 0.48)
+const HINT_AURA_SCALE_START := 1.04
+const HINT_AURA_SCALE_END := 1.26
+const HINT_AURA_FADE_IN := 0.10
+const HINT_AURA_EXPAND_TIME := 0.58
+const HINT_AURA_SECOND_DELAY := 0.16
 
 # Profundidad visual respecto al Player.
 # Fondo permanece en -10 y los frontales fijos en +10.
@@ -121,8 +136,12 @@ func _ready() -> void:
 	DialogueManager.dialogue_sources_changed.connect(
 		_actualizar_estado_nombre_dialogo
 	)
+	DialogueManager.dialogue_sources_changed.connect(
+		_actualizar_condiciones_de_pista
+	)
 
 	_actualizar_estado_nombre_dialogo()
+	_actualizar_condiciones_de_pista()
 
 	_idle_base_position = visual_sprite.position
 	_idle_base_scale = visual_sprite.scale
@@ -195,6 +214,7 @@ func _physics_process(_delta: float) -> void:
 
 	_actualizar_profundidad_visual()
 	_actualizar_seguimiento()
+	_actualizar_pista_condicional()
 
 	match tipo_seguimiento:
 
@@ -227,6 +247,144 @@ func _physics_process(_delta: float) -> void:
 			else:
 
 				velocity = Vector2.ZERO
+
+
+func _actualizar_condiciones_de_pista() -> void:
+	_conditional_item_sets.clear()
+	_conditional_available = false
+	_conditional_hint_pending = false
+
+	var map_name := get_map_name()
+	if map_name.is_empty():
+		return
+
+	var dialogue_path := str(DialogueManager.resolve_dialogue_path(
+		map_name,
+		get_nombre_tecnico()
+	))
+
+	if dialogue_path.is_empty():
+		return
+
+	if not FileAccess.file_exists(dialogue_path):
+		return
+
+	var parser := DialogueParser.new()
+	var dialogue := parser.parse(
+		FileAccess.get_file_as_string(dialogue_path)
+	)
+
+	# Una pista nunca debe intentar "arreglar" un guion inválido.
+	if not parser.errors.is_empty():
+		return
+
+	for node in dialogue.values():
+		for condition in node.get("conditions", []):
+			var items = condition.get("items", [])
+
+			if not items.is_empty():
+				_conditional_item_sets.append(items.duplicate())
+
+
+func _actualizar_pista_condicional() -> void:
+	if _conditional_item_sets.is_empty():
+		return
+
+	var available := _tiene_condicion_de_dialogo_disponible()
+
+	if available and not _conditional_available:
+		_conditional_hint_pending = true
+
+	_conditional_available = available
+
+	# Si el objeto se obtiene durante una conversación, esperamos a que
+	# termine: así el pulso se ve en el mapa y no detrás del diálogo.
+	if (
+		_conditional_hint_pending
+		and not DialogueManager.dialogue_active
+		and not DialogueManager.editor_active
+	):
+		_conditional_hint_pending = false
+		_mostrar_pista_condicional()
+
+
+func _tiene_condicion_de_dialogo_disponible() -> bool:
+	for items in _conditional_item_sets:
+		var all_present := true
+
+		for item in items:
+			if not DialogueManager.has_item(str(item)):
+				all_present = false
+				break
+
+		if all_present:
+			return true
+
+	return false
+
+
+func _mostrar_pista_condicional() -> void:
+	if visual_sprite == null or visual_sprite.texture == null:
+		return
+
+	_crear_pulso_aura(0.0)
+	_crear_pulso_aura(HINT_AURA_SECOND_DELAY)
+
+
+func _crear_pulso_aura(delay: float) -> void:
+	var aura := Sprite2D.new()
+
+	# Copiamos sólo las propiedades visuales necesarias. El aura no tiene
+	# colisión, interacción ni lógica: es una silueta temporal del sprite.
+	aura.texture = visual_sprite.texture
+	aura.centered = visual_sprite.centered
+	aura.offset = visual_sprite.offset
+	aura.flip_h = visual_sprite.flip_h
+	aura.flip_v = visual_sprite.flip_v
+	aura.hframes = visual_sprite.hframes
+	aura.vframes = visual_sprite.vframes
+	aura.frame = visual_sprite.frame
+	aura.region_enabled = visual_sprite.region_enabled
+	aura.region_rect = visual_sprite.region_rect
+
+	aura.position = visual_sprite.position
+	aura.rotation = visual_sprite.rotation
+	aura.scale = visual_sprite.scale * HINT_AURA_SCALE_START
+	aura.z_index = visual_sprite.z_index - 1
+	aura.modulate = HINT_AURA_COLOR
+	aura.modulate.a = 0.0
+
+	add_child(aura)
+
+	var tween := create_tween()
+
+	if delay > 0.0:
+		tween.tween_interval(delay)
+
+	tween.tween_property(
+		aura,
+		"modulate:a",
+		HINT_AURA_COLOR.a,
+		HINT_AURA_FADE_IN
+	)
+
+	var expand := tween.tween_property(
+		aura,
+		"scale",
+		visual_sprite.scale * HINT_AURA_SCALE_END,
+		HINT_AURA_EXPAND_TIME
+	)
+	expand.set_trans(Tween.TRANS_CUBIC)
+	expand.set_ease(Tween.EASE_OUT)
+
+	tween.parallel().tween_property(
+		aura,
+		"modulate:a",
+		0.0,
+		HINT_AURA_EXPAND_TIME
+	)
+
+	tween.tween_callback(aura.queue_free)
 
 
 func _actualizar_profundidad_visual() -> void:
