@@ -1,7 +1,8 @@
 [gd_scene format=3 uid="uid://dn6whg1fqoc87"]
 
-[ext_resource type="Script" path="res://scripts/carrusel_mapas.gd" id="1"]
-[ext_resource type="Texture2D" path="res://art/ui/seal.png" id="2_seal"]
+[ext_resource type="Script" uid="uid://cievjiemjody1" path="res://scripts/carrusel_mapas.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cr20xelqu3a35" path="res://art/ui/seal.png" id="2_seal"]
+[ext_resource type="Texture2D" uid="uid://brsbna1xtsjbn" path="res://art/ui/play.png" id="3_play"]
 
 [sub_resource type="StyleBoxFlat" id="StyleArrow"]
 bg_color = Color(0.08, 0.105, 0.14, 0.95)
@@ -14,18 +15,6 @@ corner_radius_top_left = 22
 corner_radius_top_right = 22
 corner_radius_bottom_right = 22
 corner_radius_bottom_left = 22
-
-[sub_resource type="StyleBoxFlat" id="StylePlay"]
-bg_color = Color(0.08, 0.42, 0.49, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.45, 0.9, 0.85, 0.9)
-corner_radius_top_left = 25
-corner_radius_top_right = 25
-corner_radius_bottom_right = 25
-corner_radius_bottom_left = 25
 
 [node name="CarruselMapas" type="Control" unique_id=815486920]
 layout_mode = 3
@@ -49,17 +38,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 22
 
-[node name="BtnAnterior" type="Button" parent="Contenedor" unique_id=1670028717]
-custom_minimum_size = Vector2(108, 180)
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.72, 0.91, 1, 1)
-theme_override_font_sizes/font_size = 86
-theme_override_styles/normal = SubResource("StyleArrow")
-theme_override_styles/hover = SubResource("StyleArrow")
-theme_override_styles/pressed = SubResource("StyleArrow")
-text = "◀"
-
 [node name="Centro" type="VBoxContainer" parent="Contenedor" unique_id=148338911]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -67,8 +45,46 @@ size_flags_vertical = 3
 theme_override_constants/separation = 18
 alignment = 1
 
+[node name="Navegacion" type="HBoxContainer" parent="Contenedor/Centro" unique_id=740189492]
+custom_minimum_size = Vector2(0, 90)
+layout_mode = 2
+theme_override_constants/separation = 110
+
+[node name="BtnAnterior" type="Button" parent="Contenedor/Centro/Navegacion" unique_id=1670028717]
+custom_minimum_size = Vector2(0, 90)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_colors/font_color = Color(0.72, 0.91, 1, 1)
+theme_override_font_sizes/font_size = 64
+theme_override_styles/normal = SubResource("StyleArrow")
+theme_override_styles/pressed = SubResource("StyleArrow")
+theme_override_styles/hover = SubResource("StyleArrow")
+text = "◀"
+
+[node name="BtnSiguiente" type="Button" parent="Contenedor/Centro/Navegacion" unique_id=1356066911]
+custom_minimum_size = Vector2(0, 90)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+theme_override_colors/font_color = Color(0.72, 0.91, 1, 1)
+theme_override_font_sizes/font_size = 64
+theme_override_styles/normal = SubResource("StyleArrow")
+theme_override_styles/pressed = SubResource("StyleArrow")
+theme_override_styles/hover = SubResource("StyleArrow")
+text = "▶"
+
+[node name="Nombre" type="Label" parent="Contenedor/Centro" unique_id=884854648]
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
+theme_override_font_sizes/font_size = 59
+text = "mapa"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Preview" type="TextureRect" parent="Contenedor/Centro" unique_id=370161252]
-custom_minimum_size = Vector2(0, 500)
+custom_minimum_size = Vector2(0, 400)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -76,7 +92,7 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Sello" type="TextureRect" parent="Contenedor/Centro/Preview"]
+[node name="Sello" type="TextureRect" parent="Contenedor/Centro/Preview" unique_id=1561703160]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -97,16 +113,7 @@ texture = ExtResource("2_seal")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Nombre" type="Label" parent="Contenedor/Centro" unique_id=884854648]
-custom_minimum_size = Vector2(0, 76)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.92, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 48
-text = "mapa"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Texto" type="Label" parent="Contenedor/Centro"]
+[node name="Texto" type="Label" parent="Contenedor/Centro" unique_id=366768116]
 custom_minimum_size = Vector2(0, 120)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.82, 0.88, 0.92, 1)
@@ -129,24 +136,12 @@ vertical_alignment = 1
 custom_minimum_size = Vector2(0, 105)
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.94, 1, 1, 1)
-theme_override_font_sizes/font_size = 52
-theme_override_styles/normal = SubResource("StylePlay")
-theme_override_styles/hover = SubResource("StylePlay")
-theme_override_styles/pressed = SubResource("StylePlay")
-text = "JUGAR"
+theme_override_constants/icon_max_width = 72
+icon = ExtResource("3_play")
+flat = true
+icon_alignment = 1
+expand_icon = true
 
-[node name="BtnSiguiente" type="Button" parent="Contenedor" unique_id=1356066911]
-custom_minimum_size = Vector2(108, 180)
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.72, 0.91, 1, 1)
-theme_override_font_sizes/font_size = 86
-theme_override_styles/normal = SubResource("StyleArrow")
-theme_override_styles/hover = SubResource("StyleArrow")
-theme_override_styles/pressed = SubResource("StyleArrow")
-text = "▶"
-
-[connection signal="pressed" from="Contenedor/BtnAnterior" to="." method="_on_btn_anterior_pressed"]
+[connection signal="pressed" from="Contenedor/Centro/Navegacion/BtnAnterior" to="." method="_on_btn_anterior_pressed"]
+[connection signal="pressed" from="Contenedor/Centro/Navegacion/BtnSiguiente" to="." method="_on_btn_siguiente_pressed"]
 [connection signal="pressed" from="Contenedor/Centro/Jugar" to="." method="_on_jugar_pressed"]
-[connection signal="pressed" from="Contenedor/BtnSiguiente" to="." method="_on_btn_siguiente_pressed"]

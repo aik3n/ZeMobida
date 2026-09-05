@@ -10,8 +10,8 @@ const DEFAULT_PREVIEW := preload(
 	"res://art/ui/preview_default.png"
 )
 
-@onready var btn_anterior: Button = $Contenedor/BtnAnterior
-@onready var btn_siguiente: Button = $Contenedor/BtnSiguiente
+@onready var btn_anterior: Button = $Contenedor/Centro/Navegacion/BtnAnterior
+@onready var btn_siguiente: Button = $Contenedor/Centro/Navegacion/BtnSiguiente
 @onready var lbl_nombre: Label = $Contenedor/Centro/Nombre
 @onready var preview: TextureRect = $Contenedor/Centro/Preview
 @onready var sello: TextureRect = $Contenedor/Centro/Preview/Sello

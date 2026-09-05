@@ -12,6 +12,11 @@ func _ready() -> void:
 
 	panel_carga_escenas.process_mode = Node.PROCESS_MODE_DISABLED
 
+	# Se conserva la lógica de sincronización, pero estos controles
+	# no forman parte de la UI visible del MVP.
+	lbl_estado_guiones.visible = false
+	chk_actualizar.visible = false
+
 	chk_actualizar.button_pressed = DialogueUpdater.actualizar_guiones_al_iniciar
 	_actualizar_texto_check()
 
