@@ -1,7 +1,8 @@
 # ZeMobida — Development Guide
 
-**Estado:** revisado el 2026-09-03.  
-**Godot:** 4.7.x.
+**Estado:** guía de trabajo vigente.  
+**Godot:** 4.7.x.  
+**Responsabilidad:** explicar cómo desarrollar, modificar y comprobar ZeMobida sin duplicar contratos técnicos de otros documentos.
 
 ## Reglas de trabajo
 
@@ -93,37 +94,15 @@ azul  → local
 
 ## Formato de guion
 
-Resumen:
+El contrato técnico del lenguaje vive únicamente en [`DIALOGUE_FORMAT.md`](DIALOGUE_FORMAT.md).
 
-```text
-texto → texto del PNJ
-@     → firma
-#     → nodo
-?     → condición
->     → salto
-=     → opción
-[ ]   → efectos de inventario
-'     → comentario
-```
+Esta guía no duplica sus reglas. Si se modifica parser, validator, runtime o editor, los cuatro deben seguir interpretando el mismo formato y la regresión manual debe comprobar el cambio en ejecución.
 
-Efectos soportados:
-
-```text
-+objeto
--objeto
-```
-
-Para marcar que una aventura ha sido resuelta se usa la marca reservada:
+La marca de fin de aventura forma parte de ese contrato y actualmente se escribe:
 
 ```text
 [+_EOA_]
 ```
-
-No es sintaxis nueva: `_EOA_` es un item reservado que aprovecha el mismo efecto `+objeto`. No se muestra en Estado ni genera feedback visual de inventario.
-
-No hay progresión numérica del Player dentro del lenguaje de guiones.
-
-Consultar `DIALOGUE_FORMAT.md` para el contrato completo.
 
 ## Sincronización
 

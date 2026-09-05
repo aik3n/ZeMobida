@@ -3,7 +3,8 @@
 ## Estado
 
 **Especificación implementada en parser, validador, runtime y editor.**  
-**Formato v1 cerrado.**
+**Formato v1 cerrado.**  
+**Responsabilidad:** fuente única de verdad del formato de diálogo. Si otro documento resume una regla, este archivo prevalece.
 
 Los guiones son archivos UTF-8 `.txt`.
 

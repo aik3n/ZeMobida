@@ -1,6 +1,7 @@
-# ZeMobida — Experimento de mapas externos
+# ZeMobida — Experimento histórico de mapas externos
 
-**Estado:** cerrado / descartado para el prototipo actual.
+**Estado:** cerrado / descartado.  
+**Responsabilidad:** conservar únicamente la conclusión de un experimento ya realizado para no repetir la investigación.
 
 ## Qué se probó
 

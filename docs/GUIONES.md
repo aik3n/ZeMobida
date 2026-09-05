@@ -1,5 +1,44 @@
 # Guiones ZeMobida
 
+**Responsabilidad:** diseño de aventuras y criterios para quien escribe contenido. La sintaxis exacta pertenece a [`DIALOGUE_FORMAT.md`](DIALOGUE_FORMAT.md).
+
+## Propósito
+
+ZeMobida busca que comprender un idioma sirva para **hacer cosas dentro de una aventura**.
+
+El idioma no es una asignatura que el juego examine desde fuera. Es la herramienta con la que el jugador entiende a otras personas, descubre información, interpreta una situación, toma decisiones y consigue resolverla.
+
+El progreso ocurre cuando haber comprendido una conversación cambia lo que el jugador sabe, puede preguntar, puede hacer o puede conseguir.
+
+La pregunta de diseño no es:
+
+> ¿Qué ejercicio lingüístico debe superar el jugador?
+
+sino:
+
+> ¿Qué necesita comprender y utilizar para resolver esta movida?
+
+## Ambición
+
+ZeMobida aspira a crecer como una colección de aventuras pequeñas e independientes, cada una centrada en una situación concreta, un lugar, unos personajes y un nivel lingüístico.
+
+Cada mapa debería poder jugarse como una historia breve con identidad propia. El núcleo del juego se mantiene deliberadamente sencillo para que la variedad venga de las situaciones, las conversaciones y sus consecuencias, no de acumular sistemas.
+
+Las aventuras deben ser fáciles de probar, repetir y crear. Añadir contenido debería significar principalmente imaginar una buena movida, construir el mapa y escribir conversaciones, sin exigir programación al autor.
+
+La profundidad de ZeMobida debe venir del **contexto**: entender quién dice qué, qué significa en esa situación y qué cambia cuando el jugador actúa en consecuencia.
+
+## Principios de diseño
+
+- **El idioma sirve para actuar.** Una conversación debe poder abrir posibilidades, cerrar dudas, entregar pistas, cambiar relaciones o permitir decisiones.
+- **Comprender importa más que traducir.** Una frase puede ser entendida palabra por palabra y aun así interpretarse mal dentro de la situación.
+- **Cada aventura tiene una movida clara.** Debe existir un problema, deseo, misterio o situación que el jugador pueda explicar en una frase.
+- **La progresión es contextual.** Objetos, pistas y flags representan lo que ha ocurrido o lo que el jugador ha descubierto; no existe una progresión numérica del Player.
+- **El gameplay físico permanece sencillo.** Moverse y explorar sirven para conectar conversaciones y situaciones; no compiten con ellas por ser la mecánica principal.
+- **Equivocarse puede formar parte de comprender.** Una decisión incoherente puede producir una rama distinta, pero se evitan bloqueos permanentes accidentales.
+- **El nivel lingüístico pertenece a la aventura.** El mapa define la dificultad del lenguaje y debe mantener una exigencia razonablemente coherente.
+- **Crear aventuras debe seguir siendo accesible.** El formato de guion y las herramientas de autoría deben poder utilizarlos personas que no programan.
+
 ## Idea central
 
 ZeMobida son aventuras cortas por mapa que se resuelven comprendiendo y utilizando un idioma.
@@ -130,4 +169,4 @@ Se evitan bloqueos permanentes accidentales. Reintentar una conversación o desc
 
 Los guiones son texto plano y deben poder escribirlos personas que no programan.
 
-Sólo se añade sintaxis cuando resuelve una necesidad real. El formato completo está documentado en `DIALOGUE_FORMAT.md`.
+Sólo se añade sintaxis cuando resuelve una necesidad real. El contrato completo y normativo está en [`DIALOGUE_FORMAT.md`](DIALOGUE_FORMAT.md).

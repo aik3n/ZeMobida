@@ -1,6 +1,7 @@
-# Prototipo de UI, mapas, control táctil y creador de guiones
+# ZeMobida — UI
 
-**Estado:** referencia funcional revisada el 2026-09-03.
+**Estado:** comportamiento visible vigente.  
+**Responsabilidad:** describir la experiencia de interfaz, controles y presentación; no la arquitectura interna.
 
 ## Resolución
 

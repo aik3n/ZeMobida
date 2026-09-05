@@ -2,7 +2,9 @@ extends CanvasLayer
 
 
 const CUSTOM_DIALOGUE_FOLDER := "user://custom_dialogues/"
-const SUBMISSION_EMAIL := "zemobida@gmx.es"
+const PUBLISHER_URL := "https://zemobida-publish.sam-cdi110.workers.dev"
+const SEND_TEXTURE := preload("res://art/ui/enviar.png")
+const DISCARD_TEXTURE := preload("res://art/ui/papelera.png")
 
 const ERROR_GUTTER_WIDTH := 34
 const ERROR_MARKER := "●"
@@ -11,26 +13,51 @@ const ERROR_COLOR := Color("#ff4d5a")
 
 @onready var title_label: Label = $Panel/Title
 @onready var code_edit: CodeEdit = $Panel/CodeEdit
+@onready var discard_button: Button = $Panel/DiscardButton
+@onready var send_button: Button = $Panel/SendButton
+@onready var close_button: Button = $Panel/CloseButton
+@onready var confirmation_overlay: ColorRect = $ConfirmationOverlay
+@onready var confirmation_icon: TextureRect = $ConfirmationOverlay/Icon
+@onready var confirmation_cancel_button: Button = $ConfirmationOverlay/CancelButton
+@onready var confirmation_ok_button: Button = $ConfirmationOverlay/ConfirmButton
+@onready var feedback_icon: TextureRect = $FeedbackIcon
+
+
+enum ConfirmationAction {
+	NONE,
+	DISCARD,
+	SEND
+}
 
 
 var file_name := ""
+var _base_text := ""
 var _error_gutter := -1
+var _submission_request: HTTPRequest
+var _submission_busy := false
+var _confirmation_action := ConfirmationAction.NONE
+var _confirmation_source_button: Control
 
 
 func _ready() -> void:
 	_configure_highlighter()
 	_configure_error_gutter()
+	_configure_submission_request()
 
 	code_edit.text_changed.connect(
 		_refresh_line_error_markers
 	)
 
+	feedback_icon.pivot_offset = feedback_icon.size * 0.5
+
 
 func setup(
 	target_file_name: String,
-	initial_text: String
+	initial_text: String,
+	base_text: String
 ) -> void:
 	file_name = target_file_name
+	_base_text = base_text
 	title_label.text = target_file_name
 	code_edit.text = initial_text
 
@@ -69,6 +96,14 @@ func _configure_error_gutter() -> void:
 	code_edit.set_gutter_draw(
 		_error_gutter,
 		true
+	)
+
+
+func _configure_submission_request() -> void:
+	_submission_request = HTTPRequest.new()
+	add_child(_submission_request)
+	_submission_request.request_completed.connect(
+		_on_submission_request_completed
 	)
 
 
@@ -521,45 +556,630 @@ func _save_current_text() -> bool:
 	return true
 
 
-func _on_save_pressed() -> void:
-	if not _save_current_text():
+func _on_discard_pressed() -> void:
+	if _submission_busy:
 		return
 
-	# Guardar confirma la edición y vuelve inmediatamente al juego.
-	queue_free()
+	_show_confirmation(
+		ConfirmationAction.DISCARD,
+		DISCARD_TEXTURE,
+		discard_button
+	)
 
 
 func _on_send_pressed() -> void:
-	# Nunca se abre el correo con una versión que no se haya guardado.
-	if not _save_current_text():
+	if _submission_busy:
 		return
 
-	var subject: String = file_name.uri_encode()
-
-	var body: String = (
-		# "Archivo: " +
-		# file_name +
-		# "\n\n" +
-		code_edit.text
-	).uri_encode()
-
-	var mailto_uri: String = (
-		"mailto:"
-		+ SUBMISSION_EMAIL
-		+ "?subject="
-		+ subject
-		+ "&body="
-		+ body
+	_show_confirmation(
+		ConfirmationAction.SEND,
+		SEND_TEXTURE,
+		send_button
 	)
 
-	var error: Error = OS.shell_open(
-		mailto_uri
+
+func _send_confirmed() -> void:
+	# No se valida: propuestas es un buzón de trabajo.
+	# Guardamos primero para que un fallo de red nunca pierda la edición.
+	if not _persist_local_if_changed():
+		return
+
+	_submission_busy = true
+	_set_editor_actions_enabled(false)
+
+	var payload := JSON.stringify({
+		"filename": file_name,
+		"content": code_edit.text
+	})
+
+	var error := _submission_request.request(
+		PUBLISHER_URL + "/proposal",
+		PackedStringArray(["Content-Type: application/json"]),
+		HTTPClient.METHOD_POST,
+		payload
 	)
 
 	if error != OK:
+		_submission_busy = false
 		print(
-			"El guion se guardó, pero no se pudo abrir la aplicación de correo."
+			"El guion se guardó, pero no se pudo iniciar el envío de la propuesta: ",
+			error
 		)
+		await _show_send_result(false)
+		_set_editor_actions_enabled(true)
+		code_edit.grab_focus()
+
+
+func _on_submission_request_completed(
+	result: int,
+	response_code: int,
+	_headers: PackedStringArray,
+	body: PackedByteArray
+) -> void:
+	_submission_busy = false
+
+	var response_text := body.get_string_from_utf8()
+	var response_data = JSON.parse_string(response_text)
+
+	var success := (
+		result == HTTPRequest.RESULT_SUCCESS
+		and response_code >= 200
+		and response_code < 300
+		and response_data is Dictionary
+		and bool(response_data.get("ok", false))
+	)
+
+	if success:
+		var sent_name := str(
+			response_data.get("filename", file_name)
+		)
+
+		print("Propuesta enviada: ", sent_name)
+
+		if not _delete_local_copy():
+			print(
+				"La propuesta se envió, pero no se pudo borrar la copia local: ",
+				file_name
+			)
+			await _show_send_result(false)
+			_set_editor_actions_enabled(true)
+			code_edit.grab_focus()
+			return
+
+		await _show_send_result(true)
+		queue_free()
+		return
+
+	var message := "HTTP %s · resultado %s" % [
+		response_code,
+		result
+	]
+
+	if response_data is Dictionary:
+		message = str(
+			response_data.get("error", message)
+		)
+
+	print(
+		"El guion quedó guardado localmente, pero falló el envío de la propuesta: ",
+		message
+	)
+
+	await _show_send_result(false)
+	_set_editor_actions_enabled(true)
+	code_edit.grab_focus()
+
+
+func _show_confirmation(
+	action: ConfirmationAction,
+	texture: Texture2D,
+	source_button: Control
+) -> void:
+	_confirmation_action = action
+	_confirmation_source_button = source_button
+	confirmation_icon.texture = texture
+	confirmation_overlay.visible = true
+
+	await _animate_confirmation_in(source_button)
+
+	confirmation_cancel_button.grab_focus()
+
+
+func _confirmation_target_rect() -> Rect2:
+	var side := clampf(
+		min(
+			confirmation_overlay.size.x,
+			confirmation_overlay.size.y
+		) * 0.34,
+		180.0,
+		320.0
+	)
+
+	var target_size := Vector2(side, side)
+	var target_position := Vector2(
+		(confirmation_overlay.size.x - side) * 0.5,
+		(confirmation_overlay.size.y - side) * 0.5 - side * 0.08
+	)
+
+	return Rect2(
+		target_position,
+		target_size
+	)
+
+
+func _source_rect_in_overlay(
+	source_button: Control
+) -> Rect2:
+	var source_rect := source_button.get_global_rect()
+	var overlay_rect := confirmation_overlay.get_global_rect()
+
+	return Rect2(
+		source_rect.position - overlay_rect.position,
+		source_rect.size
+	)
+
+
+func _layout_confirmation_buttons(
+	target: Rect2
+) -> void:
+	confirmation_cancel_button.size = Vector2(64.0, 64.0)
+	confirmation_cancel_button.position = Vector2(
+		target.end.x - 34.0,
+		target.position.y - 26.0
+	)
+
+	confirmation_ok_button.size = Vector2(124.0, 58.0)
+	confirmation_ok_button.position = Vector2(
+		target.position.x + (target.size.x - 124.0) * 0.5,
+		target.end.y + 26.0
+	)
+
+	confirmation_cancel_button.pivot_offset = (
+		confirmation_cancel_button.size * 0.5
+	)
+	confirmation_ok_button.pivot_offset = (
+		confirmation_ok_button.size * 0.5
+	)
+
+
+func _reset_confirmation_visuals() -> void:
+	confirmation_overlay.modulate = Color.WHITE
+	confirmation_icon.modulate = Color.WHITE
+	confirmation_cancel_button.modulate = Color.WHITE
+	confirmation_ok_button.modulate = Color.WHITE
+
+	confirmation_cancel_button.visible = true
+	confirmation_ok_button.visible = true
+
+	confirmation_icon.scale = Vector2.ONE
+	confirmation_cancel_button.scale = Vector2.ONE
+	confirmation_ok_button.scale = Vector2.ONE
+
+
+func _set_confirmation_buttons_enabled(
+	enabled: bool
+) -> void:
+	confirmation_cancel_button.disabled = not enabled
+	confirmation_ok_button.disabled = not enabled
+
+
+func _animate_confirmation_in(
+	source_button: Control
+) -> void:
+	_reset_confirmation_visuals()
+	_set_confirmation_buttons_enabled(false)
+
+	var source := _source_rect_in_overlay(source_button)
+	var target := _confirmation_target_rect()
+
+	confirmation_overlay.modulate.a = 0.0
+
+	confirmation_icon.position = source.position
+	confirmation_icon.size = source.size
+	confirmation_icon.pivot_offset = source.size * 0.5
+
+	_layout_confirmation_buttons(target)
+
+	confirmation_cancel_button.modulate.a = 0.0
+	confirmation_ok_button.modulate.a = 0.0
+	confirmation_cancel_button.scale = Vector2(0.72, 0.72)
+	confirmation_ok_button.scale = Vector2(0.72, 0.72)
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+
+	tween.tween_property(
+		confirmation_overlay,
+		"modulate:a",
+		1.0,
+		0.14
+	)
+
+	tween.tween_property(
+		confirmation_icon,
+		"position",
+		target.position,
+		0.26
+	).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+
+	tween.tween_property(
+		confirmation_icon,
+		"size",
+		target.size,
+		0.26
+	).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+
+	tween.tween_property(
+		confirmation_cancel_button,
+		"modulate:a",
+		1.0,
+		0.10
+	).set_delay(0.17)
+
+	tween.tween_property(
+		confirmation_cancel_button,
+		"scale",
+		Vector2.ONE,
+		0.14
+	).set_delay(0.17).set_trans(
+		Tween.TRANS_BACK
+	).set_ease(Tween.EASE_OUT)
+
+	tween.tween_property(
+		confirmation_ok_button,
+		"modulate:a",
+		1.0,
+		0.10
+	).set_delay(0.20)
+
+	tween.tween_property(
+		confirmation_ok_button,
+		"scale",
+		Vector2.ONE,
+		0.14
+	).set_delay(0.20).set_trans(
+		Tween.TRANS_BACK
+	).set_ease(Tween.EASE_OUT)
+
+	await tween.finished
+
+	confirmation_icon.pivot_offset = confirmation_icon.size * 0.5
+	_set_confirmation_buttons_enabled(true)
+
+
+func _animate_confirmation_cancel() -> void:
+	_set_confirmation_buttons_enabled(false)
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+
+	tween.tween_property(
+		confirmation_cancel_button,
+		"modulate:a",
+		0.0,
+		0.08
+	)
+	tween.tween_property(
+		confirmation_ok_button,
+		"modulate:a",
+		0.0,
+		0.08
+	)
+
+	if (
+		_confirmation_source_button != null
+		and is_instance_valid(_confirmation_source_button)
+	):
+		var source := _source_rect_in_overlay(
+			_confirmation_source_button
+		)
+
+		tween.tween_property(
+			confirmation_icon,
+			"position",
+			source.position,
+			0.20
+		).set_trans(Tween.TRANS_QUART).set_ease(
+			Tween.EASE_IN
+		)
+
+		tween.tween_property(
+			confirmation_icon,
+			"size",
+			source.size,
+			0.20
+		).set_trans(Tween.TRANS_QUART).set_ease(
+			Tween.EASE_IN
+		)
+
+	tween.tween_property(
+		confirmation_overlay,
+		"modulate:a",
+		0.0,
+		0.20
+	)
+
+	await tween.finished
+
+	confirmation_overlay.visible = false
+	_confirmation_source_button = null
+	_reset_confirmation_visuals()
+	_set_confirmation_buttons_enabled(true)
+
+
+func _animate_confirmation_accept() -> void:
+	_set_confirmation_buttons_enabled(false)
+
+	var pop := create_tween()
+	pop.set_parallel(true)
+
+	pop.tween_property(
+		confirmation_cancel_button,
+		"modulate:a",
+		0.0,
+		0.07
+	)
+
+	pop.tween_property(
+		confirmation_ok_button,
+		"scale",
+		Vector2(1.14, 1.14),
+		0.10
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	pop.tween_property(
+		confirmation_icon,
+		"scale",
+		Vector2(1.06, 1.06),
+		0.10
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	await pop.finished
+
+	var fade := create_tween()
+	fade.set_parallel(true)
+
+	fade.tween_property(
+		confirmation_overlay,
+		"modulate:a",
+		0.0,
+		0.12
+	)
+	fade.tween_property(
+		confirmation_ok_button,
+		"modulate:a",
+		0.0,
+		0.10
+	)
+
+	await fade.finished
+
+	confirmation_overlay.visible = false
+	_confirmation_source_button = null
+	_reset_confirmation_visuals()
+	_set_confirmation_buttons_enabled(true)
+
+
+func _prepare_confirmation_send_waiting() -> void:
+	_set_confirmation_buttons_enabled(false)
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+
+	tween.tween_property(
+		confirmation_cancel_button,
+		"modulate:a",
+		0.0,
+		0.07
+	)
+	tween.tween_property(
+		confirmation_ok_button,
+		"modulate:a",
+		0.0,
+		0.07
+	)
+	tween.tween_property(
+		confirmation_icon,
+		"scale",
+		Vector2(1.06, 1.06),
+		0.10
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	await tween.finished
+
+	confirmation_cancel_button.visible = false
+	confirmation_ok_button.visible = false
+	confirmation_icon.scale = Vector2.ONE
+
+
+func _show_send_result(
+	success: bool
+) -> void:
+	if success:
+		var tween := create_tween()
+		tween.set_parallel(true)
+
+		tween.tween_property(
+			confirmation_icon,
+			"position",
+			confirmation_icon.position + Vector2(0.0, -170.0),
+			0.28
+		).set_trans(Tween.TRANS_QUART).set_ease(
+			Tween.EASE_OUT
+		)
+
+		tween.tween_property(
+			confirmation_icon,
+			"modulate:a",
+			0.0,
+			0.20
+		).set_delay(0.08)
+
+		tween.tween_property(
+			confirmation_overlay,
+			"modulate:a",
+			0.0,
+			0.22
+		).set_delay(0.08)
+
+		await tween.finished
+	else:
+		var origin := confirmation_icon.position
+		var shake := create_tween()
+
+		for offset in [-24.0, 24.0, -16.0, 16.0, -10.0, 10.0, 0.0]:
+			shake.tween_property(
+				confirmation_icon,
+				"position",
+				origin + Vector2(offset, 0.0),
+				0.045
+			)
+
+		await shake.finished
+
+		var fade := create_tween()
+		fade.set_parallel(true)
+
+		fade.tween_property(
+			confirmation_icon,
+			"modulate:a",
+			0.0,
+			0.12
+		)
+		fade.tween_property(
+			confirmation_overlay,
+			"modulate:a",
+			0.0,
+			0.14
+		)
+
+		await fade.finished
+
+	confirmation_overlay.visible = false
+	_confirmation_source_button = null
+	_reset_confirmation_visuals()
+	_set_confirmation_buttons_enabled(true)
+
+
+func _on_confirmation_cancel_pressed() -> void:
+	_confirmation_action = ConfirmationAction.NONE
+
+	await _animate_confirmation_cancel()
+
+	code_edit.grab_focus()
+
+
+func _on_confirmation_ok_pressed() -> void:
+	var action := _confirmation_action
+	_confirmation_action = ConfirmationAction.NONE
+
+	match action:
+		ConfirmationAction.DISCARD:
+			await _animate_confirmation_accept()
+			_discard_confirmed()
+		ConfirmationAction.SEND:
+			await _prepare_confirmation_send_waiting()
+			_send_confirmed()
+
+
+func _discard_confirmed() -> void:
+	if not _delete_local_copy():
+		print(
+			"No se pudo descartar la copia local: ",
+			file_name
+		)
+		return
+
+	queue_free()
+
+
+func _persist_local_if_changed() -> bool:
+	if code_edit.text == _base_text:
+		return _delete_local_copy()
+
+	return _save_current_text()
+
+
+func _delete_local_copy() -> bool:
+	var local_path := CUSTOM_DIALOGUE_FOLDER + file_name
+
+	if not FileAccess.file_exists(local_path):
+		return true
+
+	var dir := DirAccess.open(CUSTOM_DIALOGUE_FOLDER)
+
+	if dir == null:
+		return false
+
+	return dir.remove(file_name) == OK
+
+
+func _set_editor_actions_enabled(
+	enabled: bool
+) -> void:
+	discard_button.disabled = not enabled
+	send_button.disabled = not enabled
+	close_button.disabled = not enabled
+
+
+func _show_send_feedback(
+	success: bool
+) -> void:
+	feedback_icon.texture = SEND_TEXTURE
+	feedback_icon.visible = true
+	feedback_icon.modulate = Color.WHITE
+	feedback_icon.scale = Vector2.ONE
+	feedback_icon.pivot_offset = feedback_icon.size * 0.5
+
+	if success:
+		feedback_icon.scale = Vector2(0.72, 0.72)
+
+		var tween := create_tween()
+		tween.tween_property(
+			feedback_icon,
+			"scale",
+			Vector2(1.14, 1.14),
+			0.16
+		).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(
+			feedback_icon,
+			"scale",
+			Vector2.ONE,
+			0.08
+		)
+		tween.tween_interval(0.35)
+		tween.tween_property(
+			feedback_icon,
+			"modulate:a",
+			0.0,
+			0.18
+		)
+		await tween.finished
+	else:
+		var origin := feedback_icon.position
+		var tween := create_tween()
+
+		for offset in [-20.0, 20.0, -14.0, 14.0, 0.0]:
+			tween.tween_property(
+				feedback_icon,
+				"position",
+				origin + Vector2(offset, 0.0),
+				0.055
+			)
+
+		tween.tween_interval(0.22)
+		tween.tween_property(
+			feedback_icon,
+			"modulate:a",
+			0.0,
+			0.16
+		)
+		await tween.finished
+		feedback_icon.position = origin
+
+	feedback_icon.visible = false
+	feedback_icon.modulate = Color.WHITE
+	feedback_icon.scale = Vector2.ONE
 
 
 func _ensure_custom_folder() -> bool:
@@ -575,4 +1195,9 @@ func _ensure_custom_folder() -> bool:
 
 
 func _on_close_pressed() -> void:
-	queue_free()
+	if _submission_busy:
+		return
+
+	# Azul significa que existe una variante local realmente distinta.
+	if _persist_local_if_changed():
+		queue_free()

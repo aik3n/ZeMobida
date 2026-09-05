@@ -1,9 +1,8 @@
 [gd_scene format=3 uid="uid://dnvvingbo01b2"]
 
 [ext_resource type="Script" uid="uid://0446qb4544yx" path="res://scripts/dialogue_editor.gd" id="1_editor"]
-[ext_resource type="Texture2D" path="res://art/ui/guardar.png" id="2_guardar"]
+[ext_resource type="Texture2D" path="res://art/ui/papelera.png" id="2_papelera"]
 [ext_resource type="Texture2D" path="res://art/ui/enviar.png" id="3_enviar"]
-[ext_resource type="Texture2D" path="res://art/ui/cerrar.png" id="4_cerrar"]
 
 [sub_resource type="StyleBoxFlat" id="StyleEditor"]
 bg_color = Color(0.025, 0.037, 0.058, 0.99)
@@ -16,6 +15,18 @@ corner_radius_top_left = 28
 corner_radius_top_right = 28
 corner_radius_bottom_right = 28
 corner_radius_bottom_left = 28
+
+[sub_resource type="StyleBoxFlat" id="StyleButton"]
+bg_color = Color(0.08, 0.31, 0.38, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.84, 0.82, 0.85)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
 
 [node name="DialogueEditor" type="CanvasLayer" unique_id=1720702188]
 layer = 30
@@ -44,7 +55,7 @@ layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.04
 anchor_top = 0.025
-anchor_right = 0.96
+anchor_right = 0.76
 anchor_bottom = 0.075
 grow_horizontal = 2
 grow_vertical = 2
@@ -68,17 +79,17 @@ theme_override_font_sizes/font_size = 30
 placeholder_text = "# INICIO\nEscribe aquí tu diálogo."
 scroll_past_end_of_file = true
 
-[node name="SaveButton" type="Button" parent="Panel" unique_id=1177657783]
+[node name="DiscardButton" type="Button" parent="Panel" unique_id=1177657783]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.04
+anchor_left = 0.16
 anchor_top = 0.865
-anchor_right = 0.32
+anchor_right = 0.46
 anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 0
-icon = ExtResource("2_guardar")
+icon = ExtResource("2_papelera")
 expand_icon = true
 icon_alignment = 1
 theme_override_constants/icon_max_width = 64
@@ -86,9 +97,9 @@ theme_override_constants/icon_max_width = 64
 [node name="SendButton" type="Button" parent="Panel"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.36
+anchor_left = 0.54
 anchor_top = 0.865
-anchor_right = 0.64
+anchor_right = 0.84
 anchor_bottom = 0.95
 grow_horizontal = 2
 grow_vertical = 2
@@ -101,18 +112,72 @@ theme_override_constants/icon_max_width = 64
 [node name="CloseButton" type="Button" parent="Panel" unique_id=1710235549]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.68
-anchor_top = 0.865
-anchor_right = 0.96
-anchor_bottom = 0.95
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -112.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 112.0
+grow_horizontal = 0
+grow_vertical = 0
+focus_mode = 0
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleButton")
+theme_override_styles/hover = SubResource("StyleButton")
+theme_override_styles/pressed = SubResource("StyleButton")
+text = "×"
+
+[node name="ConfirmationOverlay" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-focus_mode = 0
-icon = ExtResource("4_cerrar")
-expand_icon = true
-icon_alignment = 1
-theme_override_constants/icon_max_width = 64
+color = Color(0, 0, 0, 0.58)
 
-[connection signal="pressed" from="Panel/SaveButton" to="." method="_on_save_pressed"]
+[node name="CancelButton" type="Button" parent="ConfirmationOverlay"]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 64.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 42
+text = "×"
+
+[node name="Icon" type="TextureRect" parent="ConfirmationOverlay"]
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 64.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ConfirmButton" type="Button" parent="ConfirmationOverlay"]
+layout_mode = 0
+offset_right = 124.0
+offset_bottom = 58.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 30
+text = "OK"
+
+[node name="FeedbackIcon" type="TextureRect" parent="."]
+visible = false
+anchors_preset = -1
+anchor_left = 0.41
+anchor_top = 0.34
+anchor_right = 0.59
+anchor_bottom = 0.66
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[connection signal="pressed" from="Panel/DiscardButton" to="." method="_on_discard_pressed"]
 [connection signal="pressed" from="Panel/SendButton" to="." method="_on_send_pressed"]
 [connection signal="pressed" from="Panel/CloseButton" to="." method="_on_close_pressed"]
+
+[connection signal="pressed" from="ConfirmationOverlay/CancelButton" to="." method="_on_confirmation_cancel_pressed"]
+[connection signal="pressed" from="ConfirmationOverlay/ConfirmButton" to="." method="_on_confirmation_ok_pressed"]

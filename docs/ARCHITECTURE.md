@@ -1,7 +1,8 @@
 # ZeMobida — Architecture
 
-**Estado:** arquitectura funcional revisada el 2026-09-03.  
+**Estado:** arquitectura funcional vigente.  
 **Godot:** 4.7.x.  
+**Responsabilidad:** describir cómo funciona ZeMobida y qué subsistema es dueño de cada comportamiento.  
 **Principio:** preferir soluciones pequeñas, explícitas y editables desde Godot antes que capas de abstracción innecesarias.
 
 ## Modelo general

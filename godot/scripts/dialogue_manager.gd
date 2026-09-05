@@ -178,6 +178,10 @@ func open_current_dialogue_editor() -> void:
 		file_name
 	)
 
+	var base_text := _get_base_dialogue_source(
+		file_name
+	)
+
 	editor_active = true
 
 	# El editor sustituye temporalmente al diálogo.
@@ -195,7 +199,8 @@ func open_current_dialogue_editor() -> void:
 
 	dialogue_editor.setup(
 		file_name,
-		initial_text
+		initial_text,
+		base_text
 	)
 
 
@@ -210,6 +215,20 @@ func _get_editable_dialogue_source(
 	if FileAccess.file_exists(local_path):
 		return _read_dialogue_text(local_path)
 
+	var official_path := (
+		DIALOGUE_FOLDER
+		+ file_name
+	)
+
+	if FileAccess.file_exists(official_path):
+		return _read_dialogue_text(official_path)
+
+	return DIALOGUE_TEMPLATE
+
+
+func _get_base_dialogue_source(
+	file_name: String
+) -> String:
 	var official_path := (
 		DIALOGUE_FOLDER
 		+ file_name

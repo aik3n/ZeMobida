@@ -1,0 +1,257 @@
+[gd_scene format=3 uid="uid://dra3yba1vf1v1"]
+
+[ext_resource type="Texture2D" uid="uid://v7qnk3q5t433" path="res://art/ui/papelera.png" id="5_papelera"]
+[ext_resource type="Texture2D" uid="uid://hfupameprno0" path="res://art/ui/cerrar.png" id="6_cerrar"]
+[ext_resource type="Texture2D" uid="uid://bqjfv2qte3l0" path="res://art/ui/bag.png" id="7_bag"]
+
+[sub_resource type="StyleBoxFlat" id="StyleState"]
+bg_color = Color(0.035, 0.05, 0.075, 0.985)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.24, 0.6, 0.72, 0.85)
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
+
+[sub_resource type="StyleBoxFlat" id="StyleButton"]
+bg_color = Color(0.08, 0.31, 0.38, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.84, 0.82, 0.85)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[node name="EstadoUI" type="CanvasLayer" unique_id=1736404976]
+layer = 20
+
+[node name="Estado" type="Control" parent="." unique_id=1254567892]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="Estado" unique_id=1398691159]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.06
+anchor_top = 0.030000001
+anchor_right = 0.94000006
+anchor_bottom = 0.88
+offset_top = -0.6000023
+offset_right = -6.1035156e-05
+offset_bottom = 0.00012207031
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleState")
+
+[node name="Titulo" type="Label" parent="Estado/Panel" unique_id=228474769]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.055
+anchor_top = 0.025
+anchor_right = 0.76
+anchor_bottom = 0.09
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.82, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 45
+text = "ESTADO DEL JUGADOR"
+vertical_alignment = 1
+
+[node name="Cerrar" type="Button" parent="Estado/Panel" unique_id=853662798]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -112.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 112.0
+grow_horizontal = 0
+grow_vertical = 0
+focus_mode = 0
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleButton")
+theme_override_styles/pressed = SubResource("StyleButton")
+theme_override_styles/hover = SubResource("StyleButton")
+text = "×"
+
+[node name="InventarioTitulo" type="Label" parent="Estado/Panel" unique_id=869162898]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.06
+anchor_top = 0.24
+anchor_right = 0.79
+anchor_bottom = 0.29
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.75, 0.88, 0.94, 1)
+theme_override_font_sizes/font_size = 34
+text = "INVENTARIO"
+vertical_alignment = 1
+
+[node name="InventarioIcon" type="TextureRect" parent="Estado/Panel" unique_id=1123224111]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.06
+anchor_top = 0.07
+anchor_right = 0.17
+anchor_bottom = 0.16
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("7_bag")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VaciarInventario" type="Button" parent="Estado/Panel" unique_id=549086716]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.156
+anchor_top = 0.841
+anchor_right = 0.33200002
+anchor_bottom = 0.9110001
+offset_left = -0.06239319
+offset_top = 39.30713
+offset_right = -0.3328247
+offset_bottom = 39.307007
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+theme_override_constants/icon_max_width = 58
+theme_override_styles/normal = SubResource("StyleButton")
+theme_override_styles/pressed = SubResource("StyleButton")
+theme_override_styles/hover = SubResource("StyleButton")
+icon = ExtResource("5_papelera")
+icon_alignment = 1
+expand_icon = true
+
+[node name="VolverMapas" type="Button" parent="Estado/Panel" unique_id=364383398]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.66400003
+anchor_top = 0.84000003
+anchor_right = 0.89300007
+anchor_bottom = 0.915
+offset_left = 0.13433838
+offset_top = 38.728027
+offset_right = -0.45922852
+offset_bottom = 38.728027
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+theme_override_constants/icon_max_width = 64
+theme_override_styles/normal = SubResource("StyleButton")
+theme_override_styles/pressed = SubResource("StyleButton")
+theme_override_styles/hover = SubResource("StyleButton")
+icon = ExtResource("6_cerrar")
+icon_alignment = 1
+expand_icon = true
+
+[node name="Scroll" type="ScrollContainer" parent="Estado/Panel" unique_id=416746288]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.06
+anchor_top = 0.187
+anchor_right = 0.94000006
+anchor_bottom = 0.83300006
+offset_top = -0.48962402
+offset_right = -6.1035156e-05
+offset_bottom = 0.6734619
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Inventario" type="Label" parent="Estado/Panel/Scroll" unique_id=1629305708]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.93, 0.96, 1)
+theme_override_font_sizes/font_size = 36
+text = "Inventario vacío"
+
+[node name="ConfirmarVaciarInventario" type="Control" parent="Estado" unique_id=189931499]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Fondo" type="ColorRect" parent="Estado/ConfirmarVaciarInventario" unique_id=1348186144]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.56)
+
+[node name="Panel" type="Panel" parent="Estado/ConfirmarVaciarInventario" unique_id=1129558354]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.24
+anchor_top = 0.34
+anchor_right = 0.76
+anchor_bottom = 0.66
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleState")
+
+[node name="Icono" type="TextureRect" parent="Estado/ConfirmarVaciarInventario/Panel" unique_id=262858915]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.31
+anchor_top = 0.08
+anchor_right = 0.69
+anchor_bottom = 0.58
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_papelera")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Ok" type="Button" parent="Estado/ConfirmarVaciarInventario/Panel" unique_id=1339965408]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.09
+anchor_top = 0.68
+anchor_right = 0.46
+anchor_bottom = 0.9
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleButton")
+theme_override_styles/pressed = SubResource("StyleButton")
+theme_override_styles/hover = SubResource("StyleButton")
+text = "ok!"
+
+[node name="Cancel" type="Button" parent="Estado/ConfirmarVaciarInventario/Panel" unique_id=1291898693]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.54
+anchor_top = 0.68
+anchor_right = 0.91
+anchor_bottom = 0.9
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleButton")
+theme_override_styles/pressed = SubResource("StyleButton")
+theme_override_styles/hover = SubResource("StyleButton")
+text = "cancel"
