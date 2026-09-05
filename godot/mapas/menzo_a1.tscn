@@ -10,8 +10,8 @@
 [ext_resource type="Texture2D" uid="uid://dpyw518c5ss7y" path="res://art/mapas/frontal_prueba.png" id="8_ykjac"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ougdv"]
-radius = 227.0
-height = 454.0
+radius = 24.0
+height = 186.0
 
 [node name="mapa" type="Node2D" unique_id=493802413]
 
@@ -63,7 +63,7 @@ tipo_seguimiento = 0
 [node name="casa1" type="StaticBody2D" parent="." unique_id=1337727459]
 
 [node name="colision" type="CollisionShape2D" parent="casa1" unique_id=638797376]
-position = Vector2(9, 11)
+position = Vector2(482, 330)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_ougdv")
 

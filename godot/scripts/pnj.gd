@@ -24,16 +24,30 @@ var player_depth_collision: CollisionShape2D = null
 
 @onready var depth_collision: CollisionShape2D = $Collision
 @onready var name_label: Label = $NameLabel
+@onready var visual_sprite: Sprite2D = $Sprite2D
 
 var posicion_seguimiento: Vector2
 var posicion_seguimiento_guardada := false
 
 var siguiendo := false
 
+var _idle_tween: Tween
+var _idle_base_position := Vector2.ZERO
+var _idle_base_scale := Vector2.ONE
+
 
 const VELOCIDAD_SEGUIR := 100.0
 const DISTANCIA_REANUDAR := 120.0
 const DISTANCIA_LLEGADA := 5.0
+
+# Idle visual muy sutil. Sólo se anima el Sprite2D:
+# el CharacterBody2D, las colisiones y el nombre permanecen quietos.
+const IDLE_BOB_DISTANCE := 6.0
+const IDLE_SCALE := 1.03
+const IDLE_MOVE_TIME := 0.6
+const IDLE_INITIAL_DELAY_MAX := 1.5
+const IDLE_REST_MIN := 1.0
+const IDLE_REST_MAX := 2.5
 
 # Profundidad visual respecto al Player.
 # Fondo permanece en -10 y los frontales fijos en +10.
@@ -109,6 +123,67 @@ func _ready() -> void:
 	)
 
 	_actualizar_estado_nombre_dialogo()
+
+	_idle_base_position = visual_sprite.position
+	_idle_base_scale = visual_sprite.scale
+	_start_idle_cycle(
+		randf_range(0.0, IDLE_INITIAL_DELAY_MAX)
+	)
+
+
+func _start_idle_cycle(delay: float = -1.0) -> void:
+	if Engine.is_editor_hint() or visual_sprite == null:
+		return
+
+	if _idle_tween != null and _idle_tween.is_valid():
+		_idle_tween.kill()
+
+	var rest := delay
+	if rest < 0.0:
+		rest = randf_range(IDLE_REST_MIN, IDLE_REST_MAX)
+
+	_idle_tween = create_tween()
+	_idle_tween.tween_interval(rest)
+
+	var up_position := _idle_tween.tween_property(
+		visual_sprite,
+		"position",
+		_idle_base_position + Vector2(0.0, -IDLE_BOB_DISTANCE),
+		IDLE_MOVE_TIME
+	)
+	up_position.set_trans(Tween.TRANS_SINE)
+	up_position.set_ease(Tween.EASE_IN_OUT)
+
+	var up_scale := _idle_tween.parallel().tween_property(
+		visual_sprite,
+		"scale",
+		_idle_base_scale * IDLE_SCALE,
+		IDLE_MOVE_TIME
+	)
+	up_scale.set_trans(Tween.TRANS_SINE)
+	up_scale.set_ease(Tween.EASE_IN_OUT)
+
+	var down_position := _idle_tween.tween_property(
+		visual_sprite,
+		"position",
+		_idle_base_position,
+		IDLE_MOVE_TIME
+	)
+	down_position.set_trans(Tween.TRANS_SINE)
+	down_position.set_ease(Tween.EASE_IN_OUT)
+
+	var down_scale := _idle_tween.parallel().tween_property(
+		visual_sprite,
+		"scale",
+		_idle_base_scale,
+		IDLE_MOVE_TIME
+	)
+	down_scale.set_trans(Tween.TRANS_SINE)
+	down_scale.set_ease(Tween.EASE_IN_OUT)
+
+	_idle_tween.tween_callback(
+		Callable(self, "_start_idle_cycle")
+	)
 
 
 func _physics_process(_delta: float) -> void:

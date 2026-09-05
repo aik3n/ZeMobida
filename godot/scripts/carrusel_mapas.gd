@@ -16,14 +16,15 @@ const DEFAULT_PREVIEW := preload(
 @onready var preview: TextureRect = $Contenedor/Centro/Preview
 @onready var sello: TextureRect = $Contenedor/Centro/Preview/Sello
 @onready var lbl_texto: Label = $Contenedor/Centro/Texto
-@onready var btn_jugar: Button = $Contenedor/Centro/Jugar
 @onready var indicadores: Label = $Contenedor/Centro/Indicadores
 
 var mapas: Array[String] = []
 var indice_actual: int = 0
 var _drag_start: Vector2 = Vector2.ZERO
 var _dragging := false
+var _transitioning := false
 const SWIPE_THRESHOLD := 60.0
+const MAP_TRANSITION_TIME := 0.42
 
 
 func _ready() -> void:
@@ -33,7 +34,7 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible:
+	if not visible or _transitioning:
 		return
 
 	if event.is_action_pressed("ui_left"):
@@ -43,7 +44,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if not visible:
+	if not visible or _transitioning:
 		return
 
 	if event is InputEventMouseButton:
@@ -55,11 +56,32 @@ func _input(event: InputEvent) -> void:
 			elif _dragging:
 				_dragging = false
 				var distance := mouse_event.position.x - _drag_start.x
+
 				if abs(distance) >= SWIPE_THRESHOLD:
 					if distance < 0:
 						_next()
 					else:
 						_previous()
+				elif _preview_was_clicked(
+					_drag_start,
+					mouse_event.position
+				):
+					_play_current_map()
+
+
+func _preview_was_clicked(
+	press_position: Vector2,
+	release_position: Vector2
+) -> bool:
+	if mapas.is_empty() or not preview.visible:
+		return false
+
+	var preview_rect := preview.get_global_rect()
+
+	return (
+		preview_rect.has_point(press_position)
+		and preview_rect.has_point(release_position)
+	)
 
 
 func _discover_maps() -> void:
@@ -111,7 +133,6 @@ func _refresh() -> void:
 
 	btn_anterior.disabled = not hay_mapas
 	btn_siguiente.disabled = not hay_mapas
-	btn_jugar.disabled = not hay_mapas
 
 	if not hay_mapas:
 		lbl_nombre.text = "No hay mapas disponibles"
@@ -206,19 +227,159 @@ func _is_map_completed(mapa_path: String) -> bool:
 
 
 func _previous() -> void:
-	if mapas.is_empty():
-		return
-
-	indice_actual = posmod(indice_actual - 1, mapas.size())
-	_refresh()
+	_change_map_with_transition(-1)
 
 
 func _next() -> void:
-	if mapas.is_empty():
+	_change_map_with_transition(1)
+
+
+func _change_map_with_transition(step: int) -> void:
+	if _transitioning or mapas.is_empty() or step == 0:
 		return
 
-	indice_actual = posmod(indice_actual + 1, mapas.size())
+	_transitioning = true
+
+	var direction := 1 if step > 0 else -1
+	var bounds := _transition_content_bounds()
+	var host := _create_transition_host(bounds)
+	var outgoing := _snapshot_transition_content(
+		host,
+		bounds
+	)
+
+	indice_actual = posmod(
+		indice_actual + direction,
+		mapas.size()
+	)
 	_refresh()
+
+	# Texto y TextureRect pueden provocar un nuevo layout del Container.
+	# Esperamos un frame antes de copiar la tarjeta que entra.
+	await get_tree().process_frame
+
+	if not is_instance_valid(host):
+		_transitioning = false
+		return
+
+	var incoming := _snapshot_transition_content(
+		host,
+		bounds
+	)
+
+	_set_transition_content_visible(false)
+
+	var travel := maxf(host.size.x * 1.12, 1.0)
+
+	outgoing.position = Vector2.ZERO
+	incoming.position = Vector2(
+		float(direction) * travel,
+		0.0
+	)
+
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.set_parallel(true)
+
+	tween.tween_property(
+		outgoing,
+		"position",
+		Vector2(-float(direction) * travel, 0.0),
+		MAP_TRANSITION_TIME
+	)
+
+	tween.tween_property(
+		incoming,
+		"position",
+		Vector2.ZERO,
+		MAP_TRANSITION_TIME
+	)
+
+	await tween.finished
+
+	if is_instance_valid(host):
+		host.queue_free()
+
+	_set_transition_content_visible(true)
+	_transitioning = false
+
+
+func _transition_sources() -> Array[Control]:
+	return [
+		lbl_nombre,
+		preview,
+		lbl_texto,
+		indicadores
+	]
+
+
+func _transition_content_bounds() -> Rect2:
+	var sources := _transition_sources()
+	var bounds := sources[0].get_global_rect()
+
+	for index in range(1, sources.size()):
+		bounds = bounds.merge(
+			sources[index].get_global_rect()
+		)
+
+	return bounds
+
+
+func _create_transition_host(bounds: Rect2) -> Control:
+	var host := Control.new()
+	host.name = "MapTransition"
+	host.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	host.clip_contents = true
+	add_child(host)
+
+	var root_rect := get_global_rect()
+	host.position = bounds.position - root_rect.position
+	host.size = bounds.size
+
+	return host
+
+
+func _snapshot_transition_content(
+	host: Control,
+	bounds: Rect2
+) -> Control:
+	var group := Control.new()
+	group.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	group.position = Vector2.ZERO
+	group.size = host.size
+	host.add_child(group)
+
+	for source in _transition_sources():
+		var copy := source.duplicate() as Control
+
+		if copy == null:
+			continue
+
+		group.add_child(copy)
+
+		copy.anchor_left = 0.0
+		copy.anchor_top = 0.0
+		copy.anchor_right = 0.0
+		copy.anchor_bottom = 0.0
+		copy.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+		var rect := source.get_global_rect()
+		copy.position = rect.position - bounds.position
+		copy.size = rect.size
+
+	return group
+
+
+func _set_transition_content_visible(value: bool) -> void:
+	lbl_nombre.visible = value
+	lbl_texto.visible = value
+	indicadores.visible = value
+
+	if value:
+		preview.visible = preview.texture != null
+	else:
+		preview.visible = false
 
 
 func _on_btn_anterior_pressed() -> void:
@@ -229,7 +390,7 @@ func _on_btn_siguiente_pressed() -> void:
 	_next()
 
 
-func _on_jugar_pressed() -> void:
+func _play_current_map() -> void:
 	if mapas.is_empty():
 		return
 

@@ -9,6 +9,14 @@ const MOVEMENT_ACCELERATION := 1800.0
 const MOVEMENT_DECELERATION := 1200.0
 const ARRIVAL_DISTANCE := 5.0
 
+# Idle visual del Player cuando está quieto.
+# Sólo se anima Sprite2D: física y colisión permanecen intactas.
+const PLAYER_IDLE_BOB_DISTANCE := 4.0
+const PLAYER_IDLE_SCALE := 1.02
+const PLAYER_IDLE_MOVE_TIME := 0.65
+const PLAYER_IDLE_REST_MIN := 0.8
+const PLAYER_IDLE_REST_MAX := 1.8
+
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var camera: Camera2D = $Camera2D
 @onready var feedback_layer: CanvasLayer = $FeedbackLayer
@@ -73,9 +81,18 @@ var _negative_feedback_queue: Array[Dictionary] = []
 var _positive_feedback_launcher_busy := false
 var _negative_feedback_launcher_busy := false
 
+var _player_idle_tween: Tween
+var _player_idle_active := false
+var _player_sprite_base_position := Vector2.ZERO
+var _player_sprite_base_scale := Vector2.ONE
+
 
 func _ready():
 	destino = global_position
+
+	_player_sprite_base_position = sprite.position
+	_player_sprite_base_scale = sprite.scale
+	_set_player_idle(true)
 
 	camera.position_smoothing_speed = CAMERA_FOLLOW_SMOOTHING_SPEED
 	_enable_camera_follow_smoothing()
@@ -291,7 +308,19 @@ func _current_pinch_distance() -> float:
 
 
 func _set_zoom(value: float) -> void:
-	var clamped_zoom := clampf(value, ZOOM_MIN, ZOOM_MAX)
+	# El mínimo real depende también del tamaño visible del mapa.
+	# Si hacemos demasiado zoom out, el viewport puede llegar a ser
+	# físicamente mayor que los límites y ningún clamp de posición puede
+	# evitar que se vea fuera del Fondo.
+	var minimum_zoom := minf(
+		_minimum_zoom_for_limits(),
+		ZOOM_MAX
+	)
+	var clamped_zoom := clampf(
+		value,
+		minimum_zoom,
+		ZOOM_MAX
+	)
 
 	camera.zoom = Vector2(
 		clamped_zoom,
@@ -302,6 +331,30 @@ func _set_zoom(value: float) -> void:
 
 	if _camera_manual_active:
 		_camera_manual_world_center = global_position + camera.position
+
+
+func _minimum_zoom_for_limits() -> float:
+	var viewport_size := get_viewport_rect().size
+
+	var map_width := float(
+		camera.limit_right - camera.limit_left
+	)
+	var map_height := float(
+		camera.limit_bottom - camera.limit_top
+	)
+
+	if map_width <= 0.0 or map_height <= 0.0:
+		return ZOOM_MIN
+
+	# Para no ver fuera:
+	# viewport / zoom <= tamaño del mapa.
+	var fit_zoom_x := viewport_size.x / map_width
+	var fit_zoom_y := viewport_size.y / map_height
+
+	return maxf(
+		ZOOM_MIN,
+		maxf(fit_zoom_x, fit_zoom_y)
+	)
 
 
 func _begin_pointer(screen_position: Vector2) -> void:
@@ -355,11 +408,22 @@ func _start_camera_recenter() -> void:
 	_end_camera_manual_mode()
 
 	var position_is_normal := camera.position.is_zero_approx()
-	var zoom_is_normal := camera.zoom.is_equal_approx(Vector2.ONE)
+	var normal_zoom_value := minf(
+		maxf(1.0, _minimum_zoom_for_limits()),
+		ZOOM_MAX
+	)
+	var normal_zoom := Vector2(
+		normal_zoom_value,
+		normal_zoom_value
+	)
+	var zoom_is_normal := camera.zoom.is_equal_approx(
+		normal_zoom
+	)
 
 	if position_is_normal and zoom_is_normal:
 		camera.position = Vector2.ZERO
-		camera.zoom = Vector2.ONE
+		camera.zoom = normal_zoom
+		_clamp_camera_to_limits()
 
 		if not camera.position_smoothing_enabled:
 			_enable_camera_follow_smoothing()
@@ -386,7 +450,7 @@ func _start_camera_recenter() -> void:
 	_camera_recenter_tween.tween_property(
 		camera,
 		"zoom",
-		Vector2.ONE,
+		normal_zoom,
 		CAMERA_RECENTER_TIME
 	)
 
@@ -398,6 +462,7 @@ func _start_camera_recenter() -> void:
 
 func _on_camera_recenter_finished() -> void:
 	_camera_recenter_tween = null
+	_clamp_camera_to_limits()
 	_enable_camera_follow_smoothing()
 
 
@@ -771,6 +836,86 @@ func _crear_feedback(
 	)
 
 
+func _set_player_idle(active: bool) -> void:
+	if active == _player_idle_active:
+		return
+
+	_player_idle_active = active
+
+	if active:
+		_start_player_idle_cycle(0.25)
+	else:
+		_stop_player_idle()
+
+
+func _start_player_idle_cycle(delay: float = -1.0) -> void:
+	if not _player_idle_active:
+		return
+
+	if _player_idle_tween != null and _player_idle_tween.is_valid():
+		_player_idle_tween.kill()
+
+	var rest := delay
+	if rest < 0.0:
+		rest = randf_range(
+			PLAYER_IDLE_REST_MIN,
+			PLAYER_IDLE_REST_MAX
+		)
+
+	_player_idle_tween = create_tween()
+	_player_idle_tween.tween_interval(rest)
+
+	var up_position := _player_idle_tween.tween_property(
+		sprite,
+		"position",
+		_player_sprite_base_position
+		+ Vector2(0.0, -PLAYER_IDLE_BOB_DISTANCE),
+		PLAYER_IDLE_MOVE_TIME
+	)
+	up_position.set_trans(Tween.TRANS_SINE)
+	up_position.set_ease(Tween.EASE_IN_OUT)
+
+	var up_scale := _player_idle_tween.parallel().tween_property(
+		sprite,
+		"scale",
+		_player_sprite_base_scale * PLAYER_IDLE_SCALE,
+		PLAYER_IDLE_MOVE_TIME
+	)
+	up_scale.set_trans(Tween.TRANS_SINE)
+	up_scale.set_ease(Tween.EASE_IN_OUT)
+
+	var down_position := _player_idle_tween.tween_property(
+		sprite,
+		"position",
+		_player_sprite_base_position,
+		PLAYER_IDLE_MOVE_TIME
+	)
+	down_position.set_trans(Tween.TRANS_SINE)
+	down_position.set_ease(Tween.EASE_IN_OUT)
+
+	var down_scale := _player_idle_tween.parallel().tween_property(
+		sprite,
+		"scale",
+		_player_sprite_base_scale,
+		PLAYER_IDLE_MOVE_TIME
+	)
+	down_scale.set_trans(Tween.TRANS_SINE)
+	down_scale.set_ease(Tween.EASE_IN_OUT)
+
+	_player_idle_tween.tween_callback(
+		Callable(self, "_start_player_idle_cycle")
+	)
+
+
+func _stop_player_idle() -> void:
+	if _player_idle_tween != null and _player_idle_tween.is_valid():
+		_player_idle_tween.kill()
+
+	_player_idle_tween = null
+	sprite.position = _player_sprite_base_position
+	sprite.scale = _player_sprite_base_scale
+
+
 func _physics_process(delta: float) -> void:
 	var input_direction := Input.get_vector(
 		"ui_left",
@@ -780,6 +925,8 @@ func _physics_process(delta: float) -> void:
 	)
 
 	if input_direction != Vector2.ZERO:
+		_set_player_idle(false)
+
 		# Teclado/mandos vuelven inmediatamente a la cámara estándar.
 		_stop_camera_recenter()
 		_end_camera_manual_mode()
@@ -795,7 +942,9 @@ func _physics_process(delta: float) -> void:
 
 	if distance_to_target <= ARRIVAL_DISTANCE:
 		velocity = Vector2.ZERO
+		_set_player_idle(true)
 	else:
+		_set_player_idle(false)
 		# La velocidad máxima permitida baja al acercarse al destino.
 		# Así el Player puede frenar con MOVEMENT_DECELERATION sin
 		# necesitar un radio de frenado independiente.

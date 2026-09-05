@@ -94,28 +94,14 @@ text = "ZeMobida"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Subtitulo" type="Label" parent="PanelCargaEscenas"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.06
-anchor_top = 0.088
-anchor_right = 0.94
-anchor_bottom = 0.125
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.58, 0.68, 0.76, 1)
-theme_override_font_sizes/font_size = 28
-text = "Selecciona un mapa"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="CarruselMapas" parent="PanelCargaEscenas" unique_id=2073266666 instance=ExtResource("2_carrusel")]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.04
-anchor_top = 0.14
+anchor_top = 0.095
 anchor_right = 0.96
-anchor_bottom = 0.69
+anchor_bottom = 0.80
 grow_horizontal = 2
 grow_vertical = 2
 

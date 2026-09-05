@@ -23,7 +23,16 @@ offset_top = -457.0
 offset_right = 1744.0
 offset_bottom = -297.0
 theme_override_font_sizes/font_size = 100
-text = "Aventura en la aldea"
+text = "vaya aventura! 
+esto si que no me lo esperaba, 
+que habra pasado?
+vamos
+a
+ver
+como
+se
+ve
+esto"
 metadata/_edit_use_anchors_ = true
 
 [node name="final" type="Label" parent="." unique_id=534582791]
@@ -34,7 +43,14 @@ offset_bottom = -582.0
 theme_override_font_sizes/font_size = 100
 text = "vaya aventura! 
 esto si que no me lo esperaba, 
-que habra pasado?"
+que habra pasado?
+vamos
+a
+ver
+como
+se
+ve
+esto"
 metadata/_edit_use_anchors_ = true
 
 [node name="Fondo" type="Sprite2D" parent="." unique_id=1994534858]
