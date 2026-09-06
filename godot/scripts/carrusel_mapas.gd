@@ -86,20 +86,37 @@ func _preview_was_clicked(
 
 func _discover_maps() -> void:
 	mapas.clear()
+	_collect_map_scenes(MAPS_FOLDER)
+	mapas.sort_custom(_sort_map_paths)
 
-	# ResourceLoader conserva los nombres originales de los recursos
-	# también en builds exportadas. DirAccess sobre res:// puede no
-	# devolver los .tscn porque Godot remapea recursos dentro del PCK.
-	var entries := ResourceLoader.list_directory(MAPS_FOLDER)
 
-	for file_name in entries:
-		if file_name.ends_with("/"):
+func _collect_map_scenes(folder: String) -> void:
+	var entries := ResourceLoader.list_directory(folder)
+
+	for entry in entries:
+		if entry.ends_with("/"):
+			_collect_map_scenes(folder + entry)
 			continue
 
-		if file_name.to_lower().ends_with(".tscn"):
-			mapas.append(MAPS_FOLDER + file_name)
+		if not entry.to_lower().ends_with(".tscn"):
+			continue
 
-	mapas.sort_custom(_sort_map_paths)
+		var scene_path := folder + entry
+
+		# Compatibilidad con mapas antiguos todavía colocados directamente
+		# en res://mapas/.
+		if folder == MAPS_FOLDER:
+			mapas.append(scene_path)
+			continue
+
+		# En la nueva estructura cada mapa vive en una carpeta con el mismo
+		# nombre que su escena principal. Así una futura subescena .tscn
+		# dentro del mapa no aparecerá por error en el carrusel.
+		var folder_name := folder.trim_suffix("/").get_file()
+		var scene_name := entry.get_basename()
+
+		if scene_name.to_lower() == folder_name.to_lower():
+			mapas.append(scene_path)
 
 
 func _sort_map_paths(a: String, b: String) -> bool:
@@ -124,6 +141,19 @@ func _select_last_map() -> void:
 		if found >= 0:
 			indice_actual = found
 			return
+
+		# Si el mapa se movió a una subcarpeta, conservamos la selección
+		# comparando el nombre del archivo guardado.
+		var last_file := last_map.get_file()
+
+		if not last_file.is_empty():
+			for index in range(mapas.size()):
+				if (
+					mapas[index].get_file().to_lower()
+					== last_file.to_lower()
+				):
+					indice_actual = index
+					return
 
 	indice_actual = 0
 

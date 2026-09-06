@@ -15,6 +15,7 @@ const PROFUNDIDAD_Z_DELANTE_PLAYER := 3
 @onready var player_depth_collision: CollisionShape2D = (
 	$Player/CollisionShape2D
 )
+@onready var player_sprite: Sprite2D = $Player/Sprite2D
 
 @onready var ui: CanvasLayer = $UI
 
@@ -44,10 +45,12 @@ const PROFUNDIDAD_Z_DELANTE_PLAYER := 3
 
 var mapa_actual: Node = null
 var objetos_profundidad: Array[Dictionary] = []
+var _default_player_texture: Texture2D
 
 
 func _ready() -> void:
 
+	_default_player_texture = player_sprite.texture
 	estado_panel.visible = false
 
 	player_actual.visible = false
@@ -246,6 +249,8 @@ func _configurar_player() -> void:
 
 		return
 
+	_configurar_sprite_player()
+
 	var spawn := mapa_actual.get_node_or_null(
 		"SpawnPlayer"
 	) as Node2D
@@ -271,6 +276,28 @@ func _configurar_player() -> void:
 
 	_configurar_camera()
 
+
+
+func _configurar_sprite_player() -> void:
+	if player_sprite == null:
+		return
+
+	# Siempre empezamos desde el fallback neutro. Así un mapa sin
+	# PlayerSprite nunca hereda por accidente el aspecto del mapa anterior.
+	player_sprite.texture = _default_player_texture
+
+	if mapa_actual == null:
+		return
+
+	var map_player_sprite := mapa_actual.get_node_or_null(
+		"PlayerSprite"
+	) as Sprite2D
+
+	if (
+		map_player_sprite != null
+		and map_player_sprite.texture != null
+	):
+		player_sprite.texture = map_player_sprite.texture
 
 
 func _get_map_id(mapa: Node) -> String:
