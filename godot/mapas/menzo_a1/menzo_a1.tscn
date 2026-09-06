@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://lclvcymrkcma" path="res://mapas/menzo_a1/recursos/personajes/pnj3.png" id="5_h7b5y"]
 [ext_resource type="Texture2D" uid="uid://dsxv4momlqenh" path="res://mapas/menzo_a1/recursos/personajes/pnj4.png" id="6_3h5g6"]
 [ext_resource type="Texture2D" uid="uid://cmbr64ls2mqj2" path="res://mapas/menzo_a1/recursos/personajes/pnj5.png" id="7_kjtna"]
-[ext_resource type="Texture2D" uid="uid://dpyw518c5ss7y" path="res://art/mapas/frontal_prueba.png" id="8_ykjac"]
+[ext_resource type="Texture2D" path="res://mapas/menzo_a1/recursos/frontal_prueba.png" id="8_ykjac"]
 [ext_resource type="Texture2D" path="res://mapas/menzo_a1/recursos/player.png" id="player_map_sprite"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ougdv"]
