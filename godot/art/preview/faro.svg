@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="720" viewBox="0 0 1080 720">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#132738"/>
+    <stop offset="1" stop-color="#07131d"/>
+  </linearGradient>
+</defs>
+<rect width="1080" height="720" fill="url(#sky)"/>
+<rect y="480" width="1080" height="240" fill="#0c293b"/>
+<path d="M0 530 Q120 470 240 530 T480 530 T720 530 T960 530 T1200 530" fill="none" stroke="#78a9bb" stroke-width="10" opacity=".35"/>
+<ellipse cx="320" cy="500" rx="270" ry="105" fill="#263a2e"/>
+<polygon points="280,500 410,500 385,205 305,205" fill="#dfdbce" stroke="#262927" stroke-width="12"/>
+<rect x="294" y="330" width="104" height="48" fill="#a9443f"/>
+<rect x="290" y="175" width="110" height="48" rx="8" fill="#1f272b"/>
+<polygon points="272,175 418,175 382,115 308,115" fill="#8c3230"/>
+<circle cx="345" cy="200" r="24" fill="#ffdf6c"/>
+<path d="M360 185 L1030 90 L1045 210 L370 220 Z" fill="#ffe790" opacity=".28"/>
+<text x="550" y="590" font-family="sans-serif" font-size="86" text-anchor="middle" fill="#f2ead8">EL FARO APAGADO</text>
+<text x="550" y="655" font-family="sans-serif" font-size="34" text-anchor="middle" fill="#a9bcc6">Aventura A1</text>
+</svg>

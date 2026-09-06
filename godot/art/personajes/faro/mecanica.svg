@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="300" viewBox="0 0 220 300">
+<ellipse cx="110" cy="282" rx="70" ry="14" fill="#000" opacity=".28"/>
+<circle cx="110" cy="73" r="48" fill="#d7a47e"/>
+<path d="M62 70 Q70 10 110 16 Q160 18 160 76 Q135 45 66 70" fill="#aa5d33"/>
+<rect x="53" y="120" width="114" height="145" rx="48" fill="#6a4c3a"/>
+<rect x="33" y="145" width="36" height="100" rx="18" fill="#d7a47e"/>
+<rect x="151" y="145" width="36" height="100" rx="18" fill="#d7a47e"/>
+<circle cx="92" cy="72" r="5" fill="#1e1b18"/><circle cx="128" cy="72" r="5" fill="#1e1b18"/>
+<path d="M95 93 Q110 104 126 93" fill="none" stroke="#6d3a32" stroke-width="5" stroke-linecap="round"/>
+<text x="110" y="292" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#f7f2e7">MECÁNICA</text>
+</svg>

@@ -1,0 +1,93 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Texture2D" path="res://art/mapas/faro.svg" id="1_bg"]
+[ext_resource type="Texture2D" path="res://art/preview/faro.svg" id="2_preview"]
+[ext_resource type="PackedScene" path="res://escenas/pnj.tscn" id="3_pnj"]
+[ext_resource type="Texture2D" path="res://art/personajes/faro/farera.svg" id="4_farera"]
+[ext_resource type="Texture2D" path="res://art/personajes/faro/pescador.svg" id="5_pescador"]
+[ext_resource type="Texture2D" path="res://art/personajes/faro/mecanica.svg" id="6_mecanica"]
+
+[sub_resource type="RectangleShape2D" id="WallVertical"]
+size = Vector2(60, 3200)
+
+[sub_resource type="RectangleShape2D" id="WallHorizontal"]
+size = Vector2(2160, 60)
+
+[sub_resource type="RectangleShape2D" id="SeaUpper"]
+size = Vector2(650, 2350)
+
+[sub_resource type="RectangleShape2D" id="SeaLower"]
+size = Vector2(650, 500)
+
+[node name="mapa" type="Node2D"]
+
+[node name="descripcion" type="Label" parent="."]
+visible = false
+text = "Una tormenta ha apagado el faro. La farera necesita ayuda antes de que lleguen los barcos."
+
+[node name="final" type="Label" parent="."]
+visible = false
+text = "El faro vuelve a iluminar la costa. Los barcos pueden regresar al puerto con seguridad."
+
+[node name="Fondo" type="Sprite2D" parent="."]
+z_index = -10
+texture = ExtResource("1_bg")
+centered = false
+
+[node name="Preview" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("2_preview")
+
+[node name="SpawnPlayer" type="Marker2D" parent="."]
+position = Vector2(510, 2870)
+
+[node name="farera" parent="." instance=ExtResource("3_pnj")]
+position = Vector2(980, 760)
+sprite = ExtResource("4_farera")
+tipo_seguimiento = 0
+
+[node name="pescador" parent="." instance=ExtResource("3_pnj")]
+position = Vector2(1020, 2510)
+sprite = ExtResource("5_pescador")
+tipo_seguimiento = 0
+
+[node name="mecanica" parent="." instance=ExtResource("3_pnj")]
+position = Vector2(700, 1930)
+sprite = ExtResource("6_mecanica")
+tipo_seguimiento = 0
+
+[node name="LimiteIzquierdo" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LimiteIzquierdo"]
+position = Vector2(-30, 1600)
+shape = SubResource("WallVertical")
+
+[node name="LimiteDerecho" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LimiteDerecho"]
+position = Vector2(2190, 1600)
+shape = SubResource("WallVertical")
+
+[node name="LimiteSuperior" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LimiteSuperior"]
+position = Vector2(1080, -30)
+shape = SubResource("WallHorizontal")
+
+[node name="LimiteInferior" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LimiteInferior"]
+position = Vector2(1080, 3230)
+shape = SubResource("WallHorizontal")
+
+[node name="MarSuperior" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MarSuperior"]
+position = Vector2(1835, 1175)
+shape = SubResource("SeaUpper")
+
+[node name="MarInferior" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MarInferior"]
+position = Vector2(1835, 2950)
+shape = SubResource("SeaLower")

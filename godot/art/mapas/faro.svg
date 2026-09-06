@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2160" height="3200" viewBox="0 0 2160 3200">
+<defs>
+  <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#16354a"/>
+    <stop offset="1" stop-color="#071b2a"/>
+  </linearGradient>
+  <linearGradient id="land" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#425641"/>
+    <stop offset="1" stop-color="#25382d"/>
+  </linearGradient>
+  <pattern id="waves" width="120" height="60" patternUnits="userSpaceOnUse">
+    <path d="M0 30 Q30 5 60 30 T120 30" fill="none" stroke="#7fb3c7" stroke-width="4" opacity=".28"/>
+  </pattern>
+</defs>
+
+<rect width="2160" height="3200" fill="#0c1820"/>
+<path d="M0 0 H1540 C1470 430 1515 790 1460 1130 C1395 1510 1445 1810 1390 2150 C1330 2500 1450 2800 1500 3200 H0 Z" fill="url(#land)"/>
+<path d="M1540 0 H2160 V3200 H1500 C1450 2800 1330 2500 1390 2150 C1445 1810 1395 1510 1460 1130 C1515 790 1470 430 1540 0 Z" fill="url(#sea)"/>
+<rect x="1420" y="0" width="740" height="3200" fill="url(#waves)"/>
+
+<!-- main path -->
+<path d="M500 2900 C650 2640 720 2450 760 2200 C810 1900 760 1650 900 1380 C1010 1160 1040 930 980 690"
+      fill="none" stroke="#b79b73" stroke-width="170" stroke-linecap="round" opacity=".95"/>
+<path d="M500 2900 C650 2640 720 2450 760 2200 C810 1900 760 1650 900 1380 C1010 1160 1040 930 980 690"
+      fill="none" stroke="#d6c29f" stroke-width="18" stroke-linecap="round" opacity=".45"/>
+
+<!-- harbor and pier -->
+<rect x="770" y="2460" width="650" height="260" rx="36" fill="#3a332d"/>
+<rect x="1320" y="2520" width="620" height="130" rx="24" fill="#6f5a42"/>
+<g stroke="#1d1712" stroke-width="28" opacity=".9">
+  <line x1="1390" y1="2580" x2="1390" y2="2750"/>
+  <line x1="1530" y1="2580" x2="1530" y2="2750"/>
+  <line x1="1670" y1="2580" x2="1670" y2="2750"/>
+  <line x1="1810" y1="2580" x2="1810" y2="2750"/>
+</g>
+
+<!-- workshop -->
+<rect x="360" y="1660" width="620" height="470" rx="35" fill="#3a2f2a" stroke="#17120f" stroke-width="22"/>
+<polygon points="300,1690 670,1410 1040,1690" fill="#6a3f33" stroke="#271914" stroke-width="22"/>
+<rect x="565" y="1830" width="210" height="300" fill="#1c2227"/>
+<rect x="410" y="1780" width="120" height="120" fill="#9ec1c7" opacity=".8"/>
+<rect x="810" y="1780" width="120" height="120" fill="#9ec1c7" opacity=".8"/>
+<text x="670" y="1580" text-anchor="middle" font-family="sans-serif" font-size="74" fill="#e4d2ad">TALLER</text>
+
+<!-- lighthouse -->
+<ellipse cx="1010" cy="620" rx="430" ry="250" fill="#26352f"/>
+<polygon points="850,670 1170,670 1100,250 920,250" fill="#ddd8c9" stroke="#282823" stroke-width="24"/>
+<rect x="900" y="430" width="220" height="90" fill="#9c3f38"/>
+<rect x="890" y="230" width="240" height="80" rx="18" fill="#1d2428"/>
+<polygon points="860,230 1160,230 1080,110 940,110" fill="#812f2d"/>
+<circle cx="1010" cy="270" r="42" fill="#f4d76c" opacity=".85"/>
+<path d="M1040 250 L1960 80 L1995 260 L1050 310 Z" fill="#ffe98d" opacity=".16"/>
+
+<!-- village details -->
+<g fill="#2e3f35" stroke="#18251f" stroke-width="12">
+  <circle cx="330" cy="1200" r="120"/><circle cx="560" cy="1080" r="90"/>
+  <circle cx="260" cy="800" r="110"/><circle cx="420" cy="560" r="95"/>
+  <circle cx="520" cy="2350" r="90"/><circle cx="260" cy="2580" r="120"/>
+</g>
+
+<!-- labels baked into illustrative prototype -->
+<g font-family="sans-serif" fill="#f5edd8" opacity=".78">
+  <text x="1070" y="900" font-size="58">FARO</text>
+  <text x="340" y="2200" font-size="58">CAMINO DEL PUERTO</text>
+  <text x="920" y="2400" font-size="58">MUELLE</text>
+</g>
+</svg>
