@@ -29,9 +29,6 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
 
-[editor]
-
-movie_writer/movie_file="C:/Users/momo/Desktop/test_v6/test_v6/video.avi"
 
 [input]
 
