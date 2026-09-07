@@ -307,7 +307,7 @@ Entre otros casos, se detectan:
 - efectos desconocidos o vacíos;
 - intento de retirar `_EOA_`.
 
-El editor añade además un diagnóstico local por línea mediante un gutter rojo. Ese diagnóstico es informativo: no bloquea `GUARDAR` ni `ENVIAR`.
+El editor añade además un diagnóstico local por línea mediante un gutter rojo. Ese diagnóstico es informativo: no bloquea el guardado local al cerrar ni el envío de una propuesta.
 
 ## Contingencia runtime
 

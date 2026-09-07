@@ -43,15 +43,30 @@ El Player no tiene progresión lingüística propia. El nivel lingüístico pert
 
 ## Mapas
 
-El carrusel descubre automáticamente escenas `.tscn` directamente en:
+El carrusel recorre `res://mapas/` de forma recursiva.
+
+La organización usada actualmente por los mapas del proyecto es:
 
 ```text
 res://mapas/
+└── <id_mapa>/
+    ├── <id_mapa>.tscn
+    └── recursos/
 ```
 
-Para crear un mapa nuevo se parte de una escena válida existente y se duplica. No existe registro de mapas, base de datos ni recurso auxiliar obligatorio.
+Dentro de una subcarpeta sólo se considera mapa seleccionable la escena `.tscn`
+cuyo basename coincide, sin distinguir mayúsculas/minúsculas, con el nombre de
+la carpeta. Esto evita que futuras subescenas `.tscn` internas aparezcan por
+error en el carrusel.
 
-Estructura esperada para mapas nuevos:
+Por compatibilidad, una escena `.tscn` colocada directamente en
+`res://mapas/` también sigue siendo seleccionable.
+
+Esta estructura describe el comportamiento actual del motor; la organización
+de mapas todavía puede revisarse mientras el prototipo evoluciona. No existe
+registro de mapas, base de datos ni recurso auxiliar obligatorio.
+
+Estructura esperada actualmente para la escena principal de un mapa:
 
 ```text
 mapa
@@ -59,6 +74,7 @@ mapa
 ├── final             Label
 ├── Fondo             Sprite2D, opcional técnicamente
 ├── Preview           opcional
+├── PlayerSprite      Sprite2D, opcional
 ├── SpawnPlayer       opcional
 ├── PNJ...
 ├── colisiones...
@@ -66,6 +82,12 @@ mapa
 ```
 
 `descripcion` y `final` son texto humano del mapa. Sus nombres forman parte del contrato de contenido. No se utiliza metadata para esos textos ni un script en la raíz del mapa.
+
+`PlayerSprite` es un nodo opcional de configuración. Si existe y tiene textura,
+`Game` copia esa textura al `Sprite2D` del Player persistente al entrar en el
+mapa. Antes de hacerlo restaura siempre la textura por defecto del Player, de
+modo que un mapa sin `PlayerSprite` nunca hereda por accidente el aspecto del
+mapa anterior.
 
 El nombre de la raíz no se utiliza como identidad técnica en runtime; las escenas nuevas usan `mapa` por uniformidad.
 

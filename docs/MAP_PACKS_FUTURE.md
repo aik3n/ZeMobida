@@ -50,11 +50,15 @@ Ninguna de esas opciones compensa en la fase actual del prototipo.
 
 ZeMobida **no carga mapas externos**.
 
-Los mapas forman parte del proyecto principal y se descubren directamente en:
+Los mapas forman parte del proyecto principal bajo:
 
 ```text
 res://mapas/
 ```
+
+La estructura y las reglas de descubrimiento vigentes pertenecen a
+[`ARCHITECTURE.md`](ARCHITECTURE.md), para que este documento histórico no
+duplique un contrato que todavía puede evolucionar.
 
 El sistema actual se mantiene deliberadamente sencillo.
 

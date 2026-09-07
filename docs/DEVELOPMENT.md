@@ -17,16 +17,26 @@
 
 ## Creación de mapas
 
-Flujo normal:
+Flujo normal actual:
 
 ```text
-duplicar un mapa válido
-→ renombrar <aventura>_<nivel>.tscn
-→ cambiar Fondo
+duplicar la carpeta de un mapa válido
+→ renombrar carpeta a <aventura>_<nivel>
+→ renombrar la escena principal a <aventura>_<nivel>.tscn
+→ actualizar los recursos propios del mapa
+→ configurar Fondo / Preview / PlayerSprite cuando corresponda
 → editar descripcion
 → editar final
-→ añadir/editar PNJ y colisiones
+→ añadir/editar PNJ, objetos y colisiones
 ```
+
+El carrusel recorre `res://mapas/` recursivamente. En subcarpetas sólo registra
+como mapa principal la escena cuyo basename coincide con el nombre de la
+carpeta. Las escenas `.tscn` directamente bajo `res://mapas/` se mantienen
+como compatibilidad con la estructura anterior.
+
+Esta organización refleja el motor actual y todavía puede revisarse mientras
+se termina de fijar el flujo de mapas.
 
 Los niveles reconocidos en el nombre son:
 
@@ -74,15 +84,31 @@ El nombre técnico del PNJ es el nombre de su nodo en minúsculas.
 
 Si existe versión local, carga la local. Si no, usa la oficial como copia de trabajo. Si tampoco existe específica, abre el boceto.
 
-Acciones:
+Acciones actuales:
 
 ```text
-GUARDAR → escribe local y cierra
-ENVIAR  → guarda primero y abre mailto:
-CERRAR  → cierra sin guardar cambios pendientes
+CERRAR
+→ si el texto difiere de la base, guarda la variante local y cierra
+→ si coincide con la base, elimina una copia local innecesaria y cierra
+
+PAPELERA
+→ pide confirmación
+→ elimina la copia local
+→ cierra
+
+ENVIAR
+→ conserva primero la edición local si hace falta
+→ envía JSON por HTTP al servicio de propuestas
+→ si el servidor confirma éxito, elimina la copia local y cierra
+→ si falla el envío, conserva la copia local
 ```
 
-El gutter rojo es informativo y no bloquea guardar o enviar.
+El envío actual se realiza mediante `HTTPRequest` contra el endpoint
+`/proposal` del servicio configurado en `dialogue_editor.gd`; ya no utiliza
+`mailto:`.
+
+El gutter rojo es informativo y no bloquea el cierre con guardado local ni el
+envío.
 
 Colores del nombre del PNJ:
 
@@ -179,7 +205,9 @@ Después de cambios en mapas/diálogo comprobar:
 - diálogo local;
 - fallback `generico.txt`;
 - `EDITAR` sobre el archivo correcto;
-- guardar local y volver a interactuar;
+- cerrar el editor y comprobar el guardado local automático;
+- descartar una copia local con la papelera;
+- comprobar que un fallo de envío conserva la copia local;
 - inventario `+objeto` / `-objeto`;
 - `[+_EOA_]`, persistencia y reinicio al vaciar inventario;
 - carrusel: `descripcion` antes de superar y `final` + sello después;

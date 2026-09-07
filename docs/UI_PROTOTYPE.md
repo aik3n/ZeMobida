@@ -58,9 +58,16 @@ aldea_chef.txt
 
 El editor usa `CodeEdit`, resaltado sintáctico y un gutter rojo informativo.
 
+Controles visibles actuales:
+
 ```text
-[ GUARDAR ]   [ ENVIAR ]   [ CERRAR ]
+[ PAPELERA ]   [ ENVIAR ]   [ × ]
 ```
+
+Cerrar guarda automáticamente una variante local si el texto difiere de la
+base. La papelera descarta la copia local tras confirmación. `ENVIAR` conserva
+primero la edición local y la remite por HTTP al servicio de propuestas; si el
+envío falla, la copia local se mantiene.
 
 Las marcas rojas no bloquean ninguna acción.
 
@@ -69,13 +76,24 @@ El highlight diferencia comentario, firma, nodo, opción, condición, salto y bl
 ## Pantalla inicial
 
 - carrusel dinámico de mapas;
-- todos los `.tscn` directos de `res://mapas/` son seleccionables;
-- actualización de guiones configurable;
+- descubrimiento recursivo bajo `res://mapas/`;
+- en subcarpetas, sólo se registra como mapa la escena cuyo basename coincide con el nombre de la carpeta;
+- los `.tscn` directamente en `res://mapas/` siguen aceptándose por compatibilidad;
+- navegación por botones, teclado izquierda/derecha y gesto horizontal;
+- pulsar el `Preview` del mapa actual inicia el mapa;
 - último mapa jugado persistente;
 - `Preview` → `Fondo` → imagen por defecto;
 - mapa no superado → mostrar `descripcion`;
 - mapa superado → mostrar `final` y `res://art/ui/seal.png` sobre el preview;
 - el sello se muestra con rotación de `+35°` y sin transparencia añadida.
+
+La lógica de actualización de guiones sigue siendo configurable internamente,
+pero sus controles están ocultos en la UI visible del MVP.
+
+La carga de mapas empieza deshabilitada. Se habilita cuando
+`DialogueUpdater` informa de que hay al menos un `.txt` oficial disponible en
+la caché local; si está activa la comprobación al inicio, se espera a que
+termine antes de permitir entrar a un mapa.
 
 ## Mapa ilustrado
 
